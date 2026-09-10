@@ -1,0 +1,21 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+pubspec.lock
+
+# Plattform-Ordner werden per `flutter create .` erzeugt
+/android/
+/ios/
+/linux/
+/macos/
+/web/
+/windows/
+
+# Build-Artefakte
+*.apk
+*.zip
