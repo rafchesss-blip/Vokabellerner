@@ -13,8 +13,8 @@ pubspec.lock
 /ios/
 /linux/
 /macos/
-/web/
 /windows/
+# /web/ wird für den Netlify-Build benötigt und ist daher versioniert
 
 # Build-Artefakte
 *.apk
