@@ -161,15 +161,4 @@ class Api {
     );
     _decode(res);
   }
-
-  static Future<Map<String, dynamic>> adminImpersonate(
-    String token,
-    String username,
-  ) async {
-    final res = await http.post(
-      _uri('/admin/users/${Uri.encodeComponent(username)}/impersonate'),
-      headers: _headers(token),
-    );
-    return _decode(res);
-  }
 }

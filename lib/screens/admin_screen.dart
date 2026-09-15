@@ -103,14 +103,14 @@ class _AdminScreenState extends State<AdminScreen> {
     }
   }
 
-  Future<void> _impersonate(String username) async {
+  Future<void> _viewAs(String username) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Als „$username" anmelden?'),
+        title: Text('Als „$username“ ansehen?'),
         content: const Text(
-          'Du siehst dann die App genau wie dieser Nutzer. Über den '
-          'Zurück-Pfeil oben kommst du wieder in dein Admin-Konto.',
+          'Du siehst dann die App genau wie dieser Nutzer (schreibgeschützt). '
+          'Über den Zurück-Pfeil oben kommst du wieder in dein Admin-Konto.',
         ),
         actions: [
           TextButton(
@@ -119,7 +119,7 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Anmelden'),
+            child: const Text('Ansehen'),
           ),
         ],
       ),
@@ -127,16 +127,9 @@ class _AdminScreenState extends State<AdminScreen> {
     if (confirmed != true || !mounted) return;
 
     try {
-      final res = await Api.adminImpersonate(
-        AuthService.instance.token!,
-        username,
-      );
       shellTabIndex.value = 0; // zurück zum Dashboard
-      await AuthService.instance.impersonate(
-        res['token'] as String,
-        res['username'] as String,
-      );
-      await Store.instance.pullFromCloud();
+      await AuthService.instance.viewAs(username);
+      await Store.instance.pullViewData(username);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -353,9 +346,9 @@ class _AdminScreenState extends State<AdminScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    tooltip: 'Als dieser Nutzer anmelden',
+                    tooltip: 'Als dieser Nutzer ansehen',
                     icon: const Icon(Icons.login),
-                    onPressed: () => _impersonate(username),
+                    onPressed: () => _viewAs(username),
                   ),
                   IconButton(
                     tooltip: 'Löschen',

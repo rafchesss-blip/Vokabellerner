@@ -33,7 +33,8 @@ class AuthService {
 
   bool get isLoggedIn => token != null && token!.isNotEmpty;
 
-  bool get isImpersonating => adminToken != null && adminToken!.isNotEmpty;
+  /// Ob gerade ein anderes Konto angesehen wird (Admin-Ansicht).
+  bool get isViewing => adminToken != null && adminToken!.isNotEmpty;
 
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -85,34 +86,26 @@ class AuthService {
     await _persist();
   }
 
-  /// Übernimmt ein anderes Konto (nur durch den Admin aufrufbar).
-  /// Die eigene Admin-Anmeldung wird für „Zurück zu Admin“ gemerkt.
-  Future<void> impersonate(String newToken, String newUsername) async {
+  /// Wechselt in die Ansicht eines anderen Kontos (nur für den Admin).
+  ///
+  /// Der eigene Admin-Token bleibt erhalten, damit die Daten über die
+  /// Admin-Endpunkte gelesen werden können. Es wird keine echte
+  /// Anmeldung erstellt und nichts gespeichert (Ansicht ist schreibgeschützt).
+  Future<void> viewAs(String newUsername) async {
     adminToken = token;
     adminUsername = username;
-    token = newToken;
     username = newUsername;
     isAdmin = false;
     await _persist();
   }
 
-  /// Wechselt vom übernommenen Konto zurück zum Admin.
+  /// Wechselt von der Konto-Ansicht zurück zum Admin.
   Future<void> restoreAdmin() async {
-    final oldImpersonated = token;
-    token = adminToken;
     username = adminUsername;
     isAdmin = true;
     adminToken = null;
     adminUsername = null;
     await _persist();
-
-    if (oldImpersonated != null && oldImpersonated.isNotEmpty) {
-      try {
-        await Api.logout(oldImpersonated);
-      } catch (_) {
-        // Session läuft serverseitig ohnehin irgendwann ab.
-      }
-    }
   }
 
   Future<void> logout() async {

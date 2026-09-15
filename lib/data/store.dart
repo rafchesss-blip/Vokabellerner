@@ -110,7 +110,9 @@ class Store {
 
   /// Überträgt den lokalen Stand in die Cloud.
   Future<void> pushToCloud() async {
-    if (!AuthService.instance.isLoggedIn) return;
+    if (AuthService.instance.isViewing || !AuthService.instance.isLoggedIn) {
+      return;
+    }
     try {
       await Api.putData(AuthService.instance.token!, toCloudJson());
     } catch (_) {
@@ -124,6 +126,29 @@ class Store {
     if (!AuthService.instance.isLoggedIn) return;
     try {
       final data = await Api.getData(AuthService.instance.token!);
+      if (data['lessons'] != null) {
+        _loading = true;
+        try {
+          loadCloudJson(data);
+          await save();
+        } finally {
+          _loading = false;
+        }
+      }
+    } catch (_) {
+      // Offline: lokalen Stand weiterverwenden.
+    }
+  }
+
+  /// Lädt die Daten eines anderen Kontos in die lokale Ansicht
+  /// (Admin-Ansicht, schreibgeschützt).
+  Future<void> pullViewData(String username) async {
+    if (!AuthService.instance.isLoggedIn) return;
+    try {
+      final data = await Api.adminGetUserData(
+        AuthService.instance.token!,
+        username,
+      );
       if (data['lessons'] != null) {
         _loading = true;
         try {
@@ -154,7 +179,11 @@ class Store {
   /// Pusht zeitverzögert, damit schnelle Folgen von `save()` (z. B. beim
   /// Karteikarten-Üben) zu einem einzigen Cloud-Aufruf gebündelt werden.
   void _scheduleCloudPush() {
-    if (_loading || !AuthService.instance.isLoggedIn) return;
+    if (_loading ||
+        AuthService.instance.isViewing ||
+        !AuthService.instance.isLoggedIn) {
+      return;
+    }
     _pushTimer?.cancel();
     _pushTimer = Timer(const Duration(seconds: 2), () {
       pushToCloud();

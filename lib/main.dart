@@ -14,7 +14,11 @@ Future<void> main() async {
   await Store.instance.load();
 
   if (AuthService.instance.isLoggedIn) {
-    await Store.instance.pullFromCloud();
+    if (AuthService.instance.isViewing) {
+      await Store.instance.pullViewData(AuthService.instance.username ?? '');
+    } else {
+      await Store.instance.pullFromCloud();
+    }
   }
 
   runApp(const VokabeltrainerApp());

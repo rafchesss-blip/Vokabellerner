@@ -70,7 +70,7 @@ class _HomeShellState extends State<HomeShell> {
         builder: (context, index, _) {
           final auth = AuthService.instance;
           final isAdmin = auth.isAdmin;
-          final isImpersonating = auth.isImpersonating;
+          final isViewing = auth.isViewing;
 
           final destinations = <NavigationDestination>[
             const NavigationDestination(
@@ -119,7 +119,7 @@ class _HomeShellState extends State<HomeShell> {
                 ],
               ),
               actions: [
-                if (isImpersonating)
+                if (isViewing)
                   IconButton(
                     icon: const Icon(Icons.undo),
                     tooltip: 'Zurück zu Admin',
