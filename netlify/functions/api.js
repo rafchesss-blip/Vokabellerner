@@ -31,7 +31,10 @@ const { getStore, connectLambda } = require('@netlify/blobs');
 let store = null;
 
 function ensureStore(event) {
-  if (store) return;
+  // Bei jedem Aufruf neu erzeugen: Der Netlify-Blobs-Token wird pro
+  // Funktionsaufruf frisch bereitgestellt und läuft nach einiger Zeit ab.
+  // Ein dauerhaft zwischengespeicherter Store würde den alten (abgelaufenen)
+  // Token weiterverwenden.
   if (event && event.blobs) {
     try {
       connectLambda(event);
