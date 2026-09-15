@@ -1,4 +1,5 @@
 [build]
+  publish = "build/web"
   functions = "netlify/functions"
 
 [[redirects]]
