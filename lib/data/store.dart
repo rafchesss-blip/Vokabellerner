@@ -39,6 +39,7 @@ class Store {
             .toList();
         _addMissingLessons();
       }
+      _sortLessons();
 
       final listsRaw = prefs.getString(_listsKey);
       practiceLists = listsRaw == null
@@ -80,6 +81,31 @@ class Store {
     practiceLists = (json['lists'] as List? ?? [])
         .map((e) => PracticeList.fromJson(e as Map<String, dynamic>))
         .toList();
+    _sortLessons();
+  }
+
+  /// Sortiert die Lektionen numerisch nach der Nummer im Namen
+  /// („Lektion 1“, „Lektion 2“, …, „Lektion 18“). Namen ohne Nummer
+  /// kommen alphabetisch ans Ende.
+  void _sortLessons() {
+    lessons.sort(_compareLessons);
+  }
+
+  int _compareLessons(Lesson a, Lesson b) {
+    final int? na = _lessonNumber(a.name);
+    final int? nb = _lessonNumber(b.name);
+    if (na == null && nb == null) return a.name.compareTo(b.name);
+    if (na == null) return 1;
+    if (nb == null) return -1;
+    return na.compareTo(nb);
+  }
+
+  int? _lessonNumber(String name) {
+    final match = RegExp(
+      r'^lektion\s*(\d+)',
+      caseSensitive: false,
+    ).firstMatch(name.trim());
+    return match == null ? null : int.tryParse(match.group(1)!);
   }
 
   /// Überträgt den lokalen Stand in die Cloud.

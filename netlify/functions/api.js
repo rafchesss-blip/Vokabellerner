@@ -235,7 +235,7 @@ async function putData(event) {
   }
 
   await store.set(dataKey(session.userId), JSON.stringify({
-    lessons: body.lessons ?? [],
+    lessons: sortLessons(body.lessons ?? []),
     lists,
   }));
 
@@ -375,11 +375,30 @@ async function getGlobalLessons() {
 
 async function mergeGlobalLessons(userLessons) {
   const globals = await getGlobalLessons();
-  if (globals.length === 0) return userLessons;
-
   const names = new Set((userLessons || []).map((l) => l.name));
   const missing = globals.filter((l) => !names.has(l.name));
-  return [...(userLessons || []), ...missing];
+  return sortLessons([...(userLessons || []), ...missing]);
+}
+
+/// Sortiert Lektionen numerisch nach der Nummer im Namen (aufsteigend).
+/// Namen ohne erkennbare Nummer kommen alphabetisch ans Ende.
+function sortLessons(lessons) {
+  const number = (lesson) => {
+    const name = String((lesson && lesson.name) || '').trim();
+    const match = name.match(/^lektion\s*(\d+)/i);
+    return match ? parseInt(match[1], 10) : null;
+  };
+
+  return [...lessons].sort((a, b) => {
+    const na = number(a);
+    const nb = number(b);
+    if (na === null && nb === null) {
+      return String(a.name).localeCompare(String(b.name));
+    }
+    if (na === null) return 1;
+    if (nb === null) return -1;
+    return na - nb;
+  });
 }
 
 function buildLesson(name, boxes) {
