@@ -75,10 +75,203 @@ class Store {
   /// Ergänzt bei bestehenden Nutzern fehlende Standard-Lektionen
   /// (z. B. Lektion 1), ohne vorhandenen Lernfortschritt zu verändern.
   void _addMissingLessons() {
-    final names = lessons.map((l) => l.name).toSet();
-    if (!names.contains('Lektion 1')) {
+    void insertAfter(String anchor, Lesson lesson) {
+      if (lessons.any((l) => l.name == lesson.name)) return;
+      final idx = lessons.indexWhere((l) => l.name == anchor);
+      lessons.insert(idx + 1, lesson);
+    }
+
+    if (!lessons.any((l) => l.name == 'Lektion 1')) {
       lessons.insert(0, _lesson1());
     }
+    insertAfter('Lektion 1', _lesson2());
+    insertAfter('Lektion 2', _lesson3());
+    insertAfter('Lektion 3', _lesson4());
+  }
+
+  /// Lektion 2 (5 Kästen, 43 Vokabeln).
+  Lesson _lesson2() {
+    Vocab v(String latin, String german, [String? middle]) =>
+        Vocab(id: newId(), latin: latin, german: german, middleColumn: middle);
+
+    return Lesson(id: newId(), name: 'Lektion 2', boxes: [
+      Box(id: newId(), name: 'Kasten 1', vocabs: [
+        v('diū', 'lange, lange Zeit'),
+        v('exspectāre', 'warten (auf), erwarten', 'exspectō'),
+        v('per', 'durch'),
+        v('via', 'der Weg, die Straße', 'f'),
+        v('properāre', 'eilen, sich beeilen', 'properō'),
+        v('semper', 'immer'),
+        v('post', 'hinter, nach'),
+        v('subitō', 'plötzlich'),
+      ]),
+      Box(id: newId(), name: 'Kasten 2', vocabs: [
+        v('nōn iam', 'nicht mehr'),
+        v('nam', 'denn, nämlich'),
+        v('undique', 'von allen Seiten, von überallher'),
+        v('turba', 'die Menge, die Menschenmenge', 'f'),
+        v('reperīre', 'finden, wiederfinden', 'reperiō'),
+        v('ante', 'vor'),
+        v('taberna', 'das Gasthaus, der Laden', 'f'),
+      ]),
+      Box(id: newId(), name: 'Kasten 3', vocabs: [
+        v('intrāre', 'betreten, hineingehen', 'intrō'),
+        v('porta', 'das Tor, die Tür', 'f'),
+        v('aperīre', 'öffnen, aufdecken', 'aperiō'),
+        v('mox', 'bald'),
+        v('servāre', 'retten, bewahren; beobachten', 'servō'),
+        v('fenestra', 'das Fenster', 'f'),
+        v('ad', 'zu, bei, nach, an'),
+      ]),
+      Box(id: newId(), name: 'Kasten 4', vocabs: [
+        v('sedēre', 'sitzen', 'sedeō'),
+        v('audīre', 'hören', 'audiō'),
+        v('tū', 'du'),
+        v('tenēre', 'halten, festhalten, besitzen', 'teneō'),
+        v('nunc', 'jetzt, nun'),
+        v('pecūnia', 'das Geld, das Vermögen', 'f'),
+        v('postulāre', 'fordern, verlangen', 'postulō'),
+      ]),
+      Box(id: newId(), name: 'Kasten 5', vocabs: [
+        v('violāre', 'verletzen, beleidigen', 'violō'),
+        v('satis', 'genug'),
+        v('valēre', 'gesund sein, stark sein, Einfluss haben', 'valeō'),
+        v('rogāre', 'fragen, bitten', 'rogō'),
+        v('quid?', 'was?'),
+        v('dēsīderāre', 'vermissen, verlangen, sich sehnen nach', 'dēsīderō'),
+        v('necāre', 'töten', 'necō'),
+        v('egō', 'ich'),
+        v('amīcus', 'der Freund', 'm'),
+        v('ita', 'so'),
+        v('ubi?', 'wo?'),
+        v('prīmō', 'zuerst'),
+        v('dare', 'geben', 'dō'),
+        v('scīre', 'wissen, kennen, verstehen', 'sciō'),
+      ]),
+    ]);
+  }
+
+  /// Lektion 4 (5 Kästen, 42 Vokabeln).
+  Lesson _lesson4() {
+    Vocab v(String latin, String german, [String? middle]) =>
+        Vocab(id: newId(), latin: latin, german: german, middleColumn: middle);
+
+    return Lesson(id: newId(), name: 'Lektion 4', boxes: [
+      Box(id: newId(), name: 'Kasten 1', vocabs: [
+        v('dē', 'über; von, von ... her, von ... weg, ... herab'),
+        v('atque', 'und, und auch'),
+        v('cōgitāre dē', 'denken an, nachdenken über', 'cōgitō dē'),
+        v('movēre', 'bewegen, beeindrucken', 'moveō'),
+        v('memoria', 'die Erinnerung, das Gedächtnis; die Zeit', 'f'),
+        v('nōlle', 'nicht wollen', 'nōlō'),
+        v('procul', 'von fern, weit weg'),
+        v('Diāna', 'Diana (Göttin der Jagd und Schützerin der Tiere)'),
+        v('dea', 'die Göttin', 'f'),
+      ]),
+      Box(id: newId(), name: 'Kasten 2', vocabs: [
+        v('cum', 'mit, zusammen mit'),
+        v('amīca', 'die Freundin', 'f'),
+        v('nescīre', 'nicht wissen, nicht kennen, nicht verstehen', 'nescīō'),
+        v('nōn nescīre', 'genau wissen, genau kennen', 'nōn nescīō'),
+        v('amāre', 'lieben', 'amō'),
+        v('memoriā tenēre', 'im Gedächtnis behalten', 'memoriā teneō'),
+        v('timēre', 'fürchten, Angst haben (vor)', 'timeō'),
+        v('in', 'in, an, auf, bei (wo?)'),
+      ]),
+      Box(id: newId(), name: 'Kasten 3', vocabs: [
+        v('campus', 'das Feld, der freie Platz', 'm'),
+        v('īra', 'der Zorn, die Wut', 'f'),
+        v('sentīre', 'fühlen, meinen, wahrnehmen', 'sentīō'),
+        v('ārdēre', 'brennen', 'ārdeō'),
+        v('appellāre', 'rufen, anrufen, nennen', 'appellō'),
+        v('velle', 'wollen', 'volō'),
+        v('propter', 'wegen'),
+        v('tibi', 'dir, für dich'),
+      ]),
+      Box(id: newId(), name: 'Kasten 4', vocabs: [
+        v('agitāre', 'treiben, betreiben, überlegen', 'agitō'),
+        v('nōnne?', '(etwa) nicht?'),
+        v('terrēre', 'erschrecken', 'terreō'),
+        v('fuga', 'die Flucht', 'f'),
+        v('in', 'in (... hinein), nach (wohin?); gegen'),
+        v('silva', 'der Wald', 'f'),
+        v('oculus', 'das Auge', 'm'),
+        v('tamen', 'dennoch, jedoch'),
+      ]),
+      Box(id: newId(), name: 'Kasten 5', vocabs: [
+        v('enim', 'denn, nämlich'),
+        v('vītāre', 'meiden, vermeiden', 'vītō'),
+        v('profectō', 'sicherlich, tatsächlich'),
+        v('mūtāre', 'ändern, verändern, verwandeln', 'mūtō'),
+        v('ē / ex', 'aus, von ... her'),
+        v('at', 'aber, jedoch'),
+        v('circumvenīre', 'umringen, umzingeln', 'circumveniō'),
+        v('prope', 'nahe, in der Nähe; beinahe'),
+        v('-que', 'und'),
+      ]),
+    ]);
+  }
+
+  /// Lektion 3 (5 Kästen, 42 Vokabeln).
+  Lesson _lesson3() {
+    Vocab v(String latin, String german, [String? middle]) =>
+        Vocab(id: newId(), latin: latin, german: german, middleColumn: middle);
+
+    return Lesson(id: newId(), name: 'Lektion 3', boxes: [
+      Box(id: newId(), name: 'Kasten 1', vocabs: [
+        v('Salvē! Salvēte!', 'Sei gegrüßt! Seid gegrüßt!'),
+        v('narrāre', 'erzählen', 'narrō'),
+        v('puella', 'das Mädchen', 'f'),
+        v('statim', 'sofort'),
+        v('parāre', '(vor)bereiten; vorhaben, erwerben', 'parō'),
+        v('iniūria', 'das Unrecht, die Beleidigung', 'f'),
+        v('sustinēre', 'ertragen, standhalten', 'sustineō'),
+        v('quemadmodum', 'wie, auf welche Weise'),
+      ]),
+      Box(id: newId(), name: 'Kasten 2', vocabs: [
+        v('prohibēre', 'abhalten, hindern, verhindern', 'prohibeō'),
+        v('paulum', 'ein wenig'),
+        v('respondēre', 'antworten', 'respondeō'),
+        v('certē', 'gewiss, sicherlich'),
+        v('indicāre', 'anzeigen, melden', 'indicō'),
+        v('negāre', 'leugnen, verneinen, verweigern', 'negō'),
+        v('culpa', 'die Schuld', 'f'),
+        v('probāre', 'prüfen, beweisen, für gut befinden', 'probō'),
+      ]),
+      Box(id: newId(), name: 'Kasten 3', vocabs: [
+        v('bene', 'gut'),
+        v('Circus Maximus',
+            'der Circus Maximus (Rennbahn für Wagenrennen in Rom)', 'm'),
+        v('ūnā', 'zusammen, zugleich'),
+        v('prōvidēre', 'sorgen für', 'prōvideō m. Dat.'),
+        v('socius', 'der Gefährte, der Verbündete', 'm'),
+        v('vocāre', 'rufen, nennen', 'vocō'),
+        v('iterum', 'wieder(um), zum zweiten Mal'),
+        v('superāre', 'besiegen, überwinden, übertreffen', 'superō'),
+        v('dum', 'während, solange, bis'),
+      ]),
+      Box(id: newId(), name: 'Kasten 4', vocabs: [
+        v('temptāre', 'versuchen, prüfen, angreifen', 'temptō'),
+        v('cavēre', 'vorsichtig sein, sich hüten (vor)', 'caveō m. Akk.'),
+        v('nōn dēbēre', 'nicht dürfen, nicht müssen', 'nōn dēbeō'),
+        v('sententia', 'die Meinung, der Satz, der Sinn', 'f'),
+        v('placēre', 'gefallen', 'placeō'),
+        v('pārēre', 'gehorchen', 'pāreō'),
+        v('paulō', '(um) ein wenig'),
+        v('paulō post', 'wenig später, kurz darauf'),
+        v('gladius', 'das Schwert', 'm'),
+      ]),
+      Box(id: newId(), name: 'Kasten 5', vocabs: [
+        v('animus', 'der Geist, der Mut, die Gesinnung', 'm'),
+        v('deesse', 'fehlen, abwesend sein, nicht da sein'),
+        v('mandāre', 'übergeben, einen Auftrag geben', 'mandō'),
+        v('poena', 'die Strafe', 'f'),
+        v('instāre', 'bevorstehen, bedrängen, drohen', 'instō m. Dat.'),
+        v('et ... et', 'sowohl ... als auch'),
+        v('grātia', 'der Dank', 'f'),
+        v('grātiam dēbēre', 'Dank schulden', 'grātiam dēbeō'),
+      ]),
+    ]);
   }
 
   /// Lektion 1 (5 Kästen, 42 Vokabeln).
@@ -149,6 +342,9 @@ class Store {
 
     return [
       _lesson1(),
+      _lesson2(),
+      _lesson3(),
+      _lesson4(),
       Lesson(id: newId(), name: 'Lektion 18', boxes: [
         Box(id: newId(), name: 'Kasten 1', vocabs: [
           v('vetus', 'alt', 'vetus, vetus, veteris'),

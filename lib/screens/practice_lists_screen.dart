@@ -22,6 +22,9 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
     if (name == null || name.trim().isEmpty) return;
     if (!mounted) return;
 
+    final dueDate = await _askDueDate();
+    if (!mounted) return;
+
     final ids = await Navigator.push<Set<String>>(
       context,
       MaterialPageRoute(
@@ -30,7 +33,12 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
     );
     if (ids == null || !mounted) return; // abgebrochen
 
-    final list = PracticeList(id: newId(), name: name.trim(), vocabIds: ids.toList());
+    final list = PracticeList(
+      id: newId(),
+      name: name.trim(),
+      vocabIds: ids.toList(),
+      dueDate: dueDate,
+    );
     Store.instance.practiceLists.add(list);
     await Store.instance.save();
     if (mounted) setState(() {});
@@ -65,6 +73,90 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
     );
     controller.dispose();
     return result;
+  }
+
+  String _formatDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}.'
+      '${d.month.toString().padLeft(2, '0')}.${d.year}';
+
+  /// Fragt ein optionales Zieldatum ab.
+  ///
+  /// Liefert `null`, wenn kein Datum gewählt wurde (übersprungen bzw.
+  /// entfernt). [initial] wird beim Ändern eines bestehenden Datums gesetzt.
+  Future<DateTime?> _askDueDate({DateTime? initial}) async {
+    DateTime? picked = initial;
+    final result = await showDialog<DateTime?>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: Text(
+            initial == null
+                ? 'Bis wann musst du sie können?'
+                : 'Zieldatum ändern',
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Lege ein Zieldatum fest (optional). In der Analyse siehst '
+                'du dann dein Tages- und Gesamtziel.',
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.event),
+                    label: const Text('Datum wählen'),
+                    onPressed: () async {
+                      final now = DateTime.now();
+                      final date = await showDatePicker(
+                        context: ctx,
+                        initialDate:
+                            picked ?? now.add(const Duration(days: 7)),
+                        firstDate: now.subtract(const Duration(days: 1)),
+                        lastDate: now.add(const Duration(days: 3650)),
+                      );
+                      if (date != null) {
+                        setDialogState(() => picked = date);
+                      }
+                    },
+                  ),
+                  if (picked != null) ...[
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _formatDate(picked!),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(initial == null ? 'Überspringen' : 'Entfernen'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, picked),
+              child: const Text('Fertig'),
+            ),
+          ],
+        ),
+      ),
+    );
+    return result;
+  }
+
+  Future<void> _editDueDate(PracticeList list) async {
+    final dueDate = await _askDueDate(initial: list.dueDate);
+    if (!mounted) return;
+    list.dueDate = dueDate;
+    await Store.instance.save();
+    if (mounted) setState(() {});
   }
 
   Future<void> _edit(PracticeList list) async {
@@ -174,11 +266,17 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                       list.name,
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    subtitle: Text('${list.vocabIds.length} Vokabeln'),
+                    subtitle: Text(
+                      list.dueDate == null
+                          ? '${list.vocabIds.length} Vokabeln'
+                          : '${list.vocabIds.length} Vokabeln · Ziel: '
+                              '${_formatDate(list.dueDate!)}',
+                    ),
                     trailing: PopupMenuButton<String>(
                       tooltip: 'Optionen',
                       onSelected: (v) {
                         if (v == 'edit') _edit(list);
+                        if (v == 'dueDate') _editDueDate(list);
                         if (v == 'delete') _delete(list);
                       },
                       itemBuilder: (_) => const [
@@ -189,6 +287,16 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                               Icon(Icons.edit_outlined, size: 20),
                               SizedBox(width: 12),
                               Text('Bearbeiten'),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'dueDate',
+                          child: Row(
+                            children: [
+                              Icon(Icons.event_outlined, size: 20),
+                              SizedBox(width: 12),
+                              Text('Zieldatum ändern'),
                             ],
                           ),
                         ),

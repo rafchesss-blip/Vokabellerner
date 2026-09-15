@@ -4,6 +4,7 @@ import '../data/store.dart';
 import '../models/practice_list.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
+import '../utils/goals.dart';
 import '../utils/levels.dart';
 import 'vocab_detail_sheet.dart';
 
@@ -102,9 +103,123 @@ class _AnalyseTabState extends State<AnalyseTab> {
             ),
           ),
         ),
+        if (selected.dueDate != null) ...[
+          const SizedBox(height: 16),
+          _GoalCard(vocabs: vocabs, dueDate: selected.dueDate!),
+        ],
         const SizedBox(height: 16),
         for (final v in vocabs)
           _VocabTile(vocab: v, onTap: () => _openDetail(v)),
+      ],
+    );
+  }
+}
+
+String _formatDate(DateTime d) =>
+    '${d.day.toString().padLeft(2, '0')}.'
+    '${d.month.toString().padLeft(2, '0')}.${d.year}';
+
+/// Zeigt das Tages- und Gesamtziel einer Übungsliste an.
+class _GoalCard extends StatelessWidget {
+  final List<Vocab> vocabs;
+  final DateTime dueDate;
+
+  const _GoalCard({required this.vocabs, required this.dueDate});
+
+  @override
+  Widget build(BuildContext context) {
+    final g = computeGoal(vocabs, dueDate);
+
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.flag_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Ziel bis ${_formatDate(dueDate)}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _ProgressRow(
+              label: 'Gesamtziel',
+              valueText: '${g.known}/${g.total} Vokabeln gewusst',
+              percent: g.overallPercent,
+            ),
+            const SizedBox(height: 12),
+            _ProgressRow(
+              label: 'Tagesziel',
+              valueText: g.remaining == 0
+                  ? 'alles geschafft'
+                  : '${g.learnedToday}/${g.dailyTarget} heute gelernt',
+              percent: g.remaining == 0 ? 100 : g.dailyPercent,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              g.remaining == 0
+                  ? 'Alle Vokabeln gewusst! 🎉'
+                  : 'Noch ${g.daysRemaining} Tag(e) · ${g.remaining} Vokabeln offen.',
+              style: TextStyle(color: muted(context), fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProgressRow extends StatelessWidget {
+  final String label;
+  final String valueText;
+  final double percent;
+
+  const _ProgressRow({
+    required this.label,
+    required this.valueText,
+    required this.percent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              valueText,
+              style: TextStyle(color: muted(context), fontSize: 13),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: LinearProgressIndicator(
+            value: percent.clamp(0.0, 100.0) / 100,
+            minHeight: 8,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          '${percent.toStringAsFixed(0)} %',
+          style: TextStyle(color: muted(context), fontSize: 12),
+        ),
       ],
     );
   }
