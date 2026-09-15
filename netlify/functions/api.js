@@ -19,9 +19,24 @@
 //   POST   /api/admin/lessons        {name, boxes:[{name, vocabs:[{latin, middle?, german}]}]}
 
 const crypto = require('crypto');
-const { getStore } = require('@netlify/blobs');
+const { getStore, connectLambda } = require('@netlify/blobs');
 
-const store = getStore('vokabellerner');
+// Der Blob-Store wird pro Funktion-Instanz erst beim ersten Aufruf erzeugt.
+// In der „Lambda compatibility mode“ muss vorher `connectLambda(event)`
+// aufgerufen werden, damit die Netlify-Blobs-Umgebung verfügbar ist.
+let store = null;
+
+function ensureStore(event) {
+  if (store) return;
+  if (event && event.blobs) {
+    try {
+      connectLambda(event);
+    } catch (_) {
+      // Falls die Umgebung bereits konfiguriert ist, ignorieren wir das.
+    }
+  }
+  store = getStore('vokabellerner');
+}
 
 const MAX_LISTS = 10;
 const MAX_LESSONS = 30; // Admin-Lektionen (zusätzlich zu den Grundlektionen)
@@ -61,6 +76,8 @@ exports.handler = async (event) => {
   }
 
   try {
+    ensureStore(event);
+
     let result;
     const method = event.httpMethod;
 
@@ -100,7 +117,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 500,
       headers: CORS,
-      body: JSON.stringify({ error: 'Interner Serverfehler' }),
+      body: JSON.stringify({ error: (err && err.message) || 'Interner Serverfehler' }),
     };
   }
 };
