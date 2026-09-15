@@ -25,13 +25,18 @@ jobs:
       - name: Web-Version bauen
         run: flutter build web --release
 
-      - name: Auf Netlify veröffentlichen
-        uses: nwtgck/actions-netlify@v3
+      - name: Node einrichten
+        uses: actions/setup-node@v4
         with:
-          publish-dir: ./build/web
-          production-branch: main
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: 'Deploy von GitHub Actions'
+          node-version: '20'
+
+      - name: Funktions-Abhängigkeiten laden
+        run: npm install
+
+      - name: Netlify CLI installieren
+        run: npm install -g netlify-cli
+
+      - name: Auf Netlify veröffentlichen (inkl. Funktionen)
+        run: netlify deploy --prod --dir=build/web --functions=netlify/functions --site "${{ secrets.NETLIFY_SITE_ID }}"
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

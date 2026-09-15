@@ -19,3 +19,6 @@ pubspec.lock
 # Build-Artefakte
 *.apk
 *.zip
+
+# Node / Netlify-Funktionen
+node_modules/

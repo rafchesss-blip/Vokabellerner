@@ -1,0 +1,8 @@
+{
+  "name": "vokabellerner-functions",
+  "private": true,
+  "description": "Netlify-Funktionen für den Latein-Vokabeltrainer (Accounts & Cloud-Speicher).",
+  "dependencies": {
+    "@netlify/blobs": "^11.1.0"
+  }
+}

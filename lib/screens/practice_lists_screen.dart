@@ -17,7 +17,20 @@ class PracticeListsScreen extends StatefulWidget {
 }
 
 class _PracticeListsScreenState extends State<PracticeListsScreen> {
+  static const int _maxLists = 10;
+
   Future<void> _createList() async {
+    if (Store.instance.practiceLists.length >= _maxLists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Limit erreicht: Du kannst höchstens 10 Listen gleichzeitig haben.',
+          ),
+        ),
+      );
+      return;
+    }
+
     final name = await _askName();
     if (name == null || name.trim().isEmpty) return;
     if (!mounted) return;

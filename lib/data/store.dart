@@ -1,13 +1,17 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/practice_list.dart';
 import '../models/vocab.dart';
+import '../services/api.dart';
+import '../services/auth.dart';
 
 /// Zentrale Ablage für Lektionen und Übungslisten (Singleton).
 ///
-/// Alles wird als JSON in den `shared_preferences` gespeichert.
+/// Alles wird als JSON in den `shared_preferences` gespeichert. Ist ein
+/// Benutzer angemeldet, werden die Daten zusätzlich in die Cloud synchronisiert.
 class Store {
   Store._();
   static final Store instance = Store._();
@@ -18,27 +22,35 @@ class Store {
   List<Lesson> lessons = [];
   List<PracticeList> practiceLists = [];
 
+  bool _loading = false;
+  Timer? _pushTimer;
+
   Future<void> load() async {
-    final prefs = await SharedPreferences.getInstance();
+    _loading = true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    final lessonsRaw = prefs.getString(_lessonsKey);
-    if (lessonsRaw == null) {
-      lessons = _seed();
-    } else {
-      lessons = (jsonDecode(lessonsRaw) as List)
-          .map((e) => Lesson.fromJson(e as Map<String, dynamic>))
-          .toList();
-      _addMissingLessons();
-    }
-
-    final listsRaw = prefs.getString(_listsKey);
-    practiceLists = listsRaw == null
-        ? []
-        : (jsonDecode(listsRaw) as List)
-            .map((e) => PracticeList.fromJson(e as Map<String, dynamic>))
+      final lessonsRaw = prefs.getString(_lessonsKey);
+      if (lessonsRaw == null) {
+        lessons = _seed();
+      } else {
+        lessons = (jsonDecode(lessonsRaw) as List)
+            .map((e) => Lesson.fromJson(e as Map<String, dynamic>))
             .toList();
+        _addMissingLessons();
+      }
 
-    await save();
+      final listsRaw = prefs.getString(_listsKey);
+      practiceLists = listsRaw == null
+          ? []
+          : (jsonDecode(listsRaw) as List)
+              .map((e) => PracticeList.fromJson(e as Map<String, dynamic>))
+              .toList();
+
+      await save();
+    } finally {
+      _loading = false;
+    }
   }
 
   Future<void> save() async {
@@ -51,6 +63,76 @@ class Store {
       _listsKey,
       jsonEncode(practiceLists.map((l) => l.toJson()).toList()),
     );
+    _scheduleCloudPush();
+  }
+
+  // ── Cloud-Sync ─────────────────────────────────────────────────────────
+
+  Map<String, dynamic> toCloudJson() => {
+        'lessons': lessons.map((l) => l.toJson()).toList(),
+        'lists': practiceLists.map((l) => l.toJson()).toList(),
+      };
+
+  void loadCloudJson(Map<String, dynamic> json) {
+    lessons = (json['lessons'] as List? ?? [])
+        .map((e) => Lesson.fromJson(e as Map<String, dynamic>))
+        .toList();
+    practiceLists = (json['lists'] as List? ?? [])
+        .map((e) => PracticeList.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Überträgt den lokalen Stand in die Cloud.
+  Future<void> pushToCloud() async {
+    if (!AuthService.instance.isLoggedIn) return;
+    try {
+      await Api.putData(AuthService.instance.token!, toCloudJson());
+    } catch (_) {
+      // Offline: lokale Daten bleiben erhalten und werden später erneut
+      // gesendet.
+    }
+  }
+
+  /// Lädt den Cloud-Stand und ersetzt die lokalen Daten.
+  Future<void> pullFromCloud() async {
+    if (!AuthService.instance.isLoggedIn) return;
+    try {
+      final data = await Api.getData(AuthService.instance.token!);
+      if (data['lessons'] != null) {
+        _loading = true;
+        try {
+          loadCloudJson(data);
+          await save();
+        } finally {
+          _loading = false;
+        }
+      }
+    } catch (_) {
+      // Offline: lokalen Stand weiterverwenden.
+    }
+  }
+
+  /// Setzt die lokalen Daten auf einen frischen Startzustand zurück
+  /// (z. B. nach dem Abmelden).
+  Future<void> resetLocal() async {
+    _loading = true;
+    try {
+      lessons = _seed();
+      practiceLists = [];
+      await save();
+    } finally {
+      _loading = false;
+    }
+  }
+
+  /// Pusht zeitverzögert, damit schnelle Folgen von `save()` (z. B. beim
+  /// Karteikarten-Üben) zu einem einzigen Cloud-Aufruf gebündelt werden.
+  void _scheduleCloudPush() {
+    if (_loading || !AuthService.instance.isLoggedIn) return;
+    _pushTimer?.cancel();
+    _pushTimer = Timer(const Duration(seconds: 2), () {
+      pushToCloud();
+    });
   }
 
   /// Alle Vokabeln per ID nachschlagen.
