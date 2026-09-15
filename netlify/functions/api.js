@@ -16,7 +16,11 @@
 //   GET    /api/admin/users
 //   GET    /api/admin/users/:name/data
 //   DELETE /api/admin/users/:name
+//   POST   /api/admin/users/:name/impersonate
+//   GET    /api/admin/lessons
 //   POST   /api/admin/lessons        {name, boxes:[{name, vocabs:[{latin, middle?, german}]}]}
+//   PUT    /api/admin/lessons/:id     {name, boxes:[{name, vocabs:[{id?, latin, middle?, german}]}]}
+//   DELETE /api/admin/lessons/:id
 
 const crypto = require('crypto');
 const { getStore, connectLambda } = require('@netlify/blobs');
@@ -107,6 +111,23 @@ exports.handler = async (event) => {
       result = await adminDeleteUser(event, userFromPath(pathname));
     } else if (method === 'POST' && pathname === '/api/admin/lessons') {
       result = await adminAddLesson(event);
+    } else if (method === 'GET' && pathname === '/api/admin/lessons') {
+      result = await adminListLessons(event);
+    } else if (
+      method === 'PUT' &&
+      /^\/api\/admin\/lessons\/[^/]+$/.test(pathname)
+    ) {
+      result = await adminUpdateLesson(event, lessonIdFromPath(pathname));
+    } else if (
+      method === 'DELETE' &&
+      /^\/api\/admin\/lessons\/[^/]+$/.test(pathname)
+    ) {
+      result = await adminDeleteLesson(event, lessonIdFromPath(pathname));
+    } else if (
+      method === 'POST' &&
+      /^\/api\/admin\/users\/[^/]+\/impersonate$/.test(pathname)
+    ) {
+      result = await adminImpersonate(event, userFromPath(pathname));
     } else {
       result = { statusCode: 404, body: JSON.stringify({ error: 'Nicht gefunden' }) };
     }
@@ -123,6 +144,16 @@ exports.handler = async (event) => {
 };
 
 function userFromPath(pathname) {
+  const parts = pathname.split('/');
+  const raw = parts[4] || '';
+  try {
+    return decodeURIComponent(raw);
+  } catch (_) {
+    return raw;
+  }
+}
+
+function lessonIdFromPath(pathname) {
   const parts = pathname.split('/');
   const raw = parts[4] || '';
   try {
@@ -307,23 +338,8 @@ async function adminAddLesson(event) {
   const name = String(body.name || '').trim();
   const boxes = Array.isArray(body.boxes) ? body.boxes : [];
 
-  if (name.length < 2 || name.length > 60) {
-    return err(400, 'Der Lektionsname muss 2–60 Zeichen haben.');
-  }
-  if (boxes.length < 1 || boxes.length > 20) {
-    return err(400, 'Eine Lektion braucht 1–20 Kästen.');
-  }
-  for (const box of boxes) {
-    const vocabs = Array.isArray(box.vocabs) ? box.vocabs : [];
-    if (vocabs.length === 0) {
-      return err(400, `„${box.name || 'Kasten'}" enthält keine Vokabeln.`);
-    }
-    for (const v of vocabs) {
-      if (!String(v.latin || '').trim() || !String(v.german || '').trim()) {
-        return err(400, 'Jede Vokabel braucht ein lateinisches Wort und eine Übersetzung.');
-      }
-    }
-  }
+  const validationError = validateLesson(name, boxes);
+  if (validationError) return err(400, validationError);
 
   const globals = await getGlobalLessons();
   if (globals.length >= MAX_LESSONS) {
@@ -338,6 +354,64 @@ async function adminAddLesson(event) {
   await store.set('global_lessons', JSON.stringify(globals));
 
   return ok({ ok: true, lesson });
+}
+
+async function adminListLessons(event) {
+  const auth = await requireAdmin(event);
+  if (auth.error) return auth.error;
+
+  return ok({ lessons: await getGlobalLessons() });
+}
+
+async function adminUpdateLesson(event, lessonId) {
+  const auth = await requireAdmin(event);
+  if (auth.error) return auth.error;
+
+  const body = parseBody(event);
+  const name = String(body.name || '').trim();
+  const boxes = Array.isArray(body.boxes) ? body.boxes : [];
+
+  const validationError = validateLesson(name, boxes);
+  if (validationError) return err(400, validationError);
+
+  const globals = await getGlobalLessons();
+  const index = globals.findIndex((l) => l.id === lessonId);
+  if (index === -1) return err(404, 'Lektion nicht gefunden.');
+
+  const lesson = rebuildLesson(lessonId, name, boxes);
+  globals[index] = lesson;
+  await store.set('global_lessons', JSON.stringify(globals));
+
+  return ok({ ok: true, lesson });
+}
+
+async function adminDeleteLesson(event, lessonId) {
+  const auth = await requireAdmin(event);
+  if (auth.error) return auth.error;
+
+  const globals = await getGlobalLessons();
+  const next = globals.filter((l) => l.id !== lessonId);
+  if (next.length === globals.length) return err(404, 'Lektion nicht gefunden.');
+
+  await store.set('global_lessons', JSON.stringify(next));
+  return ok({ ok: true });
+}
+
+async function adminImpersonate(event, username) {
+  const auth = await requireAdmin(event);
+  if (auth.error) return auth.error;
+
+  const name = normalizeUsername(username);
+  const raw = await store.get(userKey(name));
+  if (!raw) return err(404, 'Konto nicht gefunden.');
+
+  const user = JSON.parse(raw);
+  if (user.isAdmin) {
+    return err(400, 'Das Admin-Konto kann nicht übernommen werden.');
+  }
+
+  const token = await createSession(user.username, user.userId, false);
+  return ok({ token, username: user.username, isAdmin: false });
 }
 
 // ── Admin-Konto ───────────────────────────────────────────────────────────
@@ -375,9 +449,47 @@ async function getGlobalLessons() {
 
 async function mergeGlobalLessons(userLessons) {
   const globals = await getGlobalLessons();
-  const names = new Set((userLessons || []).map((l) => l.name));
-  const missing = globals.filter((l) => !names.has(l.name));
-  return sortLessons([...(userLessons || []), ...missing]);
+  const list = Array.isArray(userLessons) ? userLessons : [];
+
+  // Grundlektionen (nicht vom Admin) bleiben unverändert. Admin-Lektionen
+  // werden über ihre ID aktualisiert: Änderungen/Ergänzungen des Admins
+  // kommen an, gelöschte Admin-Lektionen verschwinden, der Lernfortschritt
+  // bleibt anhand der Vokabel-IDs erhalten.
+  const base = list.filter((l) => !String(l.id || '').startsWith('admin-'));
+  const userAdmin = new Map(
+    list
+      .filter((l) => String(l.id || '').startsWith('admin-'))
+      .map((l) => [l.id, l]),
+  );
+
+  const merged = [...base];
+  for (const global of globals) {
+    merged.push(mergeLessonProgress(global, userAdmin.get(global.id) || null));
+  }
+
+  return sortLessons(merged);
+}
+
+function mergeLessonProgress(globalLesson, oldLesson) {
+  if (!oldLesson) return globalLesson;
+
+  const oldVocabs = new Map();
+  for (const box of oldLesson.boxes || []) {
+    for (const v of box.vocabs || []) {
+      oldVocabs.set(v.id, v);
+    }
+  }
+
+  const boxes = (globalLesson.boxes || []).map((box) => ({
+    ...box,
+    vocabs: (box.vocabs || []).map((v) => {
+      const old = oldVocabs.get(v.id);
+      if (!old) return v;
+      return { ...v, level: old.level ?? 0, history: old.history ?? [] };
+    }),
+  }));
+
+  return { ...globalLesson, boxes };
 }
 
 /// Sortiert Lektionen numerisch nach der Nummer im Namen (aufsteigend).
@@ -405,10 +517,18 @@ function buildLesson(name, boxes) {
   const stamp = Date.now();
   const rand = crypto.randomBytes(4).toString('hex');
   const lessonId = `admin-${stamp}-${rand}`;
+  return rebuildLesson(lessonId, name, boxes);
+}
 
+/// Baut eine Lektion neu auf und erhält dabei vorhandene Vokabel-IDs
+/// (damit der Lernfortschritt erhalten bleibt). Fehlende IDs werden neu
+/// erzeugt.
+function rebuildLesson(lessonId, name, boxes) {
   const builtBoxes = boxes.map((box, bi) => {
-    const vocabs = (box.vocabs || []).map((v, vi) => ({
-      id: `${lessonId}-b${bi + 1}-v${vi + 1}`,
+    const vocabs = (box.vocabs || []).map((v) => ({
+      id:
+        v.id ||
+        `${lessonId}-b${bi + 1}-v${crypto.randomBytes(3).toString('hex')}`,
       latin: String(v.latin || '').trim(),
       german: String(v.german || '').trim(),
       middleColumn: v.middle ? String(v.middle).trim() : null,
@@ -417,13 +537,34 @@ function buildLesson(name, boxes) {
     }));
 
     return {
-      id: `${lessonId}-b${bi + 1}`,
+      id: box.id || `${lessonId}-b${bi + 1}`,
       name: String(box.name || '').trim() || `Kasten ${bi + 1}`,
       vocabs,
     };
   });
 
   return { id: lessonId, name, boxes: builtBoxes };
+}
+
+function validateLesson(name, boxes) {
+  if (name.length < 2 || name.length > 60) {
+    return 'Der Lektionsname muss 2–60 Zeichen haben.';
+  }
+  if (boxes.length < 1 || boxes.length > 20) {
+    return 'Eine Lektion braucht 1–20 Kästen.';
+  }
+  for (const box of boxes) {
+    const vocabs = Array.isArray(box.vocabs) ? box.vocabs : [];
+    if (vocabs.length === 0) {
+      return `„${box.name || 'Kasten'}" enthält keine Vokabeln.`;
+    }
+    for (const v of vocabs) {
+      if (!String(v.latin || '').trim() || !String(v.german || '').trim()) {
+        return 'Jede Vokabel braucht ein lateinisches Wort und eine Übersetzung.';
+      }
+    }
+  }
+  return null;
 }
 
 // ── Benutzer-Index ────────────────────────────────────────────────────────

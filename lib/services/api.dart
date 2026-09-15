@@ -127,4 +127,49 @@ class Api {
     );
     _decode(res);
   }
+
+  static Future<List<Map<String, dynamic>>> adminListLessons(
+    String token,
+  ) async {
+    final res = await http.get(_uri('/admin/lessons'), headers: _headers(token));
+    final body = _decode(res);
+    return (body['lessons'] as List? ?? [])
+        .map((e) => (e as Map).cast<String, dynamic>())
+        .toList();
+  }
+
+  static Future<void> adminUpdateLesson(
+    String token,
+    String lessonId,
+    Map<String, dynamic> lesson,
+  ) async {
+    final res = await http.put(
+      _uri('/admin/lessons/${Uri.encodeComponent(lessonId)}'),
+      headers: _headers(token),
+      body: jsonEncode(lesson),
+    );
+    _decode(res);
+  }
+
+  static Future<void> adminDeleteLesson(
+    String token,
+    String lessonId,
+  ) async {
+    final res = await http.delete(
+      _uri('/admin/lessons/${Uri.encodeComponent(lessonId)}'),
+      headers: _headers(token),
+    );
+    _decode(res);
+  }
+
+  static Future<Map<String, dynamic>> adminImpersonate(
+    String token,
+    String username,
+  ) async {
+    final res = await http.post(
+      _uri('/admin/users/${Uri.encodeComponent(username)}/impersonate'),
+      headers: _headers(token),
+    );
+    return _decode(res);
+  }
 }

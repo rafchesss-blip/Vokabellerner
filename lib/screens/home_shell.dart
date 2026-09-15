@@ -54,80 +54,98 @@ class _HomeShellState extends State<HomeShell> {
     await Store.instance.resetLocal();
   }
 
+  Future<void> _backToAdmin() async {
+    shellTabIndex.value = 0;
+    await AuthService.instance.restoreAdmin();
+    await Store.instance.resetLocal();
+    await Store.instance.pullFromCloud();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
-      valueListenable: shellTabIndex,
-      builder: (context, index, _) {
-        final isAdmin = AuthService.instance.isAdmin;
+      valueListenable: AuthService.instance.revision,
+      builder: (context, _, __) => ValueListenableBuilder<int>(
+        valueListenable: shellTabIndex,
+        builder: (context, index, _) {
+          final auth = AuthService.instance;
+          final isAdmin = auth.isAdmin;
+          final isImpersonating = auth.isImpersonating;
 
-        final destinations = <NavigationDestination>[
-          const NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.insights_outlined),
-            selectedIcon: Icon(Icons.insights),
-            label: 'Analyse',
-          ),
-          if (isAdmin)
+          final destinations = <NavigationDestination>[
             const NavigationDestination(
-              icon: Icon(Icons.admin_panel_settings_outlined),
-              selectedIcon: Icon(Icons.admin_panel_settings),
-              label: 'Admin',
+              icon: Icon(Icons.dashboard_outlined),
+              selectedIcon: Icon(Icons.dashboard),
+              label: 'Dashboard',
             ),
-        ];
+            const NavigationDestination(
+              icon: Icon(Icons.insights_outlined),
+              selectedIcon: Icon(Icons.insights),
+              label: 'Analyse',
+            ),
+            if (isAdmin)
+              const NavigationDestination(
+                icon: Icon(Icons.admin_panel_settings_outlined),
+                selectedIcon: Icon(Icons.admin_panel_settings),
+                label: 'Admin',
+              ),
+          ];
 
-        final body = switch (index) {
-          0 => const DashboardTab(),
-          1 => const AnalyseTab(),
-          _ => isAdmin ? const AdminScreen() : const DashboardTab(),
-        };
+          final body = switch (index) {
+            0 => const DashboardTab(),
+            1 => const AnalyseTab(),
+            _ => isAdmin ? const AdminScreen() : const DashboardTab(),
+          };
 
-        final title = switch (index) {
-          0 => 'Dashboard',
-          1 => 'Analyse',
-          _ => 'Admin',
-        };
+          final title = switch (index) {
+            0 => 'Dashboard',
+            1 => 'Analyse',
+            _ => 'Admin',
+          };
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title),
-                Text(
-                  AuthService.instance.username ?? '',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.normal,
+          return Scaffold(
+            appBar: AppBar(
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title),
+                  Text(
+                    auth.username ?? '',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
+                ],
+              ),
+              actions: [
+                if (isImpersonating)
+                  IconButton(
+                    icon: const Icon(Icons.undo),
+                    tooltip: 'Zurück zu Admin',
+                    onPressed: _backToAdmin,
+                  ),
+                IconButton(
+                  icon: const Icon(Icons.settings_outlined),
+                  tooltip: 'Einstellungen',
+                  onPressed: _openSettings,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  tooltip: 'Abmelden',
+                  onPressed: _logout,
                 ),
               ],
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings_outlined),
-                tooltip: 'Einstellungen',
-                onPressed: _openSettings,
-              ),
-              IconButton(
-                icon: const Icon(Icons.logout),
-                tooltip: 'Abmelden',
-                onPressed: _logout,
-              ),
-            ],
-          ),
-          body: body,
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: index,
-            onDestinationSelected: (i) => shellTabIndex.value = i,
-            destinations: destinations,
-          ),
-        );
-      },
+            body: body,
+            bottomNavigationBar: NavigationBar(
+              selectedIndex: index,
+              onDestinationSelected: (i) => shellTabIndex.value = i,
+              destinations: destinations,
+            ),
+          );
+        },
+      ),
     );
   }
 }

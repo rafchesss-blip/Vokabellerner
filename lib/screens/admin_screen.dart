@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../data/store.dart';
+import '../navigation.dart';
 import '../services/api.dart';
 import '../services/auth.dart';
 import '../theme/app_theme.dart';
+import 'lesson_edit_screen.dart';
 import 'lesson_editor_screen.dart';
 
-/// Admin-Bereich: alle Konten sehen, einsehen und löschen sowie neue
-/// Lektionen für alle Nutzer hinzufügen.
+/// Admin-Bereich: alle Konten sehen, einsehen, löschen und übernehmen sowie
+/// Lektionen verwalten (hinzufügen, bearbeiten, löschen).
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
 
@@ -20,18 +23,22 @@ class _AdminScreenState extends State<AdminScreen> {
   _AdminSection _section = _AdminSection.accounts;
 
   List<String> _users = [];
-  bool _loading = false;
+  List<Map<String, dynamic>> _lessons = [];
+
+  bool _loadingUsers = false;
+  bool _loadingLessons = false;
   String? _error;
 
   @override
   void initState() {
     super.initState();
     _loadUsers();
+    _loadLessons();
   }
 
   Future<void> _loadUsers() async {
     setState(() {
-      _loading = true;
+      _loadingUsers = true;
       _error = null;
     });
     try {
@@ -41,7 +48,19 @@ class _AdminScreenState extends State<AdminScreen> {
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _loadingUsers = false);
+    }
+  }
+
+  Future<void> _loadLessons() async {
+    setState(() => _loadingLessons = true);
+    try {
+      final lessons = await Api.adminListLessons(AuthService.instance.token!);
+      if (mounted) setState(() => _lessons = lessons);
+    } catch (e) {
+      // Fehler beim Laden der Lektionen nicht blockierend anzeigen.
+    } finally {
+      if (mounted) setState(() => _loadingLessons = false);
     }
   }
 
@@ -76,6 +95,48 @@ class _AdminScreenState extends State<AdminScreen> {
           SnackBar(content: Text('„$username" wurde gelöscht.')),
         );
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
+  }
+
+  Future<void> _impersonate(String username) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Als „$username" anmelden?'),
+        content: const Text(
+          'Du siehst dann die App genau wie dieser Nutzer. Über den '
+          'Zurück-Pfeil oben kommst du wieder in dein Admin-Konto.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Anmelden'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      final res = await Api.adminImpersonate(
+        AuthService.instance.token!,
+        username,
+      );
+      shellTabIndex.value = 0; // zurück zum Dashboard
+      await AuthService.instance.impersonate(
+        res['token'] as String,
+        res['username'] as String,
+      );
+      await Store.instance.pullFromCloud();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -162,6 +223,59 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
         ),
       );
+      _loadLessons();
+    }
+  }
+
+  Future<void> _editLesson(Map<String, dynamic> lesson) async {
+    final changed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LessonEditScreen(lesson: lesson),
+      ),
+    );
+    if (changed == true && mounted) {
+      _loadLessons();
+    }
+  }
+
+  Future<void> _deleteLesson(Map<String, dynamic> lesson) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('„${lesson['name']}" löschen?'),
+        content: const Text('Die Lektion wird bei allen Konten entfernt.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Löschen'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await Api.adminDeleteLesson(
+        AuthService.instance.token!,
+        lesson['id'] as String,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Lektion gelöscht.')),
+        );
+        _loadLessons();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     }
   }
 
@@ -185,8 +299,7 @@ class _AdminScreenState extends State<AdminScreen> {
               ),
             ],
             selected: {_section},
-            onSelectionChanged: (s) =>
-                setState(() => _section = s.first),
+            onSelectionChanged: (s) => setState(() => _section = s.first),
           ),
         ),
         Expanded(
@@ -199,7 +312,7 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   Widget _buildAccounts() {
-    if (_loading && _users.isEmpty) {
+    if (_loadingUsers && _users.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -236,10 +349,20 @@ class _AdminScreenState extends State<AdminScreen> {
                 username,
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-              trailing: IconButton(
-                tooltip: 'Löschen',
-                icon: const Icon(Icons.delete_outline, color: Colors.red),
-                onPressed: () => _deleteUser(username),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: 'Als dieser Nutzer anmelden',
+                    icon: const Icon(Icons.login),
+                    onPressed: () => _impersonate(username),
+                  ),
+                  IconButton(
+                    tooltip: 'Löschen',
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    onPressed: () => _deleteUser(username),
+                  ),
+                ],
               ),
               onTap: () => _showUser(username),
             ),
@@ -250,39 +373,76 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   Widget _buildLessons() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      children: [
-        Card(
-          elevation: 0,
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Neue Lektion für alle Konten',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Füge eine Lektion im bekannten Format hinzu (Kästen mit '
-                  'Latein / Mittlere Spalte / Übersetzung). Sie wird bei '
-                  'allen bestehenden und neuen Konten automatisch ergänzt.',
-                  style: TextStyle(color: muted(context)),
-                ),
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: _addLesson,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Lektion hinzufügen'),
-                ),
-              ],
+    return RefreshIndicator(
+      onRefresh: _loadLessons,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        children: [
+          Card(
+            elevation: 0,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Neue Lektion für alle Konten',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Komplette Lektion einfügen – das Format wird automatisch '
+                    'erkannt.',
+                    style: TextStyle(color: muted(context)),
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: _addLesson,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Lektion hinzufügen'),
+                  ),
+                ],
+              ),
             ),
           ),
+          const SizedBox(height: 16),
+          if (_loadingLessons && _lessons.isEmpty)
+            const Center(child: CircularProgressIndicator())
+          else if (_lessons.isEmpty)
+            const _Message(
+              icon: Icons.library_books_outlined,
+              message: 'Noch keine eigenen Lektionen. Die Grundlektionen '
+                  '(Lektion 1–4 und 18) sind fest eingebaut.',
+            )
+          else
+            for (final lesson in _lessons) _buildLessonTile(lesson),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLessonTile(Map<String, dynamic> lesson) {
+    final name = (lesson['name'] as String?) ?? 'Unbenannt';
+    final boxes = (lesson['boxes'] as List? ?? []);
+    final vocabCount = boxes.fold<int>(
+      0,
+      (sum, b) => sum + (((b as Map)['vocabs'] as List? ?? []).length),
+    );
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: const CircleAvatar(child: Icon(Icons.menu_book)),
+        title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+        subtitle: Text('$vocabCount Vokabeln · ${boxes.length} Kästen'),
+        trailing: IconButton(
+          tooltip: 'Löschen',
+          icon: const Icon(Icons.delete_outline, color: Colors.red),
+          onPressed: () => _deleteLesson(lesson),
         ),
-      ],
+        onTap: () => _editLesson(lesson),
+      ),
     );
   }
 }
