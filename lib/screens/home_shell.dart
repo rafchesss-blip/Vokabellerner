@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import '../data/store.dart';
 import '../navigation.dart';
 import '../services/auth.dart';
+import 'admin_screen.dart';
 import 'analyse_tab.dart';
 import 'dashboard_tab.dart';
 import 'settings_screen.dart';
 
 /// Rahmen der App: unten zwischen Dashboard und Analyse wechseln.
+/// Für Admins gibt es zusätzlich den Bereich „Admin".
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -47,6 +49,7 @@ class _HomeShellState extends State<HomeShell> {
 
     if (confirmed != true || !mounted) return;
 
+    shellTabIndex.value = 0;
     await AuthService.instance.logout();
     await Store.instance.resetLocal();
   }
@@ -56,12 +59,45 @@ class _HomeShellState extends State<HomeShell> {
     return ValueListenableBuilder<int>(
       valueListenable: shellTabIndex,
       builder: (context, index, _) {
+        final isAdmin = AuthService.instance.isAdmin;
+
+        final destinations = <NavigationDestination>[
+          const NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard),
+            label: 'Dashboard',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.insights_outlined),
+            selectedIcon: Icon(Icons.insights),
+            label: 'Analyse',
+          ),
+          if (isAdmin)
+            const NavigationDestination(
+              icon: Icon(Icons.admin_panel_settings_outlined),
+              selectedIcon: Icon(Icons.admin_panel_settings),
+              label: 'Admin',
+            ),
+        ];
+
+        final body = switch (index) {
+          0 => const DashboardTab(),
+          1 => const AnalyseTab(),
+          _ => isAdmin ? const AdminScreen() : const DashboardTab(),
+        };
+
+        final title = switch (index) {
+          0 => 'Dashboard',
+          1 => 'Analyse',
+          _ => 'Admin',
+        };
+
         return Scaffold(
           appBar: AppBar(
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(index == 0 ? 'Dashboard' : 'Analyse'),
+                Text(title),
                 Text(
                   AuthService.instance.username ?? '',
                   style: const TextStyle(
@@ -84,22 +120,11 @@ class _HomeShellState extends State<HomeShell> {
               ),
             ],
           ),
-          body: index == 0 ? const DashboardTab() : const AnalyseTab(),
+          body: body,
           bottomNavigationBar: NavigationBar(
             selectedIndex: index,
             onDestinationSelected: (i) => shellTabIndex.value = i,
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard),
-                label: 'Dashboard',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.insights_outlined),
-                selectedIcon: Icon(Icons.insights),
-                label: 'Analyse',
-              ),
-            ],
+            destinations: destinations,
           ),
         );
       },

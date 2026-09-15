@@ -47,8 +47,10 @@ class _AuthScreenState extends State<AuthScreen> {
     try {
       if (_register) {
         await AuthService.instance.register(name, password);
-        // Neues Konto: die lokal vorhandenen Lektionen in die Cloud legen.
+        // Neues Konto: die lokal vorhandenen Lektionen in die Cloud legen
+        // und anschließend den Cloud-Stand (inkl. Admin-Lektionen) laden.
         await Store.instance.pushToCloud();
+        await Store.instance.pullFromCloud();
       } else {
         await AuthService.instance.login(name, password);
         // Bestehendes Konto: Daten aus der Cloud laden.

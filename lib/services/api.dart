@@ -88,4 +88,43 @@ class Api {
     );
     _decode(res);
   }
+
+  // ── Admin ──────────────────────────────────────────────────────────────
+
+  static Future<List<String>> adminListUsers(String token) async {
+    final res = await http.get(_uri('/admin/users'), headers: _headers(token));
+    final body = _decode(res);
+    return (body['users'] as List? ?? []).map((e) => e as String).toList();
+  }
+
+  static Future<Map<String, dynamic>> adminGetUserData(
+    String token,
+    String username,
+  ) async {
+    final res = await http.get(
+      _uri('/admin/users/${Uri.encodeComponent(username)}/data'),
+      headers: _headers(token),
+    );
+    return _decode(res);
+  }
+
+  static Future<void> adminDeleteUser(String token, String username) async {
+    final res = await http.delete(
+      _uri('/admin/users/${Uri.encodeComponent(username)}'),
+      headers: _headers(token),
+    );
+    _decode(res);
+  }
+
+  static Future<void> adminAddLesson(
+    String token,
+    Map<String, dynamic> lesson,
+  ) async {
+    final res = await http.post(
+      _uri('/admin/lessons'),
+      headers: _headers(token),
+      body: jsonEncode(lesson),
+    );
+    _decode(res);
+  }
 }
