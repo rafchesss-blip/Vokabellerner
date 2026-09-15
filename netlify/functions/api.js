@@ -33,7 +33,19 @@ exports.handler = async (event) => {
   }
 
   const rawUrl = event.rawUrl || `http://localhost${event.path || '/'}`;
-  const { pathname } = new URL(rawUrl);
+  let pathname;
+  try {
+    pathname = new URL(rawUrl).pathname;
+  } catch (_) {
+    pathname = event.path || '/';
+  }
+
+  // Fallback: falls die Umleitung den Funktionspfad statt des Originalpfads
+  // liefert, den `/api/...`-Teil aus dem event.path ziehen.
+  if (!pathname.startsWith('/api/')) {
+    const match = (event.path || '').match(/\/api\/.*$/);
+    if (match) pathname = match[0];
+  }
 
   try {
     let result;
