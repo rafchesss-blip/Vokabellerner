@@ -22,3 +22,6 @@ pubspec.lock
 
 # Node / Netlify-Funktionen
 node_modules/
+
+# Lokaler Test-Server
+local-data.json
