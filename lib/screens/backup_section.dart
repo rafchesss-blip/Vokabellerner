@@ -39,8 +39,8 @@ class BackupSection extends StatelessWidget {
     final ok = await _confirm(
       context,
       title: 'Sicherung wiederherstellen?',
-      message: 'Dein aktueller Lernfortschritt, eigene Lektionen und '
-          'Übungslisten werden durch die Sicherung ersetzt.',
+      message: 'Dein aktueller Lernfortschritt und deine Übungslisten '
+          'werden durch die Sicherung ersetzt.',
       action: 'Wiederherstellen',
     );
     if (!ok || !context.mounted) return;

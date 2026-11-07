@@ -5,11 +5,10 @@ import '../models/vocab.dart';
 import '../theme/app_theme.dart';
 import '../utils/goals.dart';
 import '../widgets/standard_app_bar.dart';
-import 'lesson_edit_screen.dart';
-import 'lesson_editor_screen.dart';
-import 'practice_screen.dart';
 
-/// Tab „Lektionen": alle Lektionen mit Fortschritt; eigene hinzufügen.
+/// Tab „Lektionen": Übersicht aller Lektionen mit Fortschritt.
+///
+/// Geübt wird über Übungslisten (Start → Übungslisten).
 class LessonsTab extends StatelessWidget {
   const LessonsTab({super.key});
 
@@ -19,30 +18,20 @@ class LessonsTab extends StatelessWidget {
       valueListenable: Store.instance.revision,
       builder: (context, _, __) {
         final lessons = Store.instance.lessons;
-        return Scaffold(
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const LessonEditorScreen()),
-            ),
-            icon: const Icon(Icons.add),
-            label: const Text('Eigene Lektion'),
-          ),
-          body: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-            children: [
-              for (final lesson in lessons) _LessonCard(lesson: lesson),
-              if (lessons.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Text(
-                    'Noch keine Lektionen.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: muted(context)),
-                  ),
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          children: [
+            for (final lesson in lessons) _LessonCard(lesson: lesson),
+            if (lessons.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  'Noch keine Lektionen.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: muted(context)),
                 ),
-            ],
-          ),
+              ),
+          ],
         );
       },
     );
@@ -148,7 +137,7 @@ class _ProgressBadge extends StatelessWidget {
   }
 }
 
-/// Inhalt einer Lektion; direkt üben, eigene Lektionen bearbeiten.
+/// Inhalt einer Lektion (nur ansehen).
 class LessonDetailScreen extends StatelessWidget {
   final Lesson lesson;
 
@@ -166,35 +155,9 @@ class LessonDetailScreen extends StatelessWidget {
             lesson;
 
         return Scaffold(
-          appBar: standardAppBar(
-            context,
-            current.name,
-            actions: [
-              if (!current.isBuiltIn)
-                IconButton(
-                  tooltip: 'Bearbeiten',
-                  icon: const Icon(Icons.edit_outlined),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => LessonEditScreen(lesson: current),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PracticeScreen(vocabs: current.allVocabs),
-              ),
-            ),
-            icon: const Icon(Icons.play_arrow),
-            label: const Text('Lektion üben'),
-          ),
+          appBar: standardAppBar(context, current.name),
           body: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
               if (current.isBuiltIn)
                 Padding(
@@ -235,8 +198,9 @@ class LessonDetailScreen extends StatelessWidget {
                                       ? Icons.check_circle
                                       : Icons.radio_button_unchecked,
                                   size: 18,
-                                  color:
-                                      isKnown(v) ? Colors.green : faint(context),
+                                  color: isKnown(v)
+                                      ? Colors.green
+                                      : faint(context),
                                 ),
                         ),
                     ],

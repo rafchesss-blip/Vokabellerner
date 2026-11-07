@@ -30,11 +30,19 @@ class _TutorialScreenState extends State<TutorialScreen> {
           'oder tippe auf „Weiter", um alles kennenzulernen.',
     ),
     _TutorialPage(
+      Icons.list_alt_outlined,
+      'Übungslisten erstellen',
+      'Tippe auf der Startseite auf „Übungslisten" und dann auf „Neue '
+          'Liste". Gib der Liste einen Namen, optional das Datum deines '
+          'Vokabeltests, und wähle die Vokabeln aus – aufgeteilt in '
+          'Lektionen, Kästen und einzelne Wörter.',
+    ),
+    _TutorialPage(
       Icons.play_circle_outline,
-      'Einfach loslegen',
-      'Auf der Startseite steht unter „Heute", was gerade dran ist. Tippe '
-          "auf „Los geht's\" – die App wählt die passenden Vokabeln aus: "
-          'fällige Wiederholungen zuerst, dazu bis zu 15 neue.',
+      'Jeden Tag lernen',
+      'Auf der Startseite steht unter „Heute", was aus deinen Listen '
+          'gerade dran ist: fällige Wiederholungen zuerst, dazu bis zu 15 '
+          "neue Vokabeln. Tippe auf „Los geht's\" zum Starten.",
     ),
     _TutorialPage(
       Icons.style_outlined,
@@ -53,12 +61,10 @@ class _TutorialScreenState extends State<TutorialScreen> {
           'Tag ein bisschen – das hält deine 🔥 Lernserie am Leben.',
     ),
     _TutorialPage(
-      Icons.list_alt_outlined,
-      'Übungslisten für Tests',
-      'Steht ein Vokabeltest an? Lege unter „Übungslisten" eine Liste mit '
-          'genau diesen Vokabeln an und gib das Testdatum ein. Dann wird '
-          'bis zum Test alles noch einmal wiederholt, und „Heute" nimmt die '
-          'Vokabeln aus deinen Listen.',
+      Icons.event_outlined,
+      'Vokabeltest im Blick',
+      'Hat eine Übungsliste ein Testdatum, sorgt die App dafür, dass bis '
+          'zum Test alles noch einmal wiederholt wird.',
     ),
     _TutorialPage(
       Icons.edit_outlined,
@@ -70,9 +76,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
     _TutorialPage(
       Icons.menu_book_outlined,
       'Lektionen',
-      'Im Tab „Lektionen" siehst du alle Lektionen mit deinem Fortschritt '
-          'und kannst eine ganze Lektion direkt üben. Mit „Eigene Lektion" '
-          'fügst du eigene Vokabeln ein – einfach den Text hineinkopieren.',
+      'Im Tab „Lektionen" siehst du alle Lektionen mit ihren Vokabeln '
+          'und wie viele davon du schon kannst.',
     ),
     _TutorialPage(
       Icons.insights_outlined,

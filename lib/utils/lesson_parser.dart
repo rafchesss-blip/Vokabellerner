@@ -96,22 +96,6 @@ ParsedLesson parseLessonText(String text) {
   return ParsedLesson(name: lessonName ?? 'Neue Lektion', boxes: boxes);
 }
 
-/// Wandelt eine Lektion zurück ins Textformat (mit „|“ getrennt), z. B. um
-/// sie als Datei in `lektionen/` auf GitHub abzulegen.
-String lessonToText(ParsedLesson lesson) {
-  final out = StringBuffer('${lesson.name}\n');
-  for (final box in lesson.boxes) {
-    out.write('\n${box.name}\n');
-    for (final v in box.vocabs) {
-      final middle = v.middle?.trim() ?? '';
-      out.writeln(middle.isEmpty
-          ? '${v.latin} | ${v.german}'
-          : '${v.latin} | $middle | ${v.german}');
-    }
-  }
-  return out.toString();
-}
-
 bool _isHeaderLine(String line) {
   final lower = line.toLowerCase();
   return lower.contains('lateinisches wort') ||

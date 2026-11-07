@@ -147,37 +147,6 @@ class Store {
     return count;
   }
 
-  // ── Eigene Lektionen ───────────────────────────────────────────────────
-
-  Future<void> addLesson(Lesson lesson) async {
-    lessons.add(lesson);
-    _sortLessons();
-    await save();
-  }
-
-  /// Ersetzt eine eigene Lektion (gleiche ID) durch [lesson].
-  Future<void> replaceLesson(Lesson lesson) async {
-    final i = lessons.indexWhere((l) => l.id == lesson.id);
-    if (i < 0) return;
-    lessons[i] = lesson;
-    _sortLessons();
-    _dropUnknownListIds();
-    await save();
-  }
-
-  Future<void> deleteLesson(String lessonId) async {
-    lessons.removeWhere((l) => l.id == lessonId && !l.isBuiltIn);
-    _dropUnknownListIds();
-    await save();
-  }
-
-  void _dropUnknownListIds() {
-    final known = vocabById.keys.toSet();
-    for (final list in practiceLists) {
-      list.vocabIds.removeWhere((id) => !known.contains(id));
-    }
-  }
-
   // ── Sicherung ──────────────────────────────────────────────────────────
 
   /// Kompletter Stand als JSON-Text (für „Sicherung exportieren").

@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:vokabellerner/data/builtin_lessons.dart';
 import 'package:vokabellerner/data/store.dart';
-import 'package:vokabellerner/models/practice_list.dart';
 import 'package:vokabellerner/models/vocab.dart';
 import 'package:vokabellerner/utils/fsrs.dart';
 import 'package:vokabellerner/utils/lesson_parser.dart';
@@ -32,13 +31,6 @@ void main() {
     expect(vocabs[0].middle, 'm');
     expect(vocabs[1].middle, isNull);
     expect(vocabs[1].german, 'dort');
-  });
-
-  test('lessonToText und parseLessonText passen zusammen', () {
-    final lesson = parseLessonText(_lesson1);
-    final again = parseLessonText(lessonToText(lesson));
-    expect(again.boxes.single.vocabs.map((v) => v.german),
-        lesson.boxes.single.vocabs.map((v) => v.german));
   });
 
   test('Eingebaute Lektionen haben stabile, eindeutige IDs', () {
@@ -119,27 +111,5 @@ void main() {
     expect(store.streak(today), 4);
     // Ein Tag Pause → Serie gerissen.
     expect(store.streak(DateTime(2026, 3, 12)), 0);
-  });
-
-  test('Eigene Lektion löschen entfernt ihre Vokabeln aus Listen', () async {
-    SharedPreferences.setMockInitialValues({});
-    await Store.instance.load(builtIn: _builtIn());
-    final store = Store.instance;
-    await store.addLesson(Lesson(id: 'own:1', name: 'Extra', boxes: [
-      Box(id: 'b', name: 'K', vocabs: [
-        Vocab(id: 'e1', latin: 'a', german: 'b'),
-      ]),
-    ]));
-    final builtInId = store.lessons.first.allVocabs.first.id;
-    store.practiceLists.add(
-      PracticeList(id: 'l', name: 'Test', vocabIds: ['e1', builtInId]),
-    );
-    await store.deleteLesson('own:1');
-    expect(store.lessons.length, 1);
-    expect(store.practiceLists.single.vocabIds, [builtInId]);
-
-    // Eingebaute Lektionen lassen sich nicht löschen.
-    await store.deleteLesson(store.lessons.first.id);
-    expect(store.lessons.length, 1);
   });
 }

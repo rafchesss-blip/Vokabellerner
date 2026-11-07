@@ -13,13 +13,9 @@ import 'tutorial_screen.dart';
 class DashboardTab extends StatelessWidget {
   const DashboardTab({super.key});
 
-  /// Vokabeln für „Heute": alle aus den Übungslisten – oder, wenn es noch
-  /// keine Listen gibt, alle Lektionen (in Lektions-Reihenfolge).
+  /// Vokabeln für „Heute": alle aus den Übungslisten (ohne Doppelte).
   static List<Vocab> todayPool() {
     final store = Store.instance;
-    if (store.practiceLists.isEmpty) {
-      return [for (final l in store.lessons) ...l.allVocabs];
-    }
     return store.resolveVocabs(
       {for (final l in store.practiceLists) ...l.vocabIds},
     );
@@ -56,8 +52,9 @@ class DashboardTab extends StatelessWidget {
             _TodayCard(
               counts: counts,
               reviewedToday: store.reviewsToday,
-              fromLists: store.practiceLists.isNotEmpty,
+              hasLists: store.practiceLists.isNotEmpty,
               onStart: () => _open(context, PracticeScreen(vocabs: pool)),
+              onCreateList: () => _open(context, const PracticeListsScreen()),
             ),
             const SizedBox(height: 16),
             Row(
@@ -168,14 +165,16 @@ class _HeroCard extends StatelessWidget {
 class _TodayCard extends StatelessWidget {
   final ({int due, int fresh}) counts;
   final int reviewedToday;
-  final bool fromLists;
+  final bool hasLists;
   final VoidCallback onStart;
+  final VoidCallback onCreateList;
 
   const _TodayCard({
     required this.counts,
     required this.reviewedToday,
-    required this.fromLists,
+    required this.hasLists,
     required this.onStart,
+    required this.onCreateList,
   });
 
   @override
@@ -184,6 +183,46 @@ class _TodayCard extends StatelessWidget {
     final newToday =
         counts.fresh < newCardsPerSession ? counts.fresh : newCardsPerSession;
     final done = counts.due == 0 && newToday == 0;
+
+    if (!hasLists) {
+      return Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.list_alt, color: scheme.primary),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Leg los!',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Erstelle zuerst eine Übungsliste: Gib ihr einen Namen und '
+                'wähle die Vokabeln aus, die du lernen willst.',
+                style: TextStyle(color: muted(context)),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: onCreateList,
+                icon: const Icon(Icons.add),
+                label: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  child: Text('Übungsliste erstellen',
+                      style: TextStyle(fontSize: 17)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Card(
       margin: EdgeInsets.zero,
@@ -243,7 +282,7 @@ class _TodayCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                fromLists ? 'Aus deinen Übungslisten' : 'Aus allen Lektionen',
+                'Aus deinen Übungslisten',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: faint(context), fontSize: 12),
               ),

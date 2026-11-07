@@ -70,7 +70,8 @@ String _contentKey(Vocab v) =>
 /// * Lernfortschritt wird per ID übernommen – oder, bei alten Daten mit
 ///   Zufalls-IDs, per Lektionsname + Wort. [idMap] sammelt dabei, welche alte
 ///   ID zu welcher neuen wurde (für die Übungslisten).
-/// * Eigene Lektionen bleiben unverändert.
+/// * Ältere, nicht eingebaute Lektionen (aus früheren Versionen) bleiben
+///   erhalten.
 List<Lesson> mergeBuiltInLessons(
   List<Lesson> stored,
   List<Lesson> builtIn, {

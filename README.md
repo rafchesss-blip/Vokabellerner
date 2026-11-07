@@ -8,9 +8,12 @@ Browser gespeichert.
 
 ## Funktionen
 
-- **Startseite „Heute“:** zeigt fällige Wiederholungen und neue Vokabeln.
-  Ein Tipp auf „Los geht's“ startet die Runde. Dazu gibt es eine Lernserie
-  (🔥 Tage in Folge) und eine Tagesstatistik.
+- **Übungslisten:** Du stellst Vokabeln zu Listen zusammen (z. B.
+  „Vokabeltest 1“), optional mit Testdatum. Gelernt wird immer über
+  Übungslisten.
+- **Startseite „Heute“:** zeigt fällige Wiederholungen und neue Vokabeln
+  aus deinen Übungslisten. Ein Tipp auf „Los geht's“ startet die Runde.
+  Dazu gibt es eine Lernserie (🔥 Tage in Folge) und eine Tagesstatistik.
 - **Spaced Repetition mit FSRS-6:** derselbe Algorithmus wie in Anki
   (`lib/utils/fsrs.dart`). Jede Vokabel hat eine Stabilität und eine
   Schwierigkeit, daraus berechnet die App den nächsten Termin. Ziel ist,
@@ -21,11 +24,10 @@ Browser gespeichert.
   Am PC: Leertaste zum Umdrehen, 1–4 zum Bewerten.
 - **Test-Modus:** Du tippst die Übersetzung und/oder die mittlere Spalte ein.
   Die Prüfung ignoriert Makronen (ā = a) und Artikel.
-- **Übungslisten mit Testdatum:** Bis zum Testtag wird alles noch einmal
-  wiederholt.
-- **Lektionen:** Die Lektionen sind eingebaut. Zusätzlich kann jeder eigene
-  Lektionen einfügen (Text hineinkopieren). Eine ganze Lektion lässt sich
-  direkt üben.
+- **Testdatum:** Hat eine Übungsliste ein Testdatum, wird bis zum Testtag
+  alles noch einmal wiederholt.
+- **Lektionen:** Die Lektionen sind eingebaut. Der Tab „Lektionen“ zeigt sie
+  mit deinem Fortschritt.
 - **Analyse:** Jede Vokabel hat eine Lernstufe (−5 bis +5) mit Verlauf.
   Außerdem siehst du, wie gut du sie gerade noch weißt und wann sie wieder
   drankommt.
@@ -62,10 +64,6 @@ Die eingebauten Lektionen sind einfache Textdateien im Ordner
 Tippfehler korrigierst du genauso direkt in der Datei. Der Lernfortschritt
 hängt am Dateinamen und am Wort. Ändert sich ein Wort, beginnt es wieder als
 „neu“.
-
-Tipp: In der App unter **Lektionen → Eigene Lektion** kannst du eine Lektion
-einfügen und mit „Für alle: als Datei für GitHub kopieren“ direkt im
-richtigen Format kopieren.
 
 ## Entwickeln
 

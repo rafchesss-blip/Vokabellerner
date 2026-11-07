@@ -6,7 +6,8 @@ import 'package:vokabellerner/data/store.dart';
 import 'package:vokabellerner/main.dart';
 
 void main() {
-  testWidgets('Startseite zeigt „Heute" mit neuen Vokabeln', (tester) async {
+  testWidgets('Ohne Übungsliste fordert die Startseite zum Erstellen auf',
+      (tester) async {
     SharedPreferences.setMockInitialValues({});
     await tester.runAsync(() => Store.instance.load(builtIn: [
           builtInLessonFromText(
@@ -18,8 +19,7 @@ void main() {
     await tester.pumpWidget(const VokabeltrainerApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('Heute'), findsOneWidget);
-    expect(find.text("Los geht's"), findsOneWidget);
-    expect(find.text('Aus allen Lektionen'), findsOneWidget);
+    expect(find.text('Übungsliste erstellen'), findsOneWidget);
+    expect(find.text("Los geht's"), findsNothing);
   });
 }
