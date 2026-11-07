@@ -3,8 +3,8 @@ import '../models/vocab.dart';
 /// Hilfsfunktionen für Lernziele: „Bis wann muss ich die Vokabeln können?"
 ///
 /// Eine Vokabel gilt als **gewusst**, wenn ihre Lernstufe positiv ist
-/// (level > 0). Aus dem Zieldatum einer Übungsliste wird ein Tagesziel
-/// berechnet, damit man das Gesamtziel rechtzeitig erreicht.
+/// (level > 0). Aus dem Testdatum einer Übungsliste wird ein Tagesziel
+/// berechnet, damit man bis zum Vortag des Tests fertig ist.
 
 bool _isSameDay(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;
@@ -100,8 +100,9 @@ GoalProgress computeGoal(
     );
   }
 
-  final due = DateTime(dueDate.year, dueDate.month, dueDate.day);
-  final rawDays = due.difference(today).inDays + 1; // heute zählt mit
+  // Gelernt wird bis zum Vortag des Tests (heute zählt mit).
+  final lastDay = DateTime(dueDate.year, dueDate.month, dueDate.day - 1);
+  final rawDays = lastDay.difference(today).inDays + 1;
   final daysRemaining = rawDays < 1 ? 1 : rawDays;
   final dailyTarget = (remaining / daysRemaining).ceil();
 

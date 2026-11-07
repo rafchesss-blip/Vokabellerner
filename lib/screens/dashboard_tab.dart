@@ -39,18 +39,27 @@ class DashboardTab extends StatelessWidget {
       builder: (context, _, __) {
         final store = Store.instance;
         final pool = todayPool();
-        final counts = countReview(pool);
+        final plan = planReview(pool, store.practiceLists);
         final streak = store.streak();
         final allVocabs = [for (final l in store.lessons) ...l.allVocabs];
         final known = allVocabs.where(isKnown).length;
+        final exam = nextExamList(store.practiceLists);
 
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
             _HeroCard(greeting: _greeting(), streak: streak),
+            if (exam != null) ...[
+              const SizedBox(height: 16),
+              _ExamCard(
+                name: exam.name,
+                exam: exam.dueDate!,
+                onTap: () => _open(context, const PracticeListsScreen()),
+              ),
+            ],
             const SizedBox(height: 16),
             _TodayCard(
-              counts: counts,
+              plan: plan,
               reviewedToday: store.reviewsToday,
               hasLists: store.practiceLists.isNotEmpty,
               onStart: () => _open(context, PracticeScreen(vocabs: pool)),
@@ -163,14 +172,14 @@ class _HeroCard extends StatelessWidget {
 
 /// „Heute": fällige und neue Vokabeln, großer Start-Knopf.
 class _TodayCard extends StatelessWidget {
-  final ({int due, int fresh}) counts;
+  final ReviewPlan plan;
   final int reviewedToday;
   final bool hasLists;
   final VoidCallback onStart;
   final VoidCallback onCreateList;
 
   const _TodayCard({
-    required this.counts,
+    required this.plan,
     required this.reviewedToday,
     required this.hasLists,
     required this.onStart,
@@ -180,9 +189,7 @@ class _TodayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final newToday =
-        counts.fresh < newCardsPerSession ? counts.fresh : newCardsPerSession;
-    final done = counts.due == 0 && newToday == 0;
+    final done = plan.isEmpty;
 
     if (!hasLists) {
       return Card(
@@ -260,12 +267,12 @@ class _TodayCard extends StatelessWidget {
               Row(
                 children: [
                   _BigNumber(
-                    value: counts.due,
+                    value: plan.due.length,
                     label: 'wiederholen',
                     color: scheme.primary,
                   ),
                   _BigNumber(
-                    value: newToday,
+                    value: plan.fresh.length,
                     label: 'neu',
                     color: scheme.tertiary,
                   ),
@@ -393,6 +400,87 @@ class _NavTile extends StatelessWidget {
         subtitle: Text(subtitle),
         trailing: Icon(Icons.chevron_right, color: faint(context)),
         onTap: onTap,
+      ),
+    );
+  }
+}
+
+/// Countdown zum nächsten Vokabeltest.
+class _ExamCard extends StatelessWidget {
+  final String name;
+  final DateTime exam;
+  final VoidCallback onTap;
+
+  const _ExamCard({
+    required this.name,
+    required this.exam,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final days = DateTime(exam.year, exam.month, exam.day)
+        .difference(DateTime(now.year, now.month, now.day))
+        .inDays;
+
+    final (emoji, title, text, color) = switch (days) {
+      0 => (
+          '🍀',
+          'Heute ist „$name"!',
+          'Du hast geübt – jetzt zeig, was du kannst. Viel Erfolg!',
+          const Color(0xFF34D399),
+        ),
+      1 => (
+          '🚨',
+          'Morgen ist „$name"!',
+          'Heute ist der letzte Lerntag – alles wird noch einmal wiederholt.',
+          const Color(0xFFE5484D),
+        ),
+      _ => (
+          '🎯',
+          '„$name" in $days Tagen',
+          days <= 3
+              ? 'Endspurt! Noch ${days - 1} Lerntage – jeder zählt.'
+              : 'Noch ${days - 1} Lerntage. Die App verteilt die Vokabeln '
+                  'so, dass du rechtzeitig fertig bist.',
+          const Color(0xFFFB923C),
+        ),
+    };
+
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(left: BorderSide(color: color, width: 5)),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+          child: Row(
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 30)),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(text, style: TextStyle(color: muted(context))),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

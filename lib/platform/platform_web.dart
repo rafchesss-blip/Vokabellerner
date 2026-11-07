@@ -16,11 +16,16 @@ void requestPersistentStorage() {
   }
 }
 
-/// Bietet [content] als Datei [fileName] zum Herunterladen an.
-Future<bool> saveTextFile(String fileName, String content) async {
+/// Bietet [content] als Datei [fileName] zum Herunterladen an. Auf dem Handy
+/// öffnet sich eine Kalenderdatei (.ics) direkt in der Kalender-App.
+Future<bool> saveTextFile(
+  String fileName,
+  String content, {
+  String mimeType = 'application/json',
+}) async {
   final blob = web.Blob(
     [content.toJS].toJS,
-    web.BlobPropertyBag(type: 'application/json'),
+    web.BlobPropertyBag(type: mimeType),
   );
   final url = web.URL.createObjectURL(blob);
   final anchor = web.HTMLAnchorElement()
@@ -59,4 +64,11 @@ Future<String?> pickTextFile() {
 
   input.click();
   return completer.future;
+}
+
+/// Adresse der App (für Links in Erinnerungen).
+String? appUrl() {
+  final b = Uri.base;
+  return Uri(scheme: b.scheme, host: b.host, port: b.port, path: b.path)
+      .toString();
 }

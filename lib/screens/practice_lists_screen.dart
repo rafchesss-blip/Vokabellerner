@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import '../data/store.dart';
 import '../models/practice_list.dart';
 import '../models/vocab.dart';
+import '../platform/platform.dart';
 import '../theme/app_theme.dart';
+import '../utils/reminders.dart';
+import '../utils/review_queue.dart';
 import '../widgets/standard_app_bar.dart';
 import 'practice_screen.dart';
 import 'selection_screen.dart';
@@ -54,7 +57,80 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
     );
     Store.instance.practiceLists.add(list);
     await Store.instance.save();
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    setState(() {});
+    if (list.dueDate != null) await _offerReminders(list);
+  }
+
+  /// Fragt nach dem Anlegen, ob Erinnerungen eingetragen werden sollen.
+  Future<void> _offerReminders(PracticeList list) async {
+    if (!supportsFiles) return;
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Text('🔔', style: TextStyle(fontSize: 36)),
+        title: const Text('Erinnerungen einrichten?'),
+        content: const Text(
+          'Ich trage dir für jeden Lerntag bis zum Test eine Erinnerung in '
+          'deinen Kalender ein – mit Countdown, damit du nichts verpasst.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Nein, danke'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Ja, gerne!'),
+          ),
+        ],
+      ),
+    );
+    if (yes == true && mounted) await _addReminders(list);
+  }
+
+  /// Erzeugt eine Kalenderdatei mit Erinnerungen für alle Lerntage.
+  Future<void> _addReminders(PracticeList list) async {
+    void snack(String text) => ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(text), duration: const Duration(seconds: 6)),
+        );
+
+    if (!supportsFiles) {
+      snack('Erinnerungen gibt es nur in der Browser-Version.');
+      return;
+    }
+    final time = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 16, minute: 0),
+      helpText: 'Wann willst du jeden Tag lernen?',
+    );
+    if (time == null || !mounted) return;
+
+    final newVocabs =
+        Store.instance.resolveVocabs(list.vocabIds).where((v) => v.isNew);
+    final reminders = planReminders(
+      list,
+      newVocabs: newVocabs.length,
+      hour: time.hour,
+      minute: time.minute,
+    );
+    if (reminders.isEmpty) {
+      snack('Bis zum Test sind keine Lerntage mehr übrig.');
+      return;
+    }
+
+    final ics = buildIcs(reminders, uidPrefix: list.id, url: appUrl());
+    final safeName =
+        list.name.replaceAll(RegExp(r'[^\w\-äöüÄÖÜß ]'), '').trim();
+    await saveTextFile(
+      'lernplan-${safeName.isEmpty ? 'vokabeln' : safeName}.ics',
+      ics,
+      mimeType: 'text/calendar',
+    );
+    if (mounted) {
+      snack('Kalenderdatei geladen – öffne sie, um ${reminders.length} '
+          'Erinnerungen einzutragen. 🔔');
+    }
   }
 
   Future<String?> _askName() => showDialog<String>(
@@ -62,8 +138,19 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
         builder: (_) => const _NameDialog(),
       );
 
-  String _formatDate(DateTime d) =>
-      '${d.day.toString().padLeft(2, '0')}.'
+  /// „ · noch 5 Tage", „ · morgen!", „ · heute!" oder leer (vorbei).
+  String _countdown(DateTime exam) {
+    final now = DateTime.now();
+    final days = DateTime(exam.year, exam.month, exam.day)
+        .difference(DateTime(now.year, now.month, now.day))
+        .inDays;
+    if (days < 0) return '';
+    if (days == 0) return ' · heute! 🍀';
+    if (days == 1) return ' · morgen!';
+    return ' · noch $days Tage';
+  }
+
+  String _formatDate(DateTime d) => '${d.day.toString().padLeft(2, '0')}.'
       '${d.month.toString().padLeft(2, '0')}.${d.year}';
 
   /// Fragt ein optionales Zieldatum ab.
@@ -77,17 +164,16 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           title: Text(
-            initial == null
-                ? 'Bis wann musst du sie können?'
-                : 'Zieldatum ändern',
+            initial == null ? 'Wann ist der Vokabeltest?' : 'Testdatum ändern',
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Lege ein Zieldatum fest (optional). In der Analyse siehst '
-                'du dann dein Tages- und Gesamtziel.',
+                'Optional. Die App verteilt die Vokabeln so, dass du bis zum '
+                'Tag vor dem Test alles kannst – am Testtag selbst musst du '
+                'nicht mehr üben.',
               ),
               const SizedBox(height: 16),
               Row(
@@ -97,11 +183,15 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                     label: const Text('Datum wählen'),
                     onPressed: () async {
                       final now = DateTime.now();
+                      // Frühestens morgen – dann ist heute der Lerntag.
+                      final first = DateTime(now.year, now.month, now.day + 1);
+                      final current = picked;
                       final date = await showDatePicker(
                         context: ctx,
-                        initialDate:
-                            picked ?? now.add(const Duration(days: 7)),
-                        firstDate: now.subtract(const Duration(days: 1)),
+                        initialDate: current != null && !current.isBefore(first)
+                            ? current
+                            : now.add(const Duration(days: 7)),
+                        firstDate: first,
                         lastDate: now.add(const Duration(days: 3650)),
                       );
                       if (date != null) {
@@ -220,8 +310,7 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.folder_open,
-                      size: 64, color: faint(context)),
+                  Icon(Icons.folder_open, size: 64, color: faint(context)),
                   const SizedBox(height: 12),
                   Text(
                     'Noch keine Übungslisten',
@@ -256,18 +345,20 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                     subtitle: Text(
                       list.dueDate == null
                           ? '${list.vocabIds.length} Vokabeln'
-                          : '${list.vocabIds.length} Vokabeln · Ziel: '
-                              '${_formatDate(list.dueDate!)}',
+                          : '${list.vocabIds.length} Vokabeln · Test: '
+                              '${_formatDate(list.dueDate!)}'
+                              '${_countdown(list.dueDate!)}',
                     ),
                     trailing: PopupMenuButton<String>(
                       tooltip: 'Optionen',
                       onSelected: (v) {
                         if (v == 'edit') _edit(list);
                         if (v == 'dueDate') _editDueDate(list);
+                        if (v == 'remind') _addReminders(list);
                         if (v == 'delete') _delete(list);
                       },
-                      itemBuilder: (_) => const [
-                        PopupMenuItem(
+                      itemBuilder: (_) => [
+                        const PopupMenuItem(
                           value: 'edit',
                           child: Row(
                             children: [
@@ -277,17 +368,33 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                             ],
                           ),
                         ),
-                        PopupMenuItem(
+                        const PopupMenuItem(
                           value: 'dueDate',
                           child: Row(
                             children: [
                               Icon(Icons.event_outlined, size: 20),
                               SizedBox(width: 12),
-                              Text('Zieldatum ändern'),
+                              Text('Testdatum ändern'),
                             ],
                           ),
                         ),
-                        PopupMenuItem(
+                        if (list.dueDate != null &&
+                            supportsFiles &&
+                            !studyDeadline(list.dueDate!).isBefore(
+                                DateTime.now()
+                                    .subtract(const Duration(days: 1))))
+                          const PopupMenuItem(
+                            value: 'remind',
+                            child: Row(
+                              children: [
+                                Icon(Icons.notifications_active_outlined,
+                                    size: 20),
+                                SizedBox(width: 12),
+                                Text('Erinnerungen in Kalender'),
+                              ],
+                            ),
+                          ),
+                        const PopupMenuItem(
                           value: 'delete',
                           child: Row(
                             children: [

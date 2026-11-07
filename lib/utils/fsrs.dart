@@ -32,6 +32,10 @@ class FsrsCard {
   final int reps;
   final int lapses;
 
+  /// Zeitpunkt der allerersten Abfrage (für „neue Vokabeln pro Tag").
+  /// Bei Daten aus älteren Versionen unbekannt (`null`).
+  final DateTime? firstReview;
+
   const FsrsCard({
     required this.stability,
     required this.difficulty,
@@ -39,7 +43,19 @@ class FsrsCard {
     required this.due,
     this.reps = 0,
     this.lapses = 0,
+    this.firstReview,
   });
+
+  /// Kopie mit anderem Fälligkeitstermin.
+  FsrsCard withDue(DateTime newDue) => FsrsCard(
+        stability: stability,
+        difficulty: difficulty,
+        lastReview: lastReview,
+        due: newDue,
+        reps: reps,
+        lapses: lapses,
+        firstReview: firstReview,
+      );
 
   factory FsrsCard.fromJson(Map<String, dynamic> json) => FsrsCard(
         stability: (json['s'] as num).toDouble(),
@@ -48,6 +64,9 @@ class FsrsCard {
         due: DateTime.fromMillisecondsSinceEpoch(json['due'] as int),
         reps: (json['reps'] as num?)?.toInt() ?? 0,
         lapses: (json['lapses'] as num?)?.toInt() ?? 0,
+        firstReview: json['first'] == null
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(json['first'] as int),
       );
 
   Map<String, dynamic> toJson() => {
@@ -57,6 +76,7 @@ class FsrsCard {
         'due': due.millisecondsSinceEpoch,
         'reps': reps,
         'lapses': lapses,
+        if (firstReview != null) 'first': firstReview!.millisecondsSinceEpoch,
       };
 }
 
@@ -175,6 +195,7 @@ class Fsrs {
       due: due,
       reps: (card?.reps ?? 0) + 1,
       lapses: lapses,
+      firstReview: card == null ? now : card.firstReview,
     );
   }
 

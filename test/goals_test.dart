@@ -26,8 +26,9 @@ void main() {
         Vocab(id: '$i', latin: '$i', german: '$i', level: 0),
     ];
 
-    // 4 Vokabeln, Ziel in 2 Tagen (heute + morgen).
-    final g = computeGoal(vocabs, DateTime(2025, 1, 2), now: now);
+    // 4 Vokabeln, Test am 3.1. → Lerntage heute und morgen (nicht am
+    // Testtag selbst).
+    final g = computeGoal(vocabs, DateTime(2025, 1, 3), now: now);
 
     expect(g.daysRemaining, 2);
     expect(g.dailyTarget, 2);

@@ -24,8 +24,15 @@ Browser gespeichert.
   Am PC: Leertaste zum Umdrehen, 1–4 zum Bewerten.
 - **Test-Modus:** Du tippst die Übersetzung und/oder die mittlere Spalte ein.
   Die Prüfung ignoriert Makronen (ā = a) und Artikel.
-- **Testdatum:** Hat eine Übungsliste ein Testdatum, wird bis zum Testtag
-  alles noch einmal wiederholt.
+- **Testdatum:** Hat eine Übungsliste ein Testdatum, verteilt die App die
+  neuen Vokabeln gleichmäßig auf die Tage bis zum **Vortag** des Tests (am
+  Testtag selbst wird nicht mehr geübt). Je näher der Test, desto kürzer die
+  Abstände: höchstens die halbe Restzeit. Am Vortag wird alles noch einmal
+  wiederholt. Die Startseite zeigt einen Countdown.
+- **Erinnerungen:** Die App kann für jeden Lerntag eine Erinnerung als
+  Kalenderdatei (.ics) erzeugen, mit wechselnden Texten und Countdown. Weil
+  die App ohne Server läuft, gibt es keine Push-Nachrichten. Der Kalender
+  des Handys meldet sich aber zuverlässig, auch wenn die App zu ist.
 - **Lektionen:** Die Lektionen sind eingebaut. Der Tab „Lektionen“ zeigt sie
   mit deinem Fortschritt.
 - **Analyse:** Jede Vokabel hat eine Lernstufe (−5 bis +5) mit Verlauf.

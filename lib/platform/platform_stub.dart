@@ -6,6 +6,13 @@ const bool supportsFiles = false;
 
 void requestPersistentStorage() {}
 
-Future<bool> saveTextFile(String fileName, String content) async => false;
+Future<bool> saveTextFile(
+  String fileName,
+  String content, {
+  String mimeType = 'application/json',
+}) async =>
+    false;
+
+String? appUrl() => null;
 
 Future<String?> pickTextFile() async => null;

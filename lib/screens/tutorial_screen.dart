@@ -63,8 +63,18 @@ class _TutorialScreenState extends State<TutorialScreen> {
     _TutorialPage(
       Icons.event_outlined,
       'Vokabeltest im Blick',
-      'Hat eine Übungsliste ein Testdatum, sorgt die App dafür, dass bis '
-          'zum Test alles noch einmal wiederholt wird.',
+      'Gib beim Erstellen einer Liste das Datum deines Tests an. Die App '
+          'verteilt die neuen Vokabeln so auf die Tage, dass du am Tag VOR '
+          'dem Test fertig bist – dort wird alles noch einmal wiederholt. '
+          'Je näher der Test, desto öfter kommen die Vokabeln dran.',
+    ),
+    _TutorialPage(
+      Icons.notifications_active_outlined,
+      'Erinnerungen',
+      'Auf Wunsch trägt dir die App für jeden Lerntag eine Erinnerung in '
+          'den Kalender deines Handys ein – mit Countdown bis zum Test. '
+          'Später findest du das im Drei-Punkte-Menü der Liste unter '
+          '„Erinnerungen in Kalender".',
     ),
     _TutorialPage(
       Icons.edit_outlined,

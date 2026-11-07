@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/store.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
 import '../utils/review_queue.dart';
@@ -31,7 +32,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
   }
 
   List<Vocab> _selected() => switch (_filter) {
-        _Filter.smart => buildReviewSession(widget.vocabs),
+        _Filter.smart =>
+          planReview(widget.vocabs, Store.instance.practiceLists).session,
         _Filter.all => List.of(widget.vocabs)..shuffle(),
         _Filter.weak =>
           widget.vocabs.where((v) => v.isWeak).toList()..shuffle(),
@@ -110,12 +112,11 @@ class _PracticeScreenState extends State<PracticeScreen> {
           const SizedBox(height: 8),
           if (_filter == _Filter.smart)
             Builder(builder: (context) {
-              final c = countReview(widget.vocabs);
-              final newToday =
-                  c.fresh < newCardsPerSession ? c.fresh : newCardsPerSession;
+              final plan =
+                  planReview(widget.vocabs, Store.instance.practiceLists);
               return Text(
-                '${c.due} fällig · $newToday neu'
-                '${c.fresh > newToday ? ' (${c.fresh - newToday} weitere später)' : ''}',
+                '${plan.due.length} fällig · ${plan.fresh.length} neu'
+                '${plan.freshLater > 0 ? ' (${plan.freshLater} weitere später)' : ''}',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: muted(context)),
               );
@@ -148,8 +149,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
                               ? '\n\n„Fällig & neu“ nutzt Spaced Repetition '
                                   '(FSRS): Jede Vokabel kommt genau dann '
                                   'wieder, kurz bevor du sie vergessen '
-                                  'würdest. Ist ein Zieldatum gesetzt, wird '
-                                  'vorher alles noch einmal wiederholt.'
+                                  'würdest. Hat die Liste ein Testdatum, '
+                                  'werden die neuen Vokabeln auf die Tage '
+                                  'bis zum Vortag verteilt und vorher alles '
+                                  'noch einmal wiederholt.'
                               : ''),
                     ),
                   ),
