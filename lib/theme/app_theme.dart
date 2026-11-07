@@ -71,6 +71,8 @@ class AppTheme {
     final primary = isDark ? neonColor(accent) : deepColor(accent);
     final onPrimary = isDark ? _darkBg : Colors.white;
     final outline = onSurface.withValues(alpha: isDark ? 0.35 : 0.28);
+    // Dezenter Rand für Karten (wirkt ruhiger als der volle Umriss).
+    final softOutline = onSurface.withValues(alpha: isDark ? 0.12 : 0.08);
 
     final base = ColorScheme.fromSeed(
       seedColor: primary,
@@ -91,8 +93,8 @@ class AppTheme {
     );
 
     final cardShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-      side: BorderSide(color: outline, width: 1.5),
+      borderRadius: BorderRadius.circular(20),
+      side: BorderSide(color: softOutline, width: 1),
     );
     final buttonShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
@@ -103,9 +105,10 @@ class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: bg,
       appBarTheme: AppBarTheme(
-        backgroundColor: surface.withValues(alpha: isDark ? 0.92 : 1.0),
+        backgroundColor: bg,
         foregroundColor: onSurface,
         elevation: 0,
+        scrolledUnderElevation: 0,
         titleTextStyle: TextStyle(
           color: onSurface,
           fontSize: 20,
@@ -122,7 +125,7 @@ class AppTheme {
         backgroundColor: surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: outline, width: 2),
+          side: BorderSide(color: softOutline),
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
@@ -133,7 +136,7 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surface.withValues(alpha: isDark ? 0.92 : 1.0),
-        indicatorColor: primary.withValues(alpha: isDark ? 0.9 : 0.16),
+        indicatorColor: primary.withValues(alpha: isDark ? 0.25 : 0.16),
         surfaceTintColor: Colors.transparent,
         height: 72,
       ),
@@ -144,12 +147,17 @@ class AppTheme {
           textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(
-              color: isDark ? onSurface.withValues(alpha: 0.35) : onSurface,
-              width: 1.5,
-            ),
           ),
         ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: primary,
+        linearTrackColor: surfaceHigh,
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
@@ -185,7 +193,7 @@ class AppTheme {
           side: BorderSide(color: outline),
         ),
       ),
-      dividerTheme: DividerThemeData(color: outline),
+      dividerTheme: DividerThemeData(color: softOutline),
       chipTheme: ChipThemeData(
         backgroundColor: surfaceHigh,
         side: BorderSide(color: outline),

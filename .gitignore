@@ -14,14 +14,9 @@ pubspec.lock
 /linux/
 /macos/
 /windows/
-# /web/ wird für den Netlify-Build benötigt und ist daher versioniert
+# /web/ wird für den Web-Build (GitHub Pages) benötigt und ist versioniert
 
 # Build-Artefakte
 *.apk
 *.zip
 
-# Node / Netlify-Funktionen
-node_modules/
-
-# Lokaler Test-Server
-local-data.json

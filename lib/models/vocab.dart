@@ -1,3 +1,5 @@
+import '../utils/fsrs.dart';
+
 int _idCounter = 0;
 
 /// Erzeugt eine eindeutige ID (für Lektionen, Kästen, Vokabeln und Listen).
@@ -40,6 +42,10 @@ class Vocab {
   /// Verlauf aller Stufen-Änderungen.
   List<StatEvent> history;
 
+  /// Gedächtnis-Modell für die Wiederholungsplanung (FSRS).
+  /// `null`, solange die Vokabel noch nie abgefragt wurde.
+  FsrsCard? srs;
+
   Vocab({
     required this.id,
     required this.latin,
@@ -47,6 +53,7 @@ class Vocab {
     this.middleColumn,
     this.level = 0,
     List<StatEvent>? history,
+    this.srs,
   }) : history = history ?? [];
 
   bool get hasMiddle =>
@@ -63,9 +70,29 @@ class Vocab {
     history.add(StatEvent(time: DateTime.now(), level: newLevel));
   }
 
-  void markCorrect() => adjustLevel(1);
+  void markCorrect() => review(Rating.good);
 
-  void markWrong() => adjustLevel(-1);
+  void markWrong() => review(Rating.again);
+
+  /// Noch nie abgefragt.
+  bool get isNew => srs == null;
+
+  /// Zur Wiederholung fällig (neue Vokabeln zählen nicht als fällig).
+  bool isDue([DateTime? now]) =>
+      srs != null && !srs!.due.isAfter(now ?? DateTime.now());
+
+  /// Wahrscheinlichkeit (0..1), dass die Vokabel gerade gewusst wird.
+  /// `null` für neue Vokabeln.
+  double? recall([DateTime? now]) => srs == null
+      ? null
+      : Fsrs.retrievabilityOf(srs!, now ?? DateTime.now());
+
+  /// Wertet eine Antwort aus: plant die nächste Wiederholung (FSRS) und
+  /// passt die Lernstufe an (nicht gewusst −1, sonst +1).
+  void review(Rating rating, [DateTime? now]) {
+    srs = Fsrs.review(srs, rating, now ?? DateTime.now());
+    adjustLevel(rating == Rating.again ? -1 : 1);
+  }
 
   factory Vocab.fromJson(Map<String, dynamic> json) => Vocab(
         id: json['id'] as String,
@@ -76,6 +103,9 @@ class Vocab {
         history: (json['history'] as List? ?? [])
             .map((e) => StatEvent.fromJson(e as Map<String, dynamic>))
             .toList(),
+        srs: json['srs'] == null
+            ? null
+            : FsrsCard.fromJson(json['srs'] as Map<String, dynamic>),
       );
 
   Map<String, dynamic> toJson() => {
@@ -85,6 +115,7 @@ class Vocab {
         'middleColumn': middleColumn,
         'level': level,
         'history': history.map((e) => e.toJson()).toList(),
+        if (srs != null) 'srs': srs!.toJson(),
       };
 }
 
@@ -118,6 +149,9 @@ class Lesson {
   List<Box> boxes;
 
   Lesson({required this.id, required this.name, required this.boxes});
+
+  /// Eingebaute Lektion (aus `lektionen/`, nur auf GitHub änderbar).
+  bool get isBuiltIn => id.startsWith('builtin:');
 
   /// Alle Vokabeln dieser Lektion (über alle Kästen hinweg).
   List<Vocab> get allVocabs =>

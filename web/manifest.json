@@ -1,11 +1,11 @@
 {
-    "name": "vokabellerner",
-    "short_name": "vokabellerner",
+    "name": "Vokabellerner – Latein",
+    "short_name": "Vokabellerner",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0A0A0F",
+    "theme_color": "#0A0A0F",
+    "description": "Latein-Vokabeltrainer mit Karteikarten, Tests und Spaced Repetition.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
@@ -31,5 +31,6 @@
             "type": "image/png",
             "purpose": "maskable"
         }
-    ]
+    ],
+    "lang": "de"
 }

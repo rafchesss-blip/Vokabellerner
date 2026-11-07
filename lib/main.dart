@@ -2,24 +2,16 @@ import 'package:flutter/material.dart';
 
 import 'data/store.dart';
 import 'models/settings.dart';
-import 'screens/auth_screen.dart';
+import 'platform/platform.dart';
 import 'screens/home_shell.dart';
-import 'services/auth.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Settings.instance.load();
-  await AuthService.instance.load();
   await Store.instance.load();
-
-  if (AuthService.instance.isLoggedIn) {
-    if (AuthService.instance.isViewing) {
-      await Store.instance.pullViewData(AuthService.instance.username ?? '');
-    } else {
-      await Store.instance.pullFromCloud();
-    }
-  }
+  // Browser bitten, die Daten nicht automatisch zu löschen.
+  requestPersistentStorage();
 
   runApp(const VokabeltrainerApp());
 }
@@ -34,7 +26,7 @@ class VokabeltrainerApp extends StatelessWidget {
       builder: (context, _, __) {
         final s = Settings.instance;
         return MaterialApp(
-          title: 'Latein-Vokabeltrainer',
+          title: 'Vokabellerner',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(s.accent),
           darkTheme: AppTheme.dark(s.accent),
@@ -43,12 +35,7 @@ class VokabeltrainerApp extends StatelessWidget {
             AppThemeMode.light => ThemeMode.light,
             AppThemeMode.system => ThemeMode.system,
           },
-          home: ValueListenableBuilder<int>(
-            valueListenable: AuthService.instance.revision,
-            builder: (context, _, __) => AuthService.instance.isLoggedIn
-                ? const HomeShell()
-                : const AuthScreen(),
-          ),
+          home: const HomeShell(),
         );
       },
     );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/store.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
+import '../utils/fsrs.dart';
 import '../utils/levels.dart';
 
 /// Detail-Ansicht einer Vokabel: Lernstufe, Verlauf-Grafik und +/−.
@@ -19,6 +20,17 @@ class _VocabDetailSheetState extends State<VocabDetailSheet> {
   void _adjust(int delta) {
     setState(() => widget.vocab.adjustLevel(delta));
     Store.instance.save();
+  }
+
+  /// z. B. „Gedächtnis: 87 % · nächste Wiederholung in 3 T".
+  String _memoryText(Vocab v) {
+    final srs = v.srs;
+    if (srs == null) return 'Noch nie geübt';
+    final now = DateTime.now();
+    final percent = (v.recall(now)! * 100).round();
+    final wait = srs.due.difference(now);
+    final next = wait.isNegative ? 'jetzt fällig' : 'wieder in ${formatInterval(wait)}';
+    return 'Gedächtnis: $percent % · $next · ${srs.reps}× geübt';
   }
 
   @override
@@ -57,6 +69,12 @@ class _VocabDetailSheetState extends State<VocabDetailSheet> {
                   : vocab.german,
               textAlign: TextAlign.center,
               style: TextStyle(color: muted(context)),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _memoryText(vocab),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: muted(context), fontSize: 13),
             ),
             const SizedBox(height: 16),
             Row(

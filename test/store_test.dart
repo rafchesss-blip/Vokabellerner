@@ -5,7 +5,9 @@ import 'package:vokabellerner/data/store.dart';
 import 'package:vokabellerner/models/vocab.dart';
 
 void main() {
-  test('Erster Start legt Lektion 1–4 und Lektion 18 an', () async {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('Eingebaute Lektionen 1–4 und 18 werden aus lektionen/ geladen', () async {
     SharedPreferences.setMockInitialValues({});
     await Store.instance.load();
 

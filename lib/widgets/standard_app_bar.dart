@@ -4,7 +4,7 @@ import '../navigation.dart';
 import '../screens/settings_screen.dart';
 
 /// Einheitliche AppBar für alle Unterseiten:
-/// links ein Home-Button (zurück zum Dashboard), rechts die Einstellungen.
+/// links ein Home-Button (zurück zur Startseite), rechts die Einstellungen.
 AppBar standardAppBar(
   BuildContext context,
   String title, {
@@ -15,7 +15,7 @@ AppBar standardAppBar(
     title: Text(title),
     leading: IconButton(
       icon: const Icon(Icons.home_outlined),
-      tooltip: 'Zum Dashboard',
+      tooltip: 'Zur Startseite',
       onPressed: () {
         shellTabIndex.value = 0;
         Navigator.of(context).popUntil((route) => route.isFirst);

@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vokabellerner/data/store.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('IDs aller Vokabeln sind eindeutig', () async {
     SharedPreferences.setMockInitialValues({});
     await Store.instance.load();

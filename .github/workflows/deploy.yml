@@ -1,12 +1,21 @@
-name: Deploy Web zu Netlify
+name: Auf GitHub Pages veröffentlichen
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Code auschecken
@@ -22,21 +31,26 @@ jobs:
       - name: Abhängigkeiten laden
         run: flutter pub get
 
+      - name: Tests
+        run: flutter test
+
       - name: Web-Version bauen
-        run: flutter build web --release
+        # Die Seite liegt unter https://<name>.github.io/<repo>/
+        run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
 
-      - name: Node einrichten
-        uses: actions/setup-node@v4
+      - name: 404-Seite für direkte Links
+        run: cp build/web/index.html build/web/404.html
+
+      - uses: actions/upload-pages-artifact@v3
         with:
-          node-version: '20'
+          path: build/web
 
-      - name: Funktions-Abhängigkeiten laden
-        run: npm install
-
-      - name: Netlify CLI installieren
-        run: npm install -g netlify-cli
-
-      - name: Auf Netlify veröffentlichen (inkl. Funktionen)
-        run: netlify deploy --prod --dir=build/web --functions=netlify/functions --site "${{ secrets.NETLIFY_SITE_ID }}"
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

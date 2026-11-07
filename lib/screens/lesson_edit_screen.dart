@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../services/api.dart';
-import '../services/auth.dart';
+import '../data/store.dart';
+import '../models/vocab.dart';
 import '../widgets/standard_app_bar.dart';
 
-/// Bearbeiten einer Admin-Lektion: Vokabeln ändern, löschen, ergänzen.
+/// Bearbeiten einer eigenen Lektion: Vokabeln ändern, löschen, ergänzen.
+/// Der Lernfortschritt unveränderter Vokabeln bleibt erhalten.
 class LessonEditScreen extends StatefulWidget {
-  final Map<String, dynamic> lesson;
+  final Lesson lesson;
 
   const LessonEditScreen({super.key, required this.lesson});
 
@@ -54,22 +55,20 @@ class _LessonEditScreenState extends State<LessonEditScreen> {
   @override
   void initState() {
     super.initState();
-    _lessonName = TextEditingController(text: widget.lesson['name'] ?? '');
+    _lessonName = TextEditingController(text: widget.lesson.name);
     _boxes = _parseBoxes(widget.lesson);
   }
 
-  List<_BoxDraft> _parseBoxes(Map<String, dynamic> lesson) {
+  List<_BoxDraft> _parseBoxes(Lesson lesson) {
     final boxes = <_BoxDraft>[];
-    final rawBoxes = (lesson['boxes'] as List? ?? []).cast<Map>();
-    for (final rawBox in rawBoxes) {
-      final box = _BoxDraft(id: rawBox['id'] as String?);
-      box.name.text = rawBox['name'] as String? ?? '';
-      final vocabs = (rawBox['vocabs'] as List? ?? []).cast<Map>();
-      for (final v in vocabs) {
-        final draft = _VocabDraft(id: v['id'] as String?);
-        draft.latin.text = v['latin'] as String? ?? '';
-        draft.middle.text = v['middleColumn'] as String? ?? '';
-        draft.german.text = v['german'] as String? ?? '';
+    for (final rawBox in lesson.boxes) {
+      final box = _BoxDraft(id: rawBox.id);
+      box.name.text = rawBox.name;
+      for (final v in rawBox.vocabs) {
+        final draft = _VocabDraft(id: v.id);
+        draft.latin.text = v.latin;
+        draft.middle.text = v.middleColumn ?? '';
+        draft.german.text = v.german;
         box.vocabs.add(draft);
       }
       if (box.vocabs.isEmpty) box.vocabs.add(_VocabDraft());
@@ -127,34 +126,39 @@ class _LessonEditScreenState extends State<LessonEditScreen> {
       return;
     }
 
-    final boxes = <Map<String, dynamic>>[];
+    final oldVocabs = {for (final v in widget.lesson.allVocabs) v.id: v};
+    final boxes = <Box>[];
     for (final box in _boxes) {
-      final vocabs = <Map<String, dynamic>>[];
+      final vocabs = <Vocab>[];
       for (final v in box.vocabs) {
         final latin = v.latin.text.trim();
         final german = v.german.text.trim();
+        if (latin.isEmpty && german.isEmpty) continue; // leere Zeile
         if (latin.isEmpty || german.isEmpty) {
-          setState(() =>
-              _error = 'Jede Vokabel braucht ein lateinisches Wort und eine Übersetzung.');
+          setState(() => _error =
+              'Jede Vokabel braucht ein lateinisches Wort und eine Übersetzung.');
           return;
         }
-        vocabs.add({
-          'id': v.id,
-          'latin': latin,
-          'middle': v.middle.text.trim().isEmpty
-              ? null
-              : v.middle.text.trim(),
-          'german': german,
-        });
+        final middle = v.middle.text.trim();
+        final old = oldVocabs[v.id];
+        vocabs.add(Vocab(
+          id: v.id ?? newId(),
+          latin: latin,
+          german: german,
+          middleColumn: middle.isEmpty ? null : middle,
+          level: old?.level ?? 0,
+          history: old?.history,
+          srs: old?.srs,
+        ));
       }
       if (vocabs.isNotEmpty) {
-        boxes.add({
-          'id': box.id,
-          'name': box.name.text.trim().isEmpty
+        boxes.add(Box(
+          id: box.id ?? newId(),
+          name: box.name.text.trim().isEmpty
               ? 'Kasten ${boxes.length + 1}'
               : box.name.text.trim(),
-          'vocabs': vocabs,
-        });
+          vocabs: vocabs,
+        ));
       }
     }
 
@@ -168,28 +172,20 @@ class _LessonEditScreenState extends State<LessonEditScreen> {
       _error = null;
     });
 
-    try {
-      await Api.adminUpdateLesson(
-        AuthService.instance.token!,
-        widget.lesson['id'] as String,
-        {'name': name, 'boxes': boxes},
-      );
-      if (mounted) Navigator.pop(context, true);
-    } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    await Store.instance.replaceLesson(
+      Lesson(id: widget.lesson.id, name: name, boxes: boxes),
+    );
+    if (mounted) Navigator.pop(context, true);
   }
 
   Future<void> _deleteLesson() async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('„${widget.lesson['name']}" löschen?'),
+        title: Text('„${widget.lesson.name}" löschen?'),
         content: const Text(
-          'Die Lektion wird bei allen Konten entfernt. Das kann nicht '
-          'rückgängig gemacht werden.',
+          'Die Lektion und ihr Lernfortschritt werden entfernt. Das kann '
+          'nicht rückgängig gemacht werden.',
         ),
         actions: [
           TextButton(
@@ -206,18 +202,10 @@ class _LessonEditScreenState extends State<LessonEditScreen> {
     );
     if (confirmed != true || !mounted) return;
 
-    try {
-      await Api.adminDeleteLesson(
-        AuthService.instance.token!,
-        widget.lesson['id'] as String,
-      );
-      if (mounted) Navigator.pop(context, true);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
-      }
-    }
+    await Store.instance.deleteLesson(widget.lesson.id);
+    if (!mounted) return;
+    // Bearbeiten- und Detailansicht schließen.
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   @override

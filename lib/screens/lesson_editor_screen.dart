@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-import '../services/api.dart';
-import '../services/auth.dart';
+import '../data/store.dart';
+import '../models/vocab.dart';
 import '../theme/app_theme.dart';
 import '../utils/lesson_parser.dart';
 import '../widgets/standard_app_bar.dart';
 
-/// Admin-Formular zum Hinzufügen einer Lektion.
+/// Eigene Lektion hinzufügen.
 ///
 /// Die komplette Lektion wird als Text eingefügt (im bekannten
 /// Tabellen-Format mit Kästen und Spalten) und automatisch erkannt.
+/// Sie wird nur auf diesem Gerät gespeichert.
 class LessonEditorScreen extends StatefulWidget {
   const LessonEditorScreen({super.key});
 
@@ -86,34 +88,28 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
     setState(() => box.vocabs.removeAt(index));
   }
 
+  /// Aktueller Stand der Vorschau als Lektion im Textformat.
+  ParsedLesson _currentParsed() => ParsedLesson(
+        name: _lessonName.text.trim(),
+        boxes: [
+          for (var i = 0; i < _boxes.length; i++)
+            if (_boxes[i].vocabs.isNotEmpty)
+              ParsedBox(
+                name: _boxes[i].name.text.trim().isEmpty
+                    ? 'Kasten ${i + 1}'
+                    : _boxes[i].name.text.trim(),
+                vocabs: _boxes[i].vocabs,
+              ),
+        ],
+      );
+
   Future<void> _save() async {
-    final name = _lessonName.text.trim();
-    if (name.isEmpty) {
+    final parsed = _currentParsed();
+    if (parsed.name.isEmpty) {
       setState(() => _error = 'Bitte einen Lektionsnamen eingeben.');
       return;
     }
-
-    final boxes = <Map<String, dynamic>>[];
-    for (final box in _boxes) {
-      final vocabs = <Map<String, dynamic>>[];
-      for (final v in box.vocabs) {
-        vocabs.add({
-          'latin': v.latin,
-          'middle': v.middle,
-          'german': v.german,
-        });
-      }
-      if (vocabs.isNotEmpty) {
-        boxes.add({
-          'name': box.name.text.trim().isEmpty
-              ? 'Kasten ${boxes.length + 1}'
-              : box.name.text.trim(),
-          'vocabs': vocabs,
-        });
-      }
-    }
-
-    if (boxes.isEmpty) {
+    if (parsed.boxes.isEmpty) {
       setState(() => _error = 'Keine Vokabeln vorhanden.');
       return;
     }
@@ -123,17 +119,41 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
       _error = null;
     });
 
-    try {
-      await Api.adminAddLesson(AuthService.instance.token!, {
-        'name': name,
-        'boxes': boxes,
-      });
-      if (mounted) Navigator.pop(context, true);
-    } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    await Store.instance.addLesson(Lesson(
+      id: 'own:${newId()}',
+      name: parsed.name,
+      boxes: [
+        for (final box in parsed.boxes)
+          Box(
+            id: newId(),
+            name: box.name,
+            vocabs: [
+              for (final v in box.vocabs)
+                Vocab(
+                  id: newId(),
+                  latin: v.latin,
+                  german: v.german,
+                  middleColumn: v.middle,
+                ),
+            ],
+          ),
+      ],
+    ));
+    if (mounted) Navigator.pop(context, true);
+  }
+
+  /// Kopiert die Lektion im Dateiformat – zum Anlegen auf GitHub, damit sie
+  /// bei allen erscheint.
+  Future<void> _copyForGitHub() async {
+    await Clipboard.setData(ClipboardData(text: lessonToText(_currentParsed())));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text(
+        'Kopiert! Auf GitHub im Ordner „lektionen“ eine neue Datei '
+        '(z. B. lektion-05.txt) anlegen und einfügen.',
+      ),
+      duration: Duration(seconds: 6),
+    ));
   }
 
   @override
@@ -141,13 +161,14 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
     final total = _boxes.fold<int>(0, (s, b) => s + b.vocabs.length);
 
     return Scaffold(
-      appBar: standardAppBar(context, 'Lektion hinzufügen'),
+      appBar: standardAppBar(context, 'Eigene Lektion'),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         children: [
           Text(
             'Füge die komplette Lektion unten ein. Das Programm erkennt '
-            'Lektionsname, Kästen und Vokabeln automatisch.',
+            'Lektionsname, Kästen und Vokabeln automatisch. Spalten trennst '
+            'du mit „|“, Tab oder zwei Leerzeichen.',
             style: TextStyle(color: muted(context)),
           ),
           const SizedBox(height: 12),
@@ -159,7 +180,7 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
             decoration: const InputDecoration(
               labelText: 'Lektionstext',
               hintText:
-                  'Lektion 5\n\nKasten 1\nLateinisches Wort    Mittlere Spalte    Übersetzung\nluna    f    der Mond\nstella        der Stern\n\nKasten 2\n...',
+                  'Lektion 5\n\nKasten 1\nluna | f | der Mond\nstella | der Stern\n\nKasten 2\n...',
               border: OutlineInputBorder(),
               alignLabelWithHint: true,
             ),
@@ -207,6 +228,12 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Text('Lektion speichern'),
               ),
+            ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: _copyForGitHub,
+              icon: const Icon(Icons.copy_all_outlined),
+              label: const Text('Für alle: als Datei für GitHub kopieren'),
             ),
           ],
         ],

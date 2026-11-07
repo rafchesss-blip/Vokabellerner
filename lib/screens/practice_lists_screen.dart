@@ -57,36 +57,10 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
     if (mounted) setState(() {});
   }
 
-  Future<String?> _askName() async {
-    final controller = TextEditingController();
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Neue Übungsliste'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Name der Liste',
-            hintText: 'z. B. Vokabeltest 1',
-          ),
-          onSubmitted: (s) => Navigator.pop(ctx, s),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, controller.text),
-            child: const Text('Weiter'),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
-    return result;
-  }
+  Future<String?> _askName() => showDialog<String>(
+        context: context,
+        builder: (_) => const _NameDialog(),
+      );
 
   String _formatDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}.'
@@ -330,6 +304,51 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                 );
               },
             ),
+    );
+  }
+}
+
+/// Dialog „Neue Übungsliste“ – besitzt seinen eigenen Controller, damit
+/// dieser erst nach der Schließ-Animation freigegeben wird.
+class _NameDialog extends StatefulWidget {
+  const _NameDialog();
+
+  @override
+  State<_NameDialog> createState() => _NameDialogState();
+}
+
+class _NameDialogState extends State<_NameDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Neue Übungsliste'),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: const InputDecoration(
+          labelText: 'Name der Liste',
+          hintText: 'z. B. Vokabeltest 1',
+        ),
+        onSubmitted: (s) => Navigator.pop(context, s),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Abbrechen'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _controller.text),
+          child: const Text('Weiter'),
+        ),
+      ],
     );
   }
 }

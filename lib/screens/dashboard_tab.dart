@@ -1,151 +1,359 @@
 import 'package:flutter/material.dart';
 
 import '../data/store.dart';
+import '../models/vocab.dart';
 import '../theme/app_theme.dart';
+import '../utils/goals.dart';
+import '../utils/review_queue.dart';
 import 'practice_lists_screen.dart';
+import 'practice_screen.dart';
 import 'tutorial_screen.dart';
 
-/// Dashboard-Tab: Begrüßung, Übersicht und „Lernen starten".
-class DashboardTab extends StatefulWidget {
+/// Start-Tab: Begrüßung, Lernserie, „Heute" und Schnellzugriffe.
+class DashboardTab extends StatelessWidget {
   const DashboardTab({super.key});
 
-  @override
-  State<DashboardTab> createState() => _DashboardTabState();
-}
-
-class _DashboardTabState extends State<DashboardTab> {
-  Future<void> _start() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const PracticeListsScreen()),
-    );
-    if (mounted) setState(() {}); // Zähler aktualisieren
-  }
-
-  void _showHelp() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const TutorialScreen()),
+  /// Vokabeln für „Heute": alle aus den Übungslisten – oder, wenn es noch
+  /// keine Listen gibt, alle Lektionen (in Lektions-Reihenfolge).
+  static List<Vocab> todayPool() {
+    final store = Store.instance;
+    if (store.practiceLists.isEmpty) {
+      return [for (final l in store.lessons) ...l.allVocabs];
+    }
+    return store.resolveVocabs(
+      {for (final l in store.practiceLists) ...l.vocabIds},
     );
   }
+
+  static String _greeting() {
+    final h = DateTime.now().hour;
+    if (h < 5) return 'Noch wach? 🌙';
+    if (h < 11) return 'Guten Morgen! ☀️';
+    if (h < 18) return 'Hallo! 👋';
+    return 'Guten Abend! 🌆';
+  }
+
+  void _open(BuildContext context, Widget screen) =>
+      Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
 
   @override
   Widget build(BuildContext context) {
-    final store = Store.instance;
-    final lessonCount = store.lessons.length;
-    final listCount = store.practiceLists.length;
-    final vocabCount = store.lessons.fold<int>(
-      0,
-      (sum, l) => sum + l.allVocabs.length,
-    );
+    return ValueListenableBuilder<int>(
+      valueListenable: Store.instance.revision,
+      builder: (context, _, __) {
+        final store = Store.instance;
+        final pool = todayPool();
+        final counts = countReview(pool);
+        final streak = store.streak();
+        final allVocabs = [for (final l in store.lessons) ...l.allVocabs];
+        final known = allVocabs.where(isKnown).length;
 
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [colorScheme.primary, colorScheme.tertiary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          children: [
+            _HeroCard(greeting: _greeting(), streak: streak),
+            const SizedBox(height: 16),
+            _TodayCard(
+              counts: counts,
+              reviewedToday: store.reviewsToday,
+              fromLists: store.practiceLists.isNotEmpty,
+              onStart: () => _open(context, PracticeScreen(vocabs: pool)),
             ),
-            borderRadius: BorderRadius.circular(20),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _StatTile(
+                  icon: Icons.local_fire_department,
+                  color: const Color(0xFFFB923C),
+                  value: '$streak',
+                  label: streak == 1 ? 'Tag Serie' : 'Tage Serie',
+                ),
+                const SizedBox(width: 12),
+                _StatTile(
+                  icon: Icons.bolt,
+                  color: Theme.of(context).colorScheme.primary,
+                  value: '${store.reviewsToday}',
+                  label: 'heute geübt',
+                ),
+                const SizedBox(width: 12),
+                _StatTile(
+                  icon: Icons.check_circle,
+                  color: const Color(0xFF34D399),
+                  value: '$known',
+                  label: 'von ${allVocabs.length} gewusst',
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _NavTile(
+              icon: Icons.list_alt,
+              title: 'Übungslisten',
+              subtitle: store.practiceLists.isEmpty
+                  ? 'Stell dir Vokabeln für einen Test zusammen'
+                  : '${store.practiceLists.length} '
+                      '${store.practiceLists.length == 1 ? 'Liste' : 'Listen'}',
+              onTap: () => _open(context, const PracticeListsScreen()),
+            ),
+            _NavTile(
+              icon: Icons.help_outline,
+              title: 'Hilfe & Anleitung',
+              subtitle: 'So funktioniert der Vokabellerner',
+              onTap: () => _open(context, const TutorialScreen()),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _HeroCard extends StatelessWidget {
+  final String greeting;
+  final int streak;
+
+  const _HeroCard({required this.greeting, required this.streak});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = switch (streak) {
+      0 => 'Starte heute deine Lernserie!',
+      1 => 'Tag 1 deiner Lernserie – weiter so!',
+      _ => '🔥 $streak Tage in Folge gelernt!',
+    };
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [scheme.primary, scheme.tertiary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.primary.withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            greeting,
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: scheme.onPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 15,
+              color: scheme.onPrimary.withValues(alpha: 0.9),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// „Heute": fällige und neue Vokabeln, großer Start-Knopf.
+class _TodayCard extends StatelessWidget {
+  final ({int due, int fresh}) counts;
+  final int reviewedToday;
+  final bool fromLists;
+  final VoidCallback onStart;
+
+  const _TodayCard({
+    required this.counts,
+    required this.reviewedToday,
+    required this.fromLists,
+    required this.onStart,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final newToday =
+        counts.fresh < newCardsPerSession ? counts.fresh : newCardsPerSession;
+    final done = counts.due == 0 && newToday == 0;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  done ? Icons.celebration : Icons.auto_awesome,
+                  color: done ? const Color(0xFF34D399) : scheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  done ? 'Für heute alles erledigt!' : 'Heute',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (done)
               Text(
-                'Willkommen!',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onPrimary,
+                reviewedToday > 0
+                    ? 'Du hast heute $reviewedToday Abfragen geschafft. '
+                        'Morgen geht es weiter!'
+                    : 'Gerade ist nichts fällig. Schau morgen wieder vorbei!',
+                style: TextStyle(color: muted(context)),
+              )
+            else ...[
+              Row(
+                children: [
+                  _BigNumber(
+                    value: counts.due,
+                    label: 'wiederholen',
+                    color: scheme.primary,
+                  ),
+                  _BigNumber(
+                    value: newToday,
+                    label: 'neu',
+                    color: scheme.tertiary,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: onStart,
+                icon: const Icon(Icons.play_arrow_rounded, size: 28),
+                label: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  child: Text("Los geht's", style: TextStyle(fontSize: 18)),
                 ),
               ),
+              const SizedBox(height: 8),
+              Text(
+                fromLists ? 'Aus deinen Übungslisten' : 'Aus allen Lektionen',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: faint(context), fontSize: 12),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BigNumber extends StatelessWidget {
+  final int value;
+  final String label;
+  final Color color;
+
+  const _BigNumber({
+    required this.value,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            '$value',
+            style: TextStyle(
+              fontSize: 40,
+              fontWeight: FontWeight.w800,
+              color: color,
+              height: 1.1,
+            ),
+          ),
+          Text(label, style: TextStyle(color: muted(context))),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String value;
+  final String label;
+
+  const _StatTile({
+    required this.icon,
+    required this.color,
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+          child: Column(
+            children: [
+              Icon(icon, color: color),
               const SizedBox(height: 4),
               Text(
-                'Latein-Vokabeltrainer',
-                style: TextStyle(
-                  color: colorScheme.onPrimary.withValues(alpha: 0.9),
-                ),
+                value,
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+              ),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                style: TextStyle(color: muted(context), fontSize: 12),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        Card(
-          elevation: 0,
-          color: colorScheme.surfaceContainerHighest,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                _StatItem(
-                  icon: Icons.book,
-                  value: '$lessonCount',
-                  label: 'Lektionen',
-                ),
-                _StatItem(
-                  icon: Icons.list_alt,
-                  value: '$listCount',
-                  label: 'Übungslisten',
-                ),
-                _StatItem(
-                  icon: Icons.style,
-                  value: '$vocabCount',
-                  label: 'Vokabeln',
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
-        FilledButton.icon(
-          onPressed: _start,
-          icon: const Icon(Icons.play_arrow, size: 28),
-          label: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 14),
-            child: Text('Lernen starten', style: TextStyle(fontSize: 18)),
-          ),
-        ),
-        const SizedBox(height: 16),
-        OutlinedButton.icon(
-          onPressed: _showHelp,
-          icon: const Icon(Icons.help_outline),
-          label: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Text('Hilfe & Anleitung', style: TextStyle(fontSize: 16)),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
 
-class _StatItem extends StatelessWidget {
+class _NavTile extends StatelessWidget {
   final IconData icon;
-  final String value;
-  final String label;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
 
-  const _StatItem({required this.icon, required this.value, required this.label});
+  const _NavTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Expanded(
-      child: Column(
-        children: [
-          Icon(icon, color: colorScheme.primary),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          Text(label, style: TextStyle(color: muted(context))),
-        ],
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+        subtitle: Text(subtitle),
+        trailing: Icon(Icons.chevron_right, color: faint(context)),
+        onTap: onTap,
       ),
     );
   }

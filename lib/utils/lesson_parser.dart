@@ -1,19 +1,20 @@
-// Zerlegt einen eingefügten Lektionstext im Tabellen-Format in Struktur.
+// Zerlegt einen Lektionstext in Struktur.
 //
-// Erwartetes Format (wie es der Admin aus den Unterlagen übernimmt):
+// Format (so liegen auch die Dateien in `lektionen/`):
 //
 //   Lektion 5
 //
 //   Kasten 1
-//   Lateinisches Wort    Mittlere Spalte    Übersetzung
-//   luna    f    der Mond
-//   stella        der Stern
+//   luna | f | der Mond
+//   stella | der Stern
 //
 //   Kasten 2
 //   ...
 //
-// Spalten können durch Tabs oder durch mindestens zwei Leerzeichen
-// getrennt sein. Die mittlere Spalte ist optional.
+// Spalten werden durch „|“, Tabs oder mindestens zwei Leerzeichen getrennt
+// (so lässt sich auch eine Tabelle aus Word/PDF direkt einfügen). Die
+// mittlere Spalte ist optional. Zeilen, die mit „#“ beginnen, sind
+// Kommentare.
 
 class ParsedVocab {
   final String latin;
@@ -48,13 +49,13 @@ ParsedLesson parseLessonText(String text) {
   ParsedBox? current;
 
   void closeBox() {
-    if (current != null) boxes.add(current!);
+    if (current != null && current!.vocabs.isNotEmpty) boxes.add(current!);
     current = null;
   }
 
   for (final raw in lines) {
     final line = raw.trim();
-    if (line.isEmpty) continue;
+    if (line.isEmpty || line.startsWith('#')) continue;
 
     if (_isHeaderLine(line)) continue;
 
@@ -78,7 +79,7 @@ ParsedLesson parseLessonText(String text) {
         ? parts.sublist(1, parts.length - 1).join(' ')
         : null;
 
-    current ??= const ParsedBox(name: 'Kasten 1', vocabs: []);
+    current ??= ParsedBox(name: 'Kasten ${boxes.length + 1}', vocabs: []);
     current!.vocabs.add(
       ParsedVocab(latin: latin, middle: middle, german: german),
     );
@@ -93,6 +94,22 @@ ParsedLesson parseLessonText(String text) {
   }
 
   return ParsedLesson(name: lessonName ?? 'Neue Lektion', boxes: boxes);
+}
+
+/// Wandelt eine Lektion zurück ins Textformat (mit „|“ getrennt), z. B. um
+/// sie als Datei in `lektionen/` auf GitHub abzulegen.
+String lessonToText(ParsedLesson lesson) {
+  final out = StringBuffer('${lesson.name}\n');
+  for (final box in lesson.boxes) {
+    out.write('\n${box.name}\n');
+    for (final v in box.vocabs) {
+      final middle = v.middle?.trim() ?? '';
+      out.writeln(middle.isEmpty
+          ? '${v.latin} | ${v.german}'
+          : '${v.latin} | $middle | ${v.german}');
+    }
+  }
+  return out.toString();
 }
 
 bool _isHeaderLine(String line) {
@@ -110,9 +127,10 @@ bool _isBoxName(String line) =>
     RegExp(r'^kasten\b', caseSensitive: false).hasMatch(line);
 
 List<String> _splitColumns(String raw) {
-  final bool hasTab = raw.contains('\t');
-  final List<String> parts = hasTab
-      ? raw.split('\t')
-      : raw.split(RegExp(r'\s{2,}'));
+  final List<String> parts = raw.contains('|')
+      ? raw.split('|')
+      : raw.contains('\t')
+          ? raw.split('\t')
+          : raw.split(RegExp(r'\s{2,}'));
   return parts.map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
 }

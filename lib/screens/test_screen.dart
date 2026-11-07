@@ -4,7 +4,10 @@ import '../data/store.dart';
 import '../models/settings.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
+import '../utils/fsrs.dart';
+import '../utils/review_queue.dart';
 import '../utils/normalize.dart';
+import '../widgets/session_summary.dart';
 import '../widgets/standard_app_bar.dart';
 
 /// Ein Antwortteil (z. B. „Deutsche Bedeutung" oder „Mittlere Spalte").
@@ -26,7 +29,7 @@ class TestScreen extends StatefulWidget {
 }
 
 class _TestScreenState extends State<TestScreen> {
-  late final List<Vocab> _queue;
+  late List<Vocab> _queue;
   int _index = 0;
 
   late List<TextEditingController> _controllers;
@@ -35,6 +38,12 @@ class _TestScreenState extends State<TestScreen> {
   bool _checked = false;
   List<bool> _partResults = [];
   int _correctCount = 0;
+
+  /// Anzahl unterschiedlicher Vokabeln zu Beginn des Tests.
+  late int _total;
+
+  /// Vokabeln, die in diesem Test schon einmal geprüft wurden.
+  final Set<String> _seen = {};
 
   Vocab get _current => _queue[_index];
 
@@ -46,7 +55,8 @@ class _TestScreenState extends State<TestScreen> {
   @override
   void initState() {
     super.initState();
-    _queue = List.of(widget.vocabs)..shuffle();
+    _queue = List.of(widget.vocabs);
+    _total = _queue.length;
     _initInputs();
   }
 
@@ -103,6 +113,7 @@ class _TestScreenState extends State<TestScreen> {
       _controllers.every((c) => c.text.trim().isNotEmpty);
 
   void _check() {
+    if (_checked) return;
     final parts = _partsFor(_current);
     final results = <bool>[
       for (var i = 0; i < parts.length; i++)
@@ -110,24 +121,33 @@ class _TestScreenState extends State<TestScreen> {
             normalizeAnswer(parts[i].correct),
     ];
     final allCorrect = results.every((r) => r);
+    final card = _current;
+    final firstTry = _seen.add(card.id);
 
     setState(() {
       _checked = true;
       _partResults = results;
-      if (allCorrect) {
-        _current.markCorrect();
-        _correctCount++;
-      } else {
-        _current.markWrong();
+      if (allCorrect && firstTry) _correctCount++;
+      Store.instance.logReview();
+      reviewWithExam(
+        card,
+        allCorrect ? Rating.good : Rating.again,
+        Store.instance.practiceLists,
+      );
+      // Falsch beantwortete Vokabeln kommen später noch einmal dran.
+      if (!allCorrect) {
+        _queue.insert((_index + 4).clamp(0, _queue.length), card);
       }
     });
 
     Store.instance.save();
   }
 
+  bool _summaryShown = false;
+
   void _next() {
     if (_index + 1 >= _queue.length) {
-      _showSummary();
+      if (!_summaryShown) _showSummary();
       return;
     }
     FocusManager.instance.primaryFocus?.unfocus();
@@ -140,12 +160,13 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   void _restart() {
-    Navigator.pop(context); // Dialog schließen
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
-      _queue.shuffle();
+      _queue = {for (final v in _queue) v.id: v}.values.toList()..shuffle();
       _index = 0;
       _correctCount = 0;
+      _seen.clear();
+      _summaryShown = false;
       _disposeInputs();
       _initInputs();
     });
@@ -153,28 +174,12 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   void _showSummary() {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Fertig!'),
-        content: Text(
-          'Du hast $_correctCount von ${_queue.length} Vokabeln '
-          'richtig beantwortet.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: _restart,
-            child: const Text('Nochmal üben'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              Navigator.pop(context);
-            },
-            child: const Text('Fertig'),
-          ),
-        ],
-      ),
+    _summaryShown = true;
+    showSessionSummary(
+      context,
+      correct: _correctCount,
+      total: _total,
+      onRestart: _restart,
     );
   }
 

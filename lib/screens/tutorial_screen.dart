@@ -24,25 +24,41 @@ class _TutorialScreenState extends State<TutorialScreen> {
   static const _pages = [
     _TutorialPage(
       Icons.school_outlined,
-      'So funktioniert der Vokabeltrainer',
+      'So funktioniert der Vokabellerner',
       'Diese App hilft dir, lateinische Vokabeln zu lernen – mit '
-          'Übungslisten, Karteikarten und Tests. Wische nach links oder '
-          'tippe auf „Weiter", um alles kennenzulernen.',
+          'Karteikarten, Tests und cleverer Wiederholung. Wische nach links '
+          'oder tippe auf „Weiter", um alles kennenzulernen.',
     ),
     _TutorialPage(
-      Icons.list_alt_outlined,
-      'Übungslisten erstellen',
-      'Tippe auf „Lernen starten" und dann auf „Neue Liste". Gib der Liste '
-          'einen Namen und wähle die Vokabeln aus – aufgeteilt in Lektionen, '
-          'Kästen und einzelne Wörter. Bestätige mit „Fertig".',
+      Icons.play_circle_outline,
+      'Einfach loslegen',
+      'Auf der Startseite steht unter „Heute", was gerade dran ist. Tippe '
+          "auf „Los geht's\" – die App wählt die passenden Vokabeln aus: "
+          'fällige Wiederholungen zuerst, dazu bis zu 15 neue.',
     ),
     _TutorialPage(
       Icons.style_outlined,
-      'Karteikarten-Modus',
-      'Ein Wort wird angezeigt. Tippe auf „Bedeutung anzeigen", um die '
-          'Lösung zu sehen, und bewerte dich ehrlich mit „Richtig" oder '
-          '„Falsch". Über den Filter kannst du auch nur schwache Vokabeln '
-          'üben.',
+      'Karteikarten',
+      'Tippe auf die Karte, um sie umzudrehen, und bewerte dich ehrlich: '
+          '„Nochmal", „Schwer", „Gut" oder „Leicht". Unter jedem Knopf '
+          'steht, wann die Karte wiederkommt. Am PC: Leertaste zum '
+          'Umdrehen, 1–4 zum Bewerten.',
+    ),
+    _TutorialPage(
+      Icons.auto_awesome,
+      'Clever wiederholen',
+      'Die App fragt jede Vokabel genau dann ab, kurz bevor du sie '
+          'vergessen würdest (Spaced Repetition mit FSRS, wie bei Anki). Gut '
+          'gekonnte Wörter kommen seltener, schwierige öfter. Lerne jeden '
+          'Tag ein bisschen – das hält deine 🔥 Lernserie am Leben.',
+    ),
+    _TutorialPage(
+      Icons.list_alt_outlined,
+      'Übungslisten für Tests',
+      'Steht ein Vokabeltest an? Lege unter „Übungslisten" eine Liste mit '
+          'genau diesen Vokabeln an und gib das Testdatum ein. Dann wird '
+          'bis zum Test alles noch einmal wiederholt, und „Heute" nimmt die '
+          'Vokabeln aus deinen Listen.',
     ),
     _TutorialPage(
       Icons.edit_outlined,
@@ -50,6 +66,13 @@ class _TutorialScreenState extends State<TutorialScreen> {
       'Hier tippst du die Übersetzung und/oder die mittlere Spalte selbst '
           'ein. Beim Prüfen wird deine Antwort automatisch verglichen – '
           'Makronen (ā = a) und Artikel (der/die/das) sind dabei egal.',
+    ),
+    _TutorialPage(
+      Icons.menu_book_outlined,
+      'Lektionen',
+      'Im Tab „Lektionen" siehst du alle Lektionen mit deinem Fortschritt '
+          'und kannst eine ganze Lektion direkt üben. Mit „Eigene Lektion" '
+          'fügst du eigene Vokabeln ein – einfach den Text hineinkopieren.',
     ),
     _TutorialPage(
       Icons.insights_outlined,
@@ -60,20 +83,12 @@ class _TutorialScreenState extends State<TutorialScreen> {
           'Verbessern oder Verschlechtern mit +/−.',
     ),
     _TutorialPage(
-      Icons.settings_outlined,
-      'Einstellungen',
-      'Oben rechts findest du die Einstellungen. Dort stellst du die '
-          'Sprachrichtung ein (Latein → Deutsch oder umgekehrt) und den '
-          'Abfrage-Modus im Test: nur Übersetzung, nur mittlere Spalte '
-          'oder beides.',
-    ),
-    _TutorialPage(
-      Icons.lightbulb_outline,
-      'Noch ein paar Tipps',
-      '• Alles wird nur auf deinem Gerät gespeichert – kein Internet nötig.\n'
-          '• Der Home-Button (Haus-Symbol) bringt dich immer zurück zum '
-          'Dashboard.\n'
-          '• Deine Lernstände bleiben auch nach einem Update erhalten.',
+      Icons.save_outlined,
+      'Deine Daten',
+      'Alles wird nur in diesem Browser bzw. auf diesem Gerät gespeichert – '
+          'ohne Konto, ohne Internet. Mach in den Einstellungen ab und zu '
+          'eine Sicherung. Damit kannst du auch auf ein anderes Gerät '
+          'umziehen.',
     ),
   ];
 

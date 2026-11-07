@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
+import '../utils/review_queue.dart';
 import '../widgets/standard_app_bar.dart';
 import 'flashcard_screen.dart';
 import 'test_screen.dart';
 
 enum _Mode { flashcards, test }
 
-enum _Filter { all, weak }
+enum _Filter { smart, all, weak }
 
 /// Nach der Auswahl: Modus (Karteikarten/Test) wählen und starten.
 class PracticeScreen extends StatefulWidget {
@@ -22,38 +23,40 @@ class PracticeScreen extends StatefulWidget {
 
 class _PracticeScreenState extends State<PracticeScreen> {
   _Mode _mode = _Mode.flashcards;
-  _Filter _filter = _Filter.all;
+  _Filter _filter = _Filter.smart;
 
   void _snack(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
+  List<Vocab> _selected() => switch (_filter) {
+        _Filter.smart => buildReviewSession(widget.vocabs),
+        _Filter.all => List.of(widget.vocabs)..shuffle(),
+        _Filter.weak =>
+          widget.vocabs.where((v) => v.isWeak).toList()..shuffle(),
+      };
+
   void _start() {
-    if (_mode == _Mode.test) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => TestScreen(vocabs: List.of(widget.vocabs)),
-        ),
-      );
-    } else {
-      final vocabs = _filter == _Filter.all
-          ? widget.vocabs
-          : widget.vocabs.where((v) => v.isWeak).toList();
-
-      if (vocabs.isEmpty) {
-        _snack('Keine schwachen Vokabeln vorhanden. 😎');
-        return;
-      }
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => FlashcardScreen(vocabs: List.of(vocabs)),
-        ),
-      );
+    final vocabs = _selected();
+    if (vocabs.isEmpty) {
+      _snack(_filter == _Filter.smart
+          ? 'Für heute ist nichts mehr fällig – super! 😎 '
+              'Wähle „Alle“, wenn du trotzdem üben willst.'
+          : 'Keine schwachen Vokabeln vorhanden. 😎');
+      return;
     }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _mode == _Mode.test
+            ? TestScreen(vocabs: vocabs)
+            : FlashcardScreen(vocabs: vocabs),
+      ),
+    ).then((_) {
+      if (mounted) setState(() {}); // Zähler aktualisieren
+    });
   }
 
   @override
@@ -86,25 +89,38 @@ class _PracticeScreenState extends State<PracticeScreen> {
             onSelectionChanged: (s) => setState(() => _mode = s.first),
           ),
           const SizedBox(height: 16),
-          if (_mode == _Mode.flashcards) ...[
-            Text(
-              'Welche Vokabeln?',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            SegmentedButton<_Filter>(
-              segments: const [
-                ButtonSegment(value: _Filter.all, label: Text('Alle')),
-                ButtonSegment(
-                  value: _Filter.weak,
-                  label: Text('Nur schwache'),
-                ),
-              ],
-              selected: {_filter},
-              onSelectionChanged: (s) => setState(() => _filter = s.first),
-            ),
-            const SizedBox(height: 8),
-          ],
+          Text(
+            'Welche Vokabeln?',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          SegmentedButton<_Filter>(
+            segments: const [
+              ButtonSegment(
+                value: _Filter.smart,
+                label: Text('Fällig & neu'),
+                icon: Icon(Icons.auto_awesome),
+              ),
+              ButtonSegment(value: _Filter.all, label: Text('Alle')),
+              ButtonSegment(value: _Filter.weak, label: Text('Schwache')),
+            ],
+            selected: {_filter},
+            onSelectionChanged: (s) => setState(() => _filter = s.first),
+          ),
+          const SizedBox(height: 8),
+          if (_filter == _Filter.smart)
+            Builder(builder: (context) {
+              final c = countReview(widget.vocabs);
+              final newToday =
+                  c.fresh < newCardsPerSession ? c.fresh : newCardsPerSession;
+              return Text(
+                '${c.due} fällig · $newToday neu'
+                '${c.fresh > newToday ? ' (${c.fresh - newToday} weitere später)' : ''}',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: muted(context)),
+              );
+            }),
+          const SizedBox(height: 8),
           Card(
             elevation: 0,
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -122,12 +138,19 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      _mode == _Mode.flashcards
-                          ? 'Ein Wort wird angezeigt. Du deckst die Bedeutung '
-                              'auf und bewertest dich selbst mit Richtig oder '
-                              'Falsch.'
-                          : 'Ein Wort wird angezeigt. Du gibst Übersetzung '
-                              'und mittlere Spalte selbst ein.',
+                      (_mode == _Mode.flashcards
+                              ? 'Ein Wort wird angezeigt. Du deckst die '
+                                  'Bedeutung auf und bewertest dich selbst: '
+                                  'Nochmal, Schwer, Gut oder Leicht.'
+                              : 'Ein Wort wird angezeigt. Du gibst Übersetzung '
+                                  'und mittlere Spalte selbst ein.') +
+                          (_filter == _Filter.smart
+                              ? '\n\n„Fällig & neu“ nutzt Spaced Repetition '
+                                  '(FSRS): Jede Vokabel kommt genau dann '
+                                  'wieder, kurz bevor du sie vergessen '
+                                  'würdest. Ist ein Zieldatum gesetzt, wird '
+                                  'vorher alles noch einmal wiederholt.'
+                              : ''),
                     ),
                   ),
                 ],
