@@ -36,6 +36,9 @@ class FsrsCard {
   /// Bei Daten aus älteren Versionen unbekannt (`null`).
   final DateTime? firstReview;
 
+  /// Zeitpunkt des letzten „Nochmal" (nicht gewusst).
+  final DateTime? lapseAt;
+
   const FsrsCard({
     required this.stability,
     required this.difficulty,
@@ -44,6 +47,7 @@ class FsrsCard {
     this.reps = 0,
     this.lapses = 0,
     this.firstReview,
+    this.lapseAt,
   });
 
   /// Kopie mit anderem Fälligkeitstermin.
@@ -55,6 +59,7 @@ class FsrsCard {
         reps: reps,
         lapses: lapses,
         firstReview: firstReview,
+        lapseAt: lapseAt,
       );
 
   factory FsrsCard.fromJson(Map<String, dynamic> json) => FsrsCard(
@@ -67,6 +72,9 @@ class FsrsCard {
         firstReview: json['first'] == null
             ? null
             : DateTime.fromMillisecondsSinceEpoch(json['first'] as int),
+        lapseAt: json['lapseAt'] == null
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(json['lapseAt'] as int),
       );
 
   Map<String, dynamic> toJson() => {
@@ -77,6 +85,7 @@ class FsrsCard {
         'reps': reps,
         'lapses': lapses,
         if (firstReview != null) 'first': firstReview!.millisecondsSinceEpoch,
+        if (lapseAt != null) 'lapseAt': lapseAt!.millisecondsSinceEpoch,
       };
 }
 
@@ -196,6 +205,7 @@ class Fsrs {
       reps: (card?.reps ?? 0) + 1,
       lapses: lapses,
       firstReview: card == null ? now : card.firstReview,
+      lapseAt: rating == Rating.again ? now : card?.lapseAt,
     );
   }
 

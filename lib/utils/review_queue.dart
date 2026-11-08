@@ -7,6 +7,10 @@ import 'fsrs.dart';
 /// Neue Vokabeln pro Runde für Listen **ohne** Testdatum.
 const int newCardsPerSession = 15;
 
+/// Am letzten Lerntag gilt eine Vokabel erst als sicher, wenn sie
+/// mindestens so lange nach dem letzten Fehler richtig beantwortet wurde.
+const Duration settleTime = Duration(minutes: 30);
+
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 
 /// Letzter Lerntag vor einem Test: der Tag **vor** dem Testtag (am Testtag
@@ -37,6 +41,31 @@ DateTime? nextDeadlineFor(
   return best;
 }
 
+/// Zeitpunkt des letzten Fehlers („Nochmal"/falsch) – aus FSRS oder, bei
+/// Daten aus älteren Versionen, aus dem Lernverlauf (Stufe gesunken).
+DateTime? lastMistake(Vocab v) {
+  DateTime? fromHistory;
+  for (var i = v.history.length - 1; i >= 0; i--) {
+    final before = i == 0 ? 0 : v.history[i - 1].level;
+    if (v.history[i].level < before) {
+      fromHistory = v.history[i].time;
+      break;
+    }
+  }
+  final lapse = v.srs?.lapseAt;
+  if (lapse == null) return fromHistory;
+  if (fromHistory == null) return lapse;
+  return lapse.isAfter(fromHistory) ? lapse : fromHistory;
+}
+
+/// Am letzten Lerntag: Vokabel hatte heute einen Fehler und wurde danach
+/// noch nicht mit genug Abstand ([settleTime]) richtig beantwortet.
+bool _notSettled(Vocab v, DateTime now) {
+  final mistake = lastMistake(v);
+  if (mistake == null || _day(mistake) != _day(now)) return false;
+  return v.srs!.lastReview.difference(mistake) < settleTime;
+}
+
 /// Plan für die nächste Lern-Runde.
 class ReviewPlan {
   /// Fällige Wiederholungen (am ehesten vergessene zuerst).
@@ -61,7 +90,10 @@ class ReviewPlan {
 
 /// Stellt die nächste Runde aus [pool] zusammen.
 ///
-/// * Fällige Vokabeln kommen immer dran (am ehesten vergessene zuerst).
+/// * Fällige Vokabeln kommen immer dran (am ehesten vergessene zuerst) –
+///   auch die, die erst später heute fällig werden (z. B. 10 Minuten nach
+///   einem Fehler). Am letzten Lerntag vor einem Test zusätzlich alle, die
+///   heute falsch waren und noch nicht sicher sitzen.
 /// * Neue Vokabeln mit Testtermin werden gleichmäßig auf die Lerntage bis
 ///   zum Vortag des Tests verteilt (frühester Test zuerst). Was heute schon
 ///   neu gelernt wurde, wird abgezogen.
@@ -75,7 +107,15 @@ ReviewPlan planReview(
   final today = _day(now);
   final unique = {for (final v in pool) v.id: v}.values.toList();
 
-  final due = unique.where((v) => v.isDue(now)).toList()
+  final tomorrow = DateTime(today.year, today.month, today.day + 1);
+  bool dueToday(Vocab v) {
+    if (v.srs == null) return false;
+    if (v.srs!.due.isBefore(tomorrow)) return true;
+    return nextDeadlineFor(v.id, lists, now: now) == today &&
+        _notSettled(v, now!);
+  }
+
+  final due = unique.where(dueToday).toList()
     ..sort((a, b) => a.recall(now)!.compareTo(b.recall(now)!));
 
   // Neue und heute erstmals gelernte Vokabeln nach Lern-Deadline gruppieren.
@@ -121,6 +161,9 @@ ReviewPlan planReview(
 ///   noch einmal dran – so wird vor dem Test alles wiederholt.
 /// * Je näher der Test, desto kürzer die Abstände: höchstens die Hälfte der
 ///   verbleibenden Zeit (mindestens 1 Tag).
+/// * Am letzten Lerntag selbst wird gepaukt: „Schwer" oder richtig kurz
+///   nach einem Fehler → in [settleTime] noch einmal. Erst wer eine Vokabel
+///   mit Abstand zum letzten Fehler weiß, ist mit ihr fertig.
 void reviewWithExam(
   Vocab v,
   Rating rating,
@@ -132,7 +175,20 @@ void reviewWithExam(
   if (rating == Rating.again) return; // kommt ohnehin gleich wieder
 
   final deadline = nextDeadlineFor(v.id, lists, now: now);
-  if (deadline == null || !deadline.isAfter(now)) return;
+  if (deadline == null) return;
+
+  if (deadline == _day(now)) {
+    // Letzter Lerntag: unsichere Vokabeln heute noch einmal.
+    final mistake = lastMistake(v);
+    final shaky = rating == Rating.hard ||
+        (mistake != null &&
+            _day(mistake) == deadline &&
+            now.difference(mistake) < settleTime);
+    final card = v.srs!;
+    final next = now.add(settleTime);
+    if (shaky && card.due.isAfter(next)) v.srs = card.withDue(next);
+    return;
+  }
 
   final remaining = deadline.difference(now);
   final gap = remaining ~/ 2 > const Duration(days: 1)

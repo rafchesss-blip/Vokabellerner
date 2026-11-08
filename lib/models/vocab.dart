@@ -63,11 +63,11 @@ class Vocab {
   bool get isWeak => level < 1;
 
   /// Ändert die Lernstufe um [delta] (±1), begrenzt auf -5 .. +5.
-  void adjustLevel(int delta) {
+  void adjustLevel(int delta, [DateTime? at]) {
     final newLevel = (level + delta).clamp(-5, 5).toInt();
     if (newLevel == level) return;
     level = newLevel;
-    history.add(StatEvent(time: DateTime.now(), level: newLevel));
+    history.add(StatEvent(time: at ?? DateTime.now(), level: newLevel));
   }
 
   void markCorrect() => review(Rating.good);
@@ -90,8 +90,9 @@ class Vocab {
   /// Wertet eine Antwort aus: plant die nächste Wiederholung (FSRS) und
   /// passt die Lernstufe an (nicht gewusst −1, sonst +1).
   void review(Rating rating, [DateTime? now]) {
-    srs = Fsrs.review(srs, rating, now ?? DateTime.now());
-    adjustLevel(rating == Rating.again ? -1 : 1);
+    now ??= DateTime.now();
+    srs = Fsrs.review(srs, rating, now);
+    adjustLevel(rating == Rating.again ? -1 : 1, now);
   }
 
   factory Vocab.fromJson(Map<String, dynamic> json) => Vocab(
