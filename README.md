@@ -34,8 +34,6 @@ Browser gespeichert.
   wechseln jeden Tag und werden vor einem Test dringender. Bei jedem
   Öffnen und nach jedem Lernen plant die App sie neu. Ist für heute alles
   gelernt, kommt keine Erinnerung mehr.
-- **Automatische Updates (Android-App):** Beim Start prüft die App, ob es
-  eine neue Version gibt, und bietet das Update an.
 - **Kalender-Erinnerungen (Browser):** Im Browser gibt es keine
   Benachrichtigungen. Stattdessen kann die App eine Kalenderdatei (.ics) mit
   einer Erinnerung pro Lerntag erzeugen.
@@ -80,19 +78,20 @@ hängt am Dateinamen und am Wort. Ändert sich ein Wort, beginnt es wieder als
 
 ## Android-App
 
-**Download:** https://rafchesss-blip.github.io/Vokabellerner/vokabellerner.apk
+Die APK wird lokal gebaut, nicht von GitHub Actions:
 
-Beim ersten Installieren fragt Android, ob der Browser Apps installieren
-darf. Das einmal erlauben. Der Lernfortschritt der Android-App ist getrennt
-vom Browser. Zum Übertragen gibt es unter Einstellungen → Daten & Sicherung
-die Sicherung.
+```bash
+flutter build apk --release --target-platform android-arm,android-arm64
+```
 
-GitHub Actions baut die APK bei jedem Push mit und legt sie zusammen mit
-`version.json` auf GitHub Pages. Signiert wird mit einem festen Schlüssel aus
-den Repository-Secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`
-und `ANDROID_KEY_ALIAS`. Fehlen diese Secrets, wird nur die Web-Version
-gebaut. **Den Schlüssel nie verlieren:** Ohne ihn lassen sich keine Updates
-mehr über die installierte App spielen.
+Signiert wird mit dem Schlüssel aus `android/key.properties`. Diese Datei
+und der Schlüssel liegen nicht im Repo, sondern unter
+`C:\Users\rafch\.vokabellerner-signatur\`. Mit demselben Schlüssel lässt
+sich eine neue Version einfach über die alte installieren, und der
+Lernfortschritt bleibt erhalten. **Den Schlüssel nicht verlieren.**
+
+Der Lernfortschritt der Android-App ist getrennt vom Browser. Zum
+Übertragen gibt es unter Einstellungen → Daten & Sicherung die Sicherung.
 
 ## Entwickeln
 

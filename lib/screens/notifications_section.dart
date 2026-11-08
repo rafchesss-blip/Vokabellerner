@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../models/settings.dart';
 import '../services/notifications.dart';
-import '../services/updates.dart';
 import '../theme/app_theme.dart';
 import '../utils/notification_plan.dart';
 
 /// Einstellungen → „Erinnerungen".
 ///
 /// In der Android-App: an/aus, wie oft am Tag, Test-Benachrichtigung.
-/// Im Browser: Hinweis und Download-Link zur Android-App.
+/// Im Browser: Hinweis auf die Android-App.
 class NotificationsSection extends StatefulWidget {
   const NotificationsSection({super.key});
 
@@ -61,21 +59,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    '📱 Echte Erinnerungen gibt es in der Android-App: '
-                    'mehrmals am Tag, mit aktuellen Zahlen und nie nach '
-                    '21 Uhr.',
-                  ),
-                  const SizedBox(height: 12),
-                  FilledButton.icon(
-                    onPressed: () => launchUrl(Uri.parse(apkUrl)),
-                    icon: const Icon(Icons.android),
-                    label: const Text('Android-App herunterladen'),
-                  ),
-                ],
+              child: Text(
+                '📱 Echte Erinnerungen gibt es in der Android-App: mehrmals '
+                'am Tag, mit aktuellen Zahlen und nie nach 21 Uhr.',
+                style: TextStyle(color: muted(context)),
               ),
             ),
           ),

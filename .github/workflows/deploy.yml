@@ -17,20 +17,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      # Android-App nur bauen, wenn der Signatur-Schlüssel hinterlegt ist
-      # (sonst ließen sich Updates nicht über die alte App installieren).
-      HAS_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
       - name: Code auschecken
         uses: actions/checkout@v7
-
-      - name: Java einrichten (für die Android-App)
-        if: env.HAS_KEY == 'true'
-        uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: '17'
 
       - name: Flutter einrichten
         uses: subosito/flutter-action@v2
@@ -51,35 +40,6 @@ jobs:
 
       - name: 404-Seite für direkte Links
         run: cp build/web/index.html build/web/404.html
-
-      - name: Signatur-Schlüssel einrichten
-        if: env.HAS_KEY == 'true'
-        env:
-          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > android/release.jks
-          cat > android/key.properties <<EOF
-          storeFile=release.jks
-          storePassword=$KEYSTORE_PASSWORD
-          keyAlias=$KEY_ALIAS
-          keyPassword=$KEYSTORE_PASSWORD
-          EOF
-
-      - name: Android-App bauen
-        if: env.HAS_KEY == 'true'
-        run: >
-          flutter build apk --release
-          --target-platform android-arm,android-arm64
-          --build-number=${{ github.run_number }}
-          --dart-define=APP_BUILD=${{ github.run_number }}
-
-      - name: App und Versionsinfo zur Webseite legen
-        if: env.HAS_KEY == 'true'
-        run: |
-          cp build/app/outputs/flutter-apk/app-release.apk build/web/vokabellerner.apk
-          echo '{"build": ${{ github.run_number }}}' > build/web/version.json
 
       - uses: actions/upload-pages-artifact@v5
         with:

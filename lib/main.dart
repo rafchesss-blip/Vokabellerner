@@ -8,7 +8,6 @@ import 'models/settings.dart';
 import 'platform/platform.dart';
 import 'screens/home_shell.dart';
 import 'services/notifications.dart';
-import 'services/updates.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -69,8 +68,8 @@ class VokabeltrainerApp extends StatelessWidget {
   }
 }
 
-/// Einmalige Aufgaben nach dem Start: Erlaubnis für Benachrichtigungen
-/// (beim ersten Mal) und Update-Prüfung.
+/// Beim ersten Start der Android-App nach der Erlaubnis für
+/// Benachrichtigungen fragen.
 class _Startup extends StatefulWidget {
   final Widget child;
 
@@ -98,31 +97,6 @@ class _StartupState extends State<_Startup> {
         unawaited(rescheduleNotifications());
       }
     }
-
-    final latest = await checkForUpdate();
-    if (latest == null || !mounted) return;
-    final update = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        icon: const Text('✨', style: TextStyle(fontSize: 36)),
-        title: const Text('Neue Version verfügbar!'),
-        content: const Text(
-          'Es gibt ein Update für den Vokabellerner. Dein Lernfortschritt '
-          'bleibt dabei erhalten.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Später'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Jetzt updaten'),
-          ),
-        ],
-      ),
-    );
-    if (update == true) await openApkDownload();
   }
 
   @override
