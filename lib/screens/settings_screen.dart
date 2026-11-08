@@ -4,6 +4,7 @@ import '../models/settings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/standard_app_bar.dart';
 import 'backup_section.dart';
+import 'notifications_section.dart';
 
 /// Einstellungen: Design, Sprachrichtung, Abfrage-Modus und Sicherung.
 ///
@@ -124,6 +125,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
+          const Divider(height: 32),
+          const NotificationsSection(),
           const Divider(height: 32),
           const BackupSection(),
           const SizedBox(height: 24),

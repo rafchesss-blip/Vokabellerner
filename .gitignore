@@ -8,8 +8,7 @@ build/
 .idea/
 pubspec.lock
 
-# Plattform-Ordner werden per `flutter create .` erzeugt
-/android/
+# Plattform-Ordner (Android ist versioniert, siehe android/.gitignore)
 /ios/
 /linux/
 /macos/

@@ -71,10 +71,10 @@ class _TutorialScreenState extends State<TutorialScreen> {
     _TutorialPage(
       Icons.notifications_active_outlined,
       'Erinnerungen',
-      'Auf Wunsch trägt dir die App für jeden Lerntag eine Erinnerung in '
-          'den Kalender deines Handys ein – mit Countdown bis zum Test. '
-          'Später findest du das im Drei-Punkte-Menü der Liste unter '
-          '„Erinnerungen in Kalender".',
+      'In der Android-App erinnert dich der Vokabellerner bis zu 3-mal am '
+          'Tag – mit den aktuellen Zahlen und nie nach 21 Uhr. Hast du für '
+          'heute alles gelernt, ist Ruhe. Einstellen kannst du das unter '
+          'Einstellungen → Erinnerungen.',
     ),
     _TutorialPage(
       Icons.edit_outlined,

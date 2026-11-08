@@ -29,10 +29,16 @@ Browser gespeichert.
   Testtag selbst wird nicht mehr geübt). Je näher der Test, desto kürzer die
   Abstände: höchstens die halbe Restzeit. Am Vortag wird alles noch einmal
   wiederholt. Die Startseite zeigt einen Countdown.
-- **Erinnerungen:** Die App kann für jeden Lerntag eine Erinnerung als
-  Kalenderdatei (.ics) erzeugen, mit wechselnden Texten und Countdown. Weil
-  die App ohne Server läuft, gibt es keine Push-Nachrichten. Der Kalender
-  des Handys meldet sich aber zuverlässig, auch wenn die App zu ist.
+- **Benachrichtigungen (Android-App):** bis zu 3-mal am Tag (14:30, 17:30
+  und 20:15 Uhr), nie nach 21 Uhr. Die Texte zeigen die aktuellen Zahlen,
+  wechseln jeden Tag und werden vor einem Test dringender. Bei jedem
+  Öffnen und nach jedem Lernen plant die App sie neu. Ist für heute alles
+  gelernt, kommt keine Erinnerung mehr.
+- **Automatische Updates (Android-App):** Beim Start prüft die App, ob es
+  eine neue Version gibt, und bietet das Update an.
+- **Kalender-Erinnerungen (Browser):** Im Browser gibt es keine
+  Benachrichtigungen. Stattdessen kann die App eine Kalenderdatei (.ics) mit
+  einer Erinnerung pro Lerntag erzeugen.
 - **Lektionen:** Die Lektionen sind eingebaut. Der Tab „Lektionen“ zeigt sie
   mit deinem Fortschritt.
 - **Analyse:** Jede Vokabel hat eine Lernstufe (−5 bis +5) mit Verlauf.
@@ -71,6 +77,22 @@ Die eingebauten Lektionen sind einfache Textdateien im Ordner
 Tippfehler korrigierst du genauso direkt in der Datei. Der Lernfortschritt
 hängt am Dateinamen und am Wort. Ändert sich ein Wort, beginnt es wieder als
 „neu“.
+
+## Android-App
+
+**Download:** https://rafchesss-blip.github.io/Vokabellerner/vokabellerner.apk
+
+Beim ersten Installieren fragt Android, ob der Browser Apps installieren
+darf. Das einmal erlauben. Der Lernfortschritt der Android-App ist getrennt
+vom Browser. Zum Übertragen gibt es unter Einstellungen → Daten & Sicherung
+die Sicherung.
+
+GitHub Actions baut die APK bei jedem Push mit und legt sie zusammen mit
+`version.json` auf GitHub Pages. Signiert wird mit einem festen Schlüssel aus
+den Repository-Secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`
+und `ANDROID_KEY_ALIAS`. Fehlen diese Secrets, wird nur die Web-Version
+gebaut. **Den Schlüssel nie verlieren:** Ohne ihn lassen sich keine Updates
+mehr über die installierte App spielen.
 
 ## Entwickeln
 

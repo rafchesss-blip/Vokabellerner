@@ -107,6 +107,12 @@ class Settings {
   AppThemeMode themeMode = AppThemeMode.dark;
   NeonAccent accent = NeonAccent.violet;
 
+  /// Lern-Erinnerungen (nur Android-App).
+  bool notificationsEnabled = true;
+
+  /// Wie oft pro Tag erinnert wird (1–3).
+  int notificationsPerDay = 3;
+
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -129,6 +135,10 @@ class Settings {
       (a) => a.name == prefs.getString('accent'),
       orElse: () => NeonAccent.violet,
     );
+
+    notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
+    notificationsPerDay =
+        (prefs.getInt('notificationsPerDay') ?? 3).clamp(1, 3).toInt();
   }
 
   Future<void> save() async {
@@ -137,6 +147,8 @@ class Settings {
     await prefs.setString('answerMode', answerMode.name);
     await prefs.setString('themeMode', themeMode.name);
     await prefs.setString('accent', accent.name);
+    await prefs.setBool('notificationsEnabled', notificationsEnabled);
+    await prefs.setInt('notificationsPerDay', notificationsPerDay);
     revision.value++;
   }
 }
