@@ -212,3 +212,18 @@ PracticeList? nextExamList(Iterable<PracticeList> lists, {DateTime? now}) {
   }
   return best;
 }
+
+/// Ob der Test von [list] vorbei ist (Testtag liegt vor heute).
+bool examOver(PracticeList list, {DateTime? now}) {
+  final exam = list.dueDate;
+  return exam != null && _day(exam).isBefore(_day(now ?? DateTime.now()));
+}
+
+/// Listen, die noch gelernt werden: ohne Testdatum oder Test noch nicht
+/// vorbei. Nach dem Test fällt eine Liste aus „Heute" und den Erinnerungen
+/// heraus – üben kann man sie trotzdem noch über die Übungslisten.
+List<PracticeList> activeLists(
+  Iterable<PracticeList> lists, {
+  DateTime? now,
+}) =>
+    [for (final l in lists) if (!examOver(l, now: now)) l];

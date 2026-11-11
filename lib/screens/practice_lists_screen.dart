@@ -4,6 +4,7 @@ import '../data/store.dart';
 import '../models/practice_list.dart';
 import '../models/vocab.dart';
 import '../platform/platform.dart';
+import '../services/notifications.dart';
 import '../theme/app_theme.dart';
 import '../utils/reminders.dart';
 import '../utils/review_queue.dart';
@@ -144,7 +145,7 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
     final days = DateTime(exam.year, exam.month, exam.day)
         .difference(DateTime(now.year, now.month, now.day))
         .inDays;
-    if (days < 0) return '';
+    if (days < 0) return ' · vorbei ✅';
     if (days == 0) return ' · heute! 🍀';
     if (days == 1) return ' · morgen!';
     return ' · noch $days Tage';
@@ -234,6 +235,18 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
     list.dueDate = dueDate;
     await Store.instance.save();
     if (mounted) setState(() {});
+  }
+
+  Future<void> _toggleNotify(PracticeList list) async {
+    list.notify = !list.notify;
+    await Store.instance.save();
+    if (!mounted) return;
+    setState(() {});
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(list.notify
+          ? 'Erinnerungen für „${list.name}" sind an.'
+          : 'Keine Erinnerungen mehr für „${list.name}".'),
+    ));
   }
 
   Future<void> _edit(PracticeList list) async {
@@ -343,11 +356,14 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
-                      list.dueDate == null
-                          ? '${list.vocabIds.length} Vokabeln'
-                          : '${list.vocabIds.length} Vokabeln · Test: '
-                              '${_formatDate(list.dueDate!)}'
-                              '${_countdown(list.dueDate!)}',
+                      (list.dueDate == null
+                              ? '${list.vocabIds.length} Vokabeln'
+                              : '${list.vocabIds.length} Vokabeln · Test: '
+                                  '${_formatDate(list.dueDate!)}'
+                                  '${_countdown(list.dueDate!)}') +
+                          (notificationsSupported && !list.notify
+                              ? ' · 🔕'
+                              : ''),
                     ),
                     trailing: PopupMenuButton<String>(
                       tooltip: 'Optionen',
@@ -355,6 +371,7 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                         if (v == 'edit') _edit(list);
                         if (v == 'dueDate') _editDueDate(list);
                         if (v == 'remind') _addReminders(list);
+                        if (v == 'notify') _toggleNotify(list);
                         if (v == 'delete') _delete(list);
                       },
                       itemBuilder: (_) => [
@@ -391,6 +408,23 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                                     size: 20),
                                 SizedBox(width: 12),
                                 Text('Erinnerungen in Kalender'),
+                              ],
+                            ),
+                          ),
+                        if (notificationsSupported)
+                          PopupMenuItem(
+                            value: 'notify',
+                            child: Row(
+                              children: [
+                                Icon(
+                                    list.notify
+                                        ? Icons.notifications_off_outlined
+                                        : Icons.notifications_active_outlined,
+                                    size: 20),
+                                const SizedBox(width: 12),
+                                Text(list.notify
+                                    ? 'Erinnerungen ausschalten'
+                                    : 'Erinnerungen einschalten'),
                               ],
                             ),
                           ),

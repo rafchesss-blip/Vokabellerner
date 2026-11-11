@@ -118,4 +118,31 @@ void main() {
     );
     expect(plan, isEmpty);
   });
+
+  test('Nach dem Test erinnert die Liste nicht mehr', () {
+    final pool = vocabs(5);
+    final exam = DateTime(2026, 3, 4); // Mittwoch
+    final plan = planNotifications(
+      pool: pool,
+      lists: [list(pool, exam)],
+      perDay: 1,
+      streak: 0,
+      practicedToday: false,
+      now: morning,
+    );
+    expect(plan, isNotEmpty);
+    expect(plan.every((n) => !n.time.isAfter(exam.add(const Duration(days: 1)))),
+        isTrue);
+
+    // Test schon vorbei: gar keine Erinnerungen.
+    final after = planNotifications(
+      pool: pool,
+      lists: [list(pool, DateTime(2026, 3, 1))],
+      perDay: 3,
+      streak: 0,
+      practicedToday: false,
+      now: morning,
+    );
+    expect(after, isEmpty);
+  });
 }

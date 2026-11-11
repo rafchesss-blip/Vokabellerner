@@ -66,6 +66,9 @@ Future<String?> pickTextFile() {
   return completer.future;
 }
 
+/// Öffnet [url] im selben Tab (z. B. einen Download).
+void openUrl(String url) => web.window.location.href = url;
+
 /// Adresse der App (für Links in Erinnerungen).
 String? appUrl() {
   final b = Uri.base;

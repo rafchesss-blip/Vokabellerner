@@ -15,4 +15,6 @@ Future<bool> saveTextFile(
 
 String? appUrl() => null;
 
+void openUrl(String url) {}
+
 Future<String?> pickTextFile() async => null;

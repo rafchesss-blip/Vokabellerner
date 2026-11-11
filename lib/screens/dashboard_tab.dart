@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../data/store.dart';
 import '../models/vocab.dart';
+import '../platform/platform.dart';
 import '../theme/app_theme.dart';
 import '../utils/goals.dart';
 import '../utils/review_queue.dart';
@@ -13,11 +15,12 @@ import 'tutorial_screen.dart';
 class DashboardTab extends StatelessWidget {
   const DashboardTab({super.key});
 
-  /// Vokabeln für „Heute": alle aus den Übungslisten (ohne Doppelte).
+  /// Vokabeln für „Heute": alle aus den Übungslisten, deren Test noch
+  /// nicht vorbei ist (ohne Doppelte).
   static List<Vocab> todayPool() {
     final store = Store.instance;
     return store.resolveVocabs(
-      {for (final l in store.practiceLists) ...l.vocabIds},
+      {for (final l in activeLists(store.practiceLists)) ...l.vocabIds},
     );
   }
 
@@ -27,6 +30,38 @@ class DashboardTab extends StatelessWidget {
     if (h < 11) return 'Guten Morgen! ☀️';
     if (h < 18) return 'Hallo! 👋';
     return 'Guten Abend! 🌆';
+  }
+
+  /// Lädt die APK herunter und erklärt, wie man sie installiert.
+  static void _downloadApk(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Text('📱', style: TextStyle(fontSize: 36)),
+        title: const Text('Android-App installieren'),
+        content: const Text(
+          '1. Auf „Herunterladen" tippen.\n'
+          '2. Die heruntergeladene Datei öffnen.\n'
+          '3. Falls gefragt: Installieren aus dieser Quelle erlauben.\n\n'
+          'Dein Lernstand aus dem Browser kommt nicht automatisch mit – '
+          'übertrage ihn unter Einstellungen → Daten & Sicherung.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              openUrl(apkUrl);
+            },
+            icon: const Icon(Icons.download),
+            label: const Text('Herunterladen'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _open(BuildContext context, Widget screen) =>
@@ -100,6 +135,13 @@ class DashboardTab extends StatelessWidget {
                       '${store.practiceLists.length == 1 ? 'Liste' : 'Listen'}',
               onTap: () => _open(context, const PracticeListsScreen()),
             ),
+            if (kIsWeb)
+              _NavTile(
+                icon: Icons.android,
+                title: 'Android-App herunterladen',
+                subtitle: 'Mit Erinnerungen ans Lernen',
+                onTap: () => _downloadApk(context),
+              ),
             _NavTile(
               icon: Icons.help_outline,
               title: 'Hilfe & Anleitung',

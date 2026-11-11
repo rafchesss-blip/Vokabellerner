@@ -74,12 +74,11 @@ Future<void> rescheduleNotifications() async {
   if (!settings.notificationsEnabled) return;
 
   final store = Store.instance;
-  final pool = store.resolveVocabs(
-    {for (final l in store.practiceLists) ...l.vocabIds},
-  );
+  final lists = [for (final l in store.practiceLists) if (l.notify) l];
+  final pool = store.resolveVocabs({for (final l in lists) ...l.vocabIds});
   final planned = planNotifications(
     pool: pool,
-    lists: store.practiceLists,
+    lists: lists,
     perDay: settings.notificationsPerDay,
     streak: store.streak(),
     practicedToday: store.reviewsToday > 0,

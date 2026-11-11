@@ -7,11 +7,15 @@ class PracticeList {
   /// Zieldatum, bis zu dem die Vokabeln gewusst werden sollen (optional).
   DateTime? dueDate;
 
+  /// Ob die Liste Lern-Erinnerungen auslöst (Android-App).
+  bool notify;
+
   PracticeList({
     required this.id,
     required this.name,
     required this.vocabIds,
     this.dueDate,
+    this.notify = true,
   });
 
   factory PracticeList.fromJson(Map<String, dynamic> json) => PracticeList(
@@ -23,6 +27,7 @@ class PracticeList {
         dueDate: json['dueDate'] == null
             ? null
             : DateTime.fromMillisecondsSinceEpoch(json['dueDate'] as int),
+        notify: json['notify'] as bool? ?? true,
       );
 
   Map<String, dynamic> toJson() => {
@@ -30,5 +35,6 @@ class PracticeList {
         'name': name,
         'vocabIds': vocabIds,
         'dueDate': dueDate?.millisecondsSinceEpoch,
+        'notify': notify,
       };
 }

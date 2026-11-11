@@ -84,6 +84,17 @@ Die APK wird lokal gebaut, nicht von GitHub Actions:
 flutter build apk --release --target-platform android-arm,android-arm64
 ```
 
+Damit die Web-Version sie zum Herunterladen anbietet („Android-App
+herunterladen“ auf der Startseite), kommt die APK als
+`Vokabellerner.apk` an ein GitHub-Release:
+
+```bash
+cp build/app/outputs/flutter-apk/app-release.apk Vokabellerner.apk
+gh release create v0.1.0 Vokabellerner.apk --title "Version 0.1.0" --notes "…"
+```
+
+Der Link zeigt immer auf das neueste Release.
+
 Signiert wird mit dem Schlüssel aus `android/key.properties`. Diese Datei
 und der Schlüssel liegen nicht im Repo, sondern unter
 `C:\Users\rafch\.vokabellerner-signatur\`. Mit demselben Schlüssel lässt
@@ -92,6 +103,13 @@ Lernfortschritt bleibt erhalten. **Den Schlüssel nicht verlieren.**
 
 Der Lernfortschritt der Android-App ist getrennt vom Browser. Zum
 Übertragen gibt es unter Einstellungen → Daten & Sicherung die Sicherung.
+
+## Was ist neu?
+
+Die Web-Version zeigt neue Funktionen einmal oben rechts an (📣). Die
+Einträge stehen in `lib/data/changelog.dart` – kurz und aus Sicht der
+Nutzer geschrieben. Neue Einträge oben einfügen, mit der nächsthöheren
+Nummer.
 
 ## Entwickeln
 

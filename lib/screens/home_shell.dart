@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../navigation.dart';
+import '../widgets/changelog_button.dart';
 import 'analyse_tab.dart';
 import 'dashboard_tab.dart';
 import 'lessons_tab.dart';
@@ -20,6 +21,7 @@ class HomeShell extends StatelessWidget {
         appBar: AppBar(
           title: Text(_titles[index]),
           actions: [
+            const ChangelogButton(),
             IconButton(
               icon: const Icon(Icons.settings_outlined),
               tooltip: 'Einstellungen',

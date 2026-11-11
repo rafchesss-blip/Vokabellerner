@@ -72,6 +72,7 @@ String _fill(String text, Map<String, Object> values) {
 ///   kommende Tage wird angenommen, dass bis dahin nicht gelernt wird – wer
 ///   lernt, öffnet die App, und dann wird ohnehin neu geplant.
 /// * Ist heute alles erledigt, gibt es heute keine Erinnerung mehr.
+/// * Ist der Test einer Liste vorbei, erinnert sie nicht mehr ans Lernen.
 /// * Vor einem Test: Countdown, am Vortag „letzter Lerntag", am Testtag
 ///   morgens viel Glück.
 List<PlannedNotification> planNotifications({
@@ -106,7 +107,10 @@ List<PlannedNotification> planNotifications({
       }
     }
 
-    if (pool.isEmpty) continue;
+    // Nur Vokabeln aus Listen, deren Test noch nicht vorbei ist.
+    final ids = {for (final l in activeLists(lists, now: day)) ...l.vocabIds};
+    final dayPool = [for (final v in pool) if (ids.contains(v.id)) v];
+    if (dayPool.isEmpty) continue;
 
     // Am Testtag wird nicht mehr gelernt.
     final examToday = nextExamList(lists, now: day)?.dueDate;
@@ -122,7 +126,7 @@ List<PlannedNotification> planNotifications({
       if (!time.isAfter(now)) continue;
 
       // Für heute zählt der aktuelle Stand, für später der erwartete.
-      final plan = planReview(pool, lists, now: d == 0 ? now : time);
+      final plan = planReview(dayPool, lists, now: d == 0 ? now : time);
       if (plan.isEmpty) continue;
       final n = plan.due.length + plan.fresh.length;
 
