@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../data/store.dart';
+import '../l10n/l10n.dart';
 import '../platform/platform.dart';
 import '../theme/app_theme.dart';
 
@@ -22,13 +23,12 @@ class BackupSection extends StatelessWidget {
         '${now.day.toString().padLeft(2, '0')}';
 
     if (await saveTextFile('vokabellerner-sicherung-$date.json', json)) {
-      if (context.mounted) _snack(context, 'Sicherung wird heruntergeladen.');
+      if (context.mounted) _snack(context, context.l10n.backupExported);
       return;
     }
     await Clipboard.setData(ClipboardData(text: json));
     if (context.mounted) {
-      _snack(context,
-          'Sicherung in die Zwischenablage kopiert – z. B. in eine Notiz einfügen.');
+      _snack(context, context.l10n.backupCopied);
     }
   }
 
@@ -38,16 +38,15 @@ class BackupSection extends StatelessWidget {
 
     final ok = await _confirm(
       context,
-      title: 'Sicherung wiederherstellen?',
-      message: 'Dein aktueller Lernfortschritt und deine Übungslisten '
-          'werden durch die Sicherung ersetzt.',
-      action: 'Wiederherstellen',
+      title: context.l10n.backupRestoreTitle,
+      message: context.l10n.backupRestoreMessage,
+      action: context.l10n.backupRestoreAction,
     );
     if (!ok || !context.mounted) return;
 
     try {
       await Store.instance.restoreBackup(text);
-      if (context.mounted) _snack(context, 'Sicherung wiederhergestellt. ✅');
+      if (context.mounted) _snack(context, context.l10n.backupRestored);
     } on FormatException catch (e) {
       if (context.mounted) _snack(context, e.message);
     }
@@ -56,15 +55,14 @@ class BackupSection extends StatelessWidget {
   Future<void> _reset(BuildContext context) async {
     final ok = await _confirm(
       context,
-      title: 'Lernfortschritt zurücksetzen?',
-      message: 'Alle Lernstufen und Wiederholungstermine werden gelöscht. '
-          'Lektionen und Übungslisten bleiben erhalten.',
-      action: 'Zurücksetzen',
+      title: context.l10n.backupResetTitle,
+      message: context.l10n.backupResetMessage,
+      action: context.l10n.backupResetAction,
       destructive: true,
     );
     if (!ok || !context.mounted) return;
     await Store.instance.resetProgress();
-    if (context.mounted) _snack(context, 'Lernfortschritt zurückgesetzt.');
+    if (context.mounted) _snack(context, context.l10n.backupResetDone);
   }
 
   Future<String?> _askPaste(BuildContext context) {
@@ -72,7 +70,7 @@ class BackupSection extends StatelessWidget {
     return showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Sicherung einfügen'),
+        title: Text(context.l10n.backupPasteTitle),
         content: TextField(
           controller: controller,
           maxLines: 8,
@@ -81,11 +79,11 @@ class BackupSection extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Abbrechen'),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text),
-            child: const Text('Weiter'),
+            child: Text(context.l10n.commonNext),
           ),
         ],
       ),
@@ -110,7 +108,7 @@ class BackupSection extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Abbrechen'),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             style: destructive
@@ -127,16 +125,15 @@ class BackupSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Daten & Sicherung',
+        Text(l10n.backupTitle,
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
         Text(
-          'Dein Fortschritt wird nur in diesem Browser gespeichert. Mach ab '
-          'und zu eine Sicherung – damit kannst du auch auf ein anderes '
-          'Gerät umziehen.',
+          l10n.backupHint,
           style: TextStyle(color: muted(context)),
         ),
         const SizedBox(height: 12),
@@ -145,25 +142,25 @@ class BackupSection extends StatelessWidget {
             children: [
               ListTile(
                 leading: const Icon(Icons.download_outlined),
-                title: const Text('Sicherung exportieren'),
-                subtitle: const Text(supportsFiles
-                    ? 'Als Datei herunterladen'
-                    : 'In die Zwischenablage kopieren'),
+                title: Text(l10n.backupExportTitle),
+                subtitle: Text(supportsFiles
+                    ? l10n.backupExportFile
+                    : l10n.backupExportClipboard),
                 onTap: () => _export(context),
               ),
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.upload_outlined),
-                title: const Text('Sicherung importieren'),
-                subtitle: const Text(supportsFiles
-                    ? 'Sicherungsdatei auswählen'
-                    : 'Gesicherten Text einfügen'),
+                title: Text(l10n.backupImportTitle),
+                subtitle: Text(supportsFiles
+                    ? l10n.backupImportFile
+                    : l10n.backupImportPaste),
                 onTap: () => _import(context),
               ),
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.restart_alt, color: Colors.red),
-                title: const Text('Lernfortschritt zurücksetzen'),
+                title: Text(l10n.backupResetTile),
                 onTap: () => _reset(context),
               ),
             ],

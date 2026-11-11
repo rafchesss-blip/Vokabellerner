@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/store.dart';
+import '../l10n/l10n.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
 import '../utils/fsrs.dart';
@@ -25,12 +26,14 @@ class _VocabDetailSheetState extends State<VocabDetailSheet> {
   /// z. B. „Gedächtnis: 87 % · nächste Wiederholung in 3 T".
   String _memoryText(Vocab v) {
     final srs = v.srs;
-    if (srs == null) return 'Noch nie geübt';
+    final l10n = context.l10n;
+    if (srs == null) return l10n.vocabDetailNeverPracticed;
     final now = DateTime.now();
     final percent = (v.recall(now)! * 100).round();
     final wait = srs.due.difference(now);
-    final next = wait.isNegative ? 'jetzt fällig' : 'wieder in ${formatInterval(wait)}';
-    return 'Gedächtnis: $percent % · $next · ${srs.reps}× geübt';
+    return wait.isNegative
+        ? l10n.vocabDetailMemoryDue(percent, srs.reps)
+        : l10n.vocabDetailMemoryNext(percent, formatInterval(wait), srs.reps);
   }
 
   @override
@@ -103,7 +106,7 @@ class _VocabDetailSheetState extends State<VocabDetailSheet> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Text(
-                  'Noch keine Verläufe vorhanden.',
+                  context.l10n.vocabDetailNoHistory,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: muted(context)),
                 ),
@@ -122,7 +125,7 @@ class _VocabDetailSheetState extends State<VocabDetailSheet> {
                     ),
                     onPressed: () => _adjust(-1),
                     icon: const Icon(Icons.remove),
-                    label: const Text('Schlechter'),
+                    label: Text(context.l10n.vocabDetailWorse),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -134,7 +137,7 @@ class _VocabDetailSheetState extends State<VocabDetailSheet> {
                     ),
                     onPressed: () => _adjust(1),
                     icon: const Icon(Icons.add),
-                    label: const Text('Besser'),
+                    label: Text(context.l10n.vocabDetailBetter),
                   ),
                 ),
               ],

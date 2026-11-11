@@ -1,3 +1,4 @@
+import '../l10n/l10n.dart';
 import '../models/practice_list.dart';
 import '../models/vocab.dart';
 import 'review_queue.dart';
@@ -28,49 +29,42 @@ const int quietFromHour = 21;
 /// geplant – mit aktuellen Zahlen.
 const int planDays = 10;
 
-// Platzhalter: {n} = Vokabeln heute (fällig + neu), {due} = fällig,
-// {new} = neu, {streak} = Lernserie, {list} = Testname, {days} = Tage bis
-// zum Test.
+/// Eine Text-Variante: (Titel, Text) für [n] Vokabeln und den Namen.
+typedef _Variant = (String, String) Function(int n, String name);
 
 /// Erste Erinnerung des Tages: freundlich.
-const _first = [
-  ('🧠 {n} Vokabeln warten auf dich', 'Ein paar Minuten reichen – los geht\'s!'),
-  ('⚔️ Die Vokabeln greifen an!', '{n} Stück wollen heute besiegt werden.'),
-  ('🕵️ Geheimauftrag für heute', '{n} Wörter entschlüsseln. Bereit?'),
-  ('📚 Deine Vokabeln rufen!', 'Heute stehen {n} Vokabeln auf dem Plan.'),
-  ('🎯 Mission des Tages', '{n} Vokabeln knacken – schaffst du sie alle?'),
-  ('🦉 Die Lerneule hat Hunger', 'Füttere sie mit {n} Vokabeln!'),
-  ('🎲 Kleine Wette?', 'Ich wette, du schaffst die {n} Vokabeln in 5 Minuten.'),
-];
+List<_Variant> _first(AppLocalizations l) => [
+      (n, _) => (l.notifFirst1Title(n), l.notifFirst1Body),
+      (n, _) => (l.notifFirst2Title, l.notifFirst2Body(n)),
+      (n, _) => (l.notifFirst3Title, l.notifFirst3Body(n)),
+      (n, _) => (l.notifFirst4Title, l.notifFirst4Body(n)),
+      (n, _) => (l.notifFirst5Title, l.notifFirst5Body(n)),
+      (n, _) => (l.notifFirst6Title, l.notifFirst6Body(n)),
+      (n, _) => (l.notifFirst7Title, l.notifFirst7Body(n)),
+    ];
 
-/// Erste Erinnerung mit Namen ({name}), abwechselnd mit [_first].
-const _firstNamed = [
-  ('👋 Hey {name}!', '{n} Vokabeln warten heute auf dich.'),
-  ('🎯 {name}, deine Mission für heute', '{n} Vokabeln knacken – los geht\'s!'),
-  ('🧠 {name}, kurz lernen?', 'Heute stehen {n} Vokabeln auf dem Plan.'),
-];
+/// Erste Erinnerung mit Namen, abwechselnd mit [_first].
+List<_Variant> _firstNamed(AppLocalizations l) => [
+      (n, name) => (l.notifNamed1Title(name), l.notifNamed1Body(n)),
+      (n, name) => (l.notifNamed2Title(name), l.notifNamed2Body(n)),
+      (n, name) => (l.notifNamed3Title(name), l.notifNamed3Body(n)),
+    ];
 
 /// Mittlere Erinnerung: etwas drängender.
-const _middle = [
-  ('⏰ Psst… deine Vokabeln warten noch', '{n} Stück sind heute noch offen.'),
-  ('🐢 Die Vokabeln werden ungeduldig', 'Noch {n} warten – nur ein paar Minuten!'),
-  ('💬 Deine Karten fragen, wo du bleibst', '{n} Vokabeln sind noch übrig.'),
-  ('🧩 Fast vergessen?', '{n} Vokabeln wollen heute noch wiederholt werden.'),
-  ('🚀 Kurzer Boost gefällig?', '{n} Karten, dann hast du Ruhe.'),
-];
+List<_Variant> _middle(AppLocalizations l) => [
+      (n, _) => (l.notifMiddle1Title, l.notifMiddle1Body(n)),
+      (n, _) => (l.notifMiddle2Title, l.notifMiddle2Body(n)),
+      (n, _) => (l.notifMiddle3Title, l.notifMiddle3Body(n)),
+      (n, _) => (l.notifMiddle4Title, l.notifMiddle4Body(n)),
+      (n, _) => (l.notifMiddle5Title, l.notifMiddle5Body(n)),
+    ];
 
 /// Letzte Erinnerung vor 21 Uhr: letzte Chance.
-const _last = [
-  ('🌙 Letzte Chance für heute!', 'Noch {n} Vokabeln – danach ist Feierabend.'),
-  ('⌛ Der Tag ist fast vorbei', '{n} Vokabeln, dann bist du für heute durch.'),
-  ('🛡️ Endspurt für heute', 'Noch {n} Vokabeln bis zum Feierabend.'),
-];
-
-String _fill(String text, Map<String, Object> values) {
-  var out = text;
-  values.forEach((k, v) => out = out.replaceAll('{$k}', '$v'));
-  return out;
-}
+List<_Variant> _last(AppLocalizations l) => [
+      (n, _) => (l.notifLast1Title, l.notifLast1Body(n)),
+      (n, _) => (l.notifLast2Title, l.notifLast2Body(n)),
+      (n, _) => (l.notifLast3Title, l.notifLast3Body(n)),
+    ];
 
 /// Plant die Erinnerungen für die nächsten [planDays] Tage.
 ///
@@ -95,6 +89,11 @@ List<PlannedNotification> planNotifications({
   final slots = reminderSlots[perDay.clamp(1, 3)]!;
   final today = DateTime(now.year, now.month, now.day);
   final result = <PlannedNotification>[];
+  final l10n = L;
+  final first = _first(l10n);
+  final firstNamed = _firstNamed(l10n);
+  final middle = _middle(l10n);
+  final last = _last(l10n);
 
   for (var d = 0; d < planDays; d++) {
     final day = DateTime(today.year, today.month, today.day + d);
@@ -109,8 +108,8 @@ List<PlannedNotification> planNotifications({
       if (morning.isAfter(now)) {
         result.add(PlannedNotification(
           morning,
-          '🍀 Heute ist „${l.name}"!',
-          'Du hast geübt – jetzt zeig, was du kannst. Viel Erfolg! 💪',
+          l10n.notifExamDayTitle(l.name),
+          l10n.notifExamDayBody,
         ));
       }
     }
@@ -138,30 +137,23 @@ List<PlannedNotification> planNotifications({
       if (plan.isEmpty) continue;
       final n = plan.due.length + plan.fresh.length;
 
-      final values = <String, Object>{
-        'n': n,
-        'due': plan.due.length,
-        'new': plan.fresh.length,
-        'streak': streak,
-        'name': name,
-      };
       final isLast = i == slots.length - 1;
       final variant = d + i;
 
-      var (title, body) = slots.length == 1 || i == 0
+      var (title, body) = (slots.length == 1 || i == 0
           ? (name.isNotEmpty && d.isEven
-              ? _firstNamed[(d ~/ 2) % _firstNamed.length]
-              : _first[variant % _first.length])
+              ? firstNamed[(d ~/ 2) % firstNamed.length]
+              : first[variant % first.length])
           : isLast
-              ? _last[variant % _last.length]
-              : _middle[variant % _middle.length];
+              ? last[variant % last.length]
+              : middle[variant % middle.length])(n, name);
 
       // Lernserie in Gefahr (nur heute bekannt, ob schon gelernt wurde).
       if (isLast && streak > 0 && (d > 0 || !practicedToday)) {
         title = name.isEmpty
-            ? '🔥 Deine $streak-Tage-Serie ist in Gefahr!'
-            : '🔥 {name}, deine $streak-Tage-Serie ist in Gefahr!';
-        body = 'Noch {n} Vokabeln – lern heute, damit sie nicht reißt.';
+            ? l10n.notifStreakTitle(streak)
+            : l10n.notifStreakTitleNamed(name, streak);
+        body = l10n.notifStreakBody(n);
       }
 
       // Bevorstehender Test hat Vorrang.
@@ -169,24 +161,18 @@ List<PlannedNotification> planNotifications({
       if (exam != null) {
         final e = exam.dueDate!;
         final days = DateTime(e.year, e.month, e.day).difference(day).inDays;
-        values['list'] = exam.name;
-        values['days'] = days;
         if (days == 1) {
-          title = '🚨 Morgen ist „{list}"!';
+          title = l10n.notifExamTomorrowTitle(exam.name);
           body = isLast
-              ? 'Letzte Chance: noch {n} Vokabeln wiederholen!'
-              : 'Heute ist der letzte Lerntag – {n} Vokabeln warten.';
+              ? l10n.notifExamTomorrowBodyLast(n)
+              : l10n.notifExamTomorrowBody(n);
         } else if (days >= 2 && days <= 3 && i == 0) {
-          title = '⚡ Noch {days} Tage bis „{list}"';
-          body = 'Endspurt! Heute sind {n} Vokabeln dran.';
+          title = l10n.notifExamSoonTitle(days, exam.name);
+          body = l10n.notifExamSoonBody(n);
         }
       }
 
-      result.add(PlannedNotification(
-        time,
-        _fill(title, values),
-        _fill(body, values),
-      ));
+      result.add(PlannedNotification(time, title, body));
     }
   }
 

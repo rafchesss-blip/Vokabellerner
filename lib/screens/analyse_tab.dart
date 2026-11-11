@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../data/store.dart';
+import '../l10n/l10n.dart';
 import '../models/practice_list.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
@@ -49,12 +51,12 @@ class _AnalyseTabState extends State<AnalyseTab> {
               Icon(Icons.insights, size: 64, color: faint(context)),
               const SizedBox(height: 12),
               Text(
-                'Noch keine Übungslisten',
+                context.l10n.analyseEmptyTitle,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 4),
               Text(
-                'Erstelle eine Übungsliste, um hier deine Fortschritte zu sehen.',
+                context.l10n.analyseEmptyText,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: muted(context)),
               ),
@@ -96,8 +98,7 @@ class _AnalyseTabState extends State<AnalyseTab> {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              '${vocabs.length} Vokabeln · $good gut · $neutral neutral · '
-              '$weak schwach',
+              context.l10n.analyseSummary(vocabs.length, good, neutral, weak),
               textAlign: TextAlign.center,
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
@@ -115,10 +116,6 @@ class _AnalyseTabState extends State<AnalyseTab> {
   }
 }
 
-String _formatDate(DateTime d) =>
-    '${d.day.toString().padLeft(2, '0')}.'
-    '${d.month.toString().padLeft(2, '0')}.${d.year}';
-
 /// Zeigt das Tages- und Gesamtziel einer Übungsliste an.
 class _GoalCard extends StatelessWidget {
   final List<Vocab> vocabs;
@@ -129,6 +126,7 @@ class _GoalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final g = computeGoal(vocabs, dueDate);
+    final l10n = context.l10n;
 
     return Card(
       elevation: 0,
@@ -147,7 +145,8 @@ class _GoalCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Ziel bis ${_formatDate(dueDate)}',
+                    l10n.analyseGoalUntil(
+                        DateFormat.yMd(appLanguageCode).format(dueDate)),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -155,23 +154,23 @@ class _GoalCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _ProgressRow(
-              label: 'Gesamtziel',
-              valueText: '${g.known}/${g.total} Vokabeln gewusst',
+              label: l10n.analyseOverallGoal,
+              valueText: l10n.analyseKnown(g.known, g.total),
               percent: g.overallPercent,
             ),
             const SizedBox(height: 12),
             _ProgressRow(
-              label: 'Tagesziel',
+              label: l10n.analyseDailyGoal,
               valueText: g.remaining == 0
-                  ? 'alles geschafft'
-                  : '${g.learnedToday}/${g.dailyTarget} heute gelernt',
+                  ? l10n.analyseAllDone
+                  : l10n.analyseLearnedToday(g.learnedToday, g.dailyTarget),
               percent: g.remaining == 0 ? 100 : g.dailyPercent,
             ),
             const SizedBox(height: 8),
             Text(
               g.remaining == 0
-                  ? 'Alle Vokabeln gewusst! 🎉'
-                  : 'Noch ${g.daysRemaining} Tag(e) · ${g.remaining} Vokabeln offen.',
+                  ? l10n.analyseAllKnown
+                  : l10n.analyseRemaining(g.daysRemaining, g.remaining),
               style: TextStyle(color: muted(context), fontSize: 13),
             ),
           ],

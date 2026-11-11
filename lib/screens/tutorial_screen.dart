@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 import '../widgets/standard_app_bar.dart';
 
@@ -21,99 +22,20 @@ class TutorialScreen extends StatefulWidget {
 }
 
 class _TutorialScreenState extends State<TutorialScreen> {
-  static const _pages = [
-    _TutorialPage(
-      Icons.school_outlined,
-      'So funktioniert der Vokabeltrainer',
-      'Diese App hilft dir, Vokabeln in jeder Sprache zu lernen – mit '
-          'Karteikarten, Tests und cleverer Wiederholung. Wische nach links '
-          'oder tippe auf „Weiter", um alles kennenzulernen.',
-    ),
-    _TutorialPage(
-      Icons.menu_book_outlined,
-      'Lektion anlegen',
-      'Im Tab „Lektionen" legst du eine Lektion an: Name, Sprache und was '
-          'du lernen willst – Wort und Übersetzung, auf Wunsch Formen und '
-          'bis zu drei eigene Felder wie Beispielsatz oder Merkhilfe.',
-    ),
-    _TutorialPage(
-      Icons.document_scanner_outlined,
-      'Vokabeln scannen',
-      'Tippe die Vokabeln selbst ein – oder tippe auf „Scannen" und '
-          'fotografiere die Liste aus deinem Buch. Eine KI-App wie ChatGPT '
-          'oder Gemini liest sie ab. Kopiere ihre Antwort, komm zurück, '
-          'fertig.',
-    ),
-    _TutorialPage(
-      Icons.list_alt_outlined,
-      'Übungslisten erstellen',
-      'Tippe auf der Startseite auf „Übungslisten" und dann auf „Neue '
-          'Liste". Gib der Liste einen Namen, optional das Datum deines '
-          'Vokabeltests, und wähle die Vokabeln aus deinen Lektionen aus.',
-    ),
-    _TutorialPage(
-      Icons.play_circle_outline,
-      'Jeden Tag lernen',
-      'Auf der Startseite steht unter „Heute", was aus deinen Listen '
-          'gerade dran ist: fällige Wiederholungen zuerst, dazu bis zu 15 '
-          "neue Vokabeln. Tippe auf „Los geht's\" zum Starten.",
-    ),
-    _TutorialPage(
-      Icons.style_outlined,
-      'Karteikarten',
-      'Tippe auf die Karte, um sie umzudrehen, und bewerte dich ehrlich: '
-          '„Nochmal", „Schwer", „Gut" oder „Leicht". Unter jedem Knopf '
-          'steht, wann die Karte wiederkommt. Am PC: Leertaste zum '
-          'Umdrehen, 1–4 zum Bewerten.',
-    ),
-    _TutorialPage(
-      Icons.auto_awesome,
-      'Clever wiederholen',
-      'Die App fragt jede Vokabel genau dann ab, kurz bevor du sie '
-          'vergessen würdest (Spaced Repetition mit FSRS, wie bei Anki). Gut '
-          'gekonnte Wörter kommen seltener, schwierige öfter. Lerne jeden '
-          'Tag ein bisschen – das hält deine 🔥 Lernserie am Leben.',
-    ),
-    _TutorialPage(
-      Icons.event_outlined,
-      'Vokabeltest im Blick',
-      'Gib beim Erstellen einer Liste das Datum deines Tests an. Die App '
-          'verteilt die neuen Vokabeln so auf die Tage, dass du am Tag VOR '
-          'dem Test fertig bist – dort wird alles noch einmal wiederholt. '
-          'Je näher der Test, desto öfter kommen die Vokabeln dran.',
-    ),
-    _TutorialPage(
-      Icons.notifications_active_outlined,
-      'Erinnerungen',
-      'Die App erinnert dich bis zu 3-mal am '
-          'Tag – mit den aktuellen Zahlen und nie nach 21 Uhr. Hast du für '
-          'heute alles gelernt, ist Ruhe. Einstellen kannst du das unter '
-          'Einstellungen → Erinnerungen.',
-    ),
-    _TutorialPage(
-      Icons.edit_outlined,
-      'Test-Modus',
-      'Hier tippst du die Übersetzung und/oder die Formen selbst ein – auf '
-          'Wunsch auch die eigenen Felder (Einstellungen). Beim Prüfen sind '
-          'Groß-/Kleinschreibung und Artikel (der/die/das) egal.',
-    ),
-    _TutorialPage(
-      Icons.insights_outlined,
-      'Lernfortschritt sehen',
-      'Im Tab „Analyse" siehst du jede Vokabel mit ihrer Lernstufe: '
-          '5 Grüntöne (gut), Grau (neutral) und 5 Rottöne (schwach). '
-          'Tippe auf eine Vokabel für die Verlaufs-Grafik und zum manuellen '
-          'Verbessern oder Verschlechtern mit +/−.',
-    ),
-    _TutorialPage(
-      Icons.save_outlined,
-      'Deine Daten',
-      'Alles wird nur auf diesem Gerät gespeichert – '
-          'ohne Konto, ohne Internet. Mach in den Einstellungen ab und zu '
-          'eine Sicherung. Damit kannst du auch auf ein anderes Gerät '
-          'umziehen.',
-    ),
-  ];
+  static List<_TutorialPage> _pages(AppLocalizations l) => [
+        _TutorialPage(Icons.school_outlined, l.tutorialPage1Title, l.tutorialPage1Text),
+        _TutorialPage(Icons.menu_book_outlined, l.tutorialPage2Title, l.tutorialPage2Text),
+        _TutorialPage(Icons.document_scanner_outlined, l.tutorialPage3Title, l.tutorialPage3Text),
+        _TutorialPage(Icons.list_alt_outlined, l.tutorialPage4Title, l.tutorialPage4Text),
+        _TutorialPage(Icons.play_circle_outline, l.tutorialPage5Title, l.tutorialPage5Text),
+        _TutorialPage(Icons.style_outlined, l.tutorialPage6Title, l.tutorialPage6Text),
+        _TutorialPage(Icons.auto_awesome, l.tutorialPage7Title, l.tutorialPage7Text),
+        _TutorialPage(Icons.event_outlined, l.tutorialPage8Title, l.tutorialPage8Text),
+        _TutorialPage(Icons.notifications_active_outlined, l.tutorialPage9Title, l.tutorialPage9Text),
+        _TutorialPage(Icons.edit_outlined, l.tutorialPage10Title, l.tutorialPage10Text),
+        _TutorialPage(Icons.insights_outlined, l.tutorialPage11Title, l.tutorialPage11Text),
+        _TutorialPage(Icons.save_outlined, l.tutorialPage12Title, l.tutorialPage12Text),
+      ];
 
   final PageController _controller = PageController();
   int _index = 0;
@@ -141,18 +63,20 @@ class _TutorialScreenState extends State<TutorialScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isLast = _index == _pages.length - 1;
+    final l10n = context.l10n;
+    final pages = _pages(l10n);
+    final isLast = _index == pages.length - 1;
 
     return Scaffold(
-      appBar: standardAppBar(context, 'So funktioniert die App', showSettings: false),
+      appBar: standardAppBar(context, l10n.tutorialTitle, showSettings: false),
       body: Column(
         children: [
           Expanded(
             child: PageView.builder(
               controller: _controller,
-              itemCount: _pages.length,
+              itemCount: pages.length,
               onPageChanged: (i) => setState(() => _index = i),
-              itemBuilder: (context, i) => _buildPage(context, _pages[i]),
+              itemBuilder: (context, i) => _buildPage(context, pages[i]),
             ),
           ),
           SafeArea(
@@ -166,7 +90,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     child: _index > 0
                         ? OutlinedButton(
                             onPressed: _prev,
-                            child: const Text('Zurück'),
+                            child: Text(l10n.commonBack),
                           )
                         : null,
                   ),
@@ -174,7 +98,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        for (var i = 0; i < _pages.length; i++)
+                        for (var i = 0; i < pages.length; i++)
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -194,7 +118,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                     width: 100,
                     child: FilledButton(
                       onPressed: isLast ? () => Navigator.pop(context) : _next,
-                      child: Text(isLast ? 'Fertig' : 'Weiter'),
+                      child: Text(isLast ? l10n.commonDone : l10n.commonNext),
                     ),
                   ),
                 ],

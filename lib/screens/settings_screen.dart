@@ -40,9 +40,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final titleStyle = Theme.of(context).textTheme.titleMedium;
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: standardAppBar(context, 'Einstellungen', showSettings: false),
+      appBar: standardAppBar(context, l10n.commonSettings, showSettings: false),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -67,11 +68,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             margin: EdgeInsets.zero,
             child: ListTile(
               leading: const Icon(Icons.person_outline),
-              title: const Text('Dein Name'),
+              title: Text(l10n.settingsNameTitle),
               subtitle: Text(Settings.instance.userName.isEmpty
-                  ? 'Nicht angegeben – nur auf diesem Handy gespeichert'
-                  : '${Settings.instance.userName} · nur auf diesem Handy '
-                      'gespeichert'),
+                  ? l10n.settingsNameEmpty
+                  : l10n.settingsNameSaved(Settings.instance.userName)),
               trailing: const Icon(Icons.edit_outlined),
               onTap: () async {
                 final name = await showNameDialog(
@@ -85,7 +85,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const Divider(height: 32),
-          Text('Design', style: titleStyle),
+          Text(l10n.settingsDesignTitle, style: titleStyle),
           const SizedBox(height: 8),
           for (final mode in AppThemeMode.values)
             _optionTile(
@@ -98,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               }),
             ),
           const Divider(height: 32),
-          Text('Akzentfarbe (Neon)', style: titleStyle),
+          Text(l10n.settingsAccentTitle, style: titleStyle),
           const SizedBox(height: 8),
           Wrap(
             spacing: 12,
@@ -114,16 +114,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Text(
-                'Die Akzentfarbe gilt für Buttons, Schalter und '
-                'Hervorhebungen. Im Dark Mode leuchten die Farben, im '
-                'Light Mode werden sie automatisch etwas abgedunkelt, '
-                'damit alles gut lesbar bleibt.',
+                l10n.settingsAccentHint,
                 style: TextStyle(color: muted(context)),
               ),
             ),
           ),
           const Divider(height: 32),
-          Text('Sprachrichtung', style: titleStyle),
+          Text(l10n.settingsDirectionTitle, style: titleStyle),
           const SizedBox(height: 8),
           _optionTile(
             title: LanguageDirection.latinToGerman.label,
@@ -144,7 +141,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             }),
           ),
           const Divider(height: 32),
-          Text('Abfrage-Modus im Test', style: titleStyle),
+          Text(l10n.settingsAnswerModeTitle, style: titleStyle),
           const SizedBox(height: 8),
           for (final mode in AnswerMode.values)
             _optionTile(
@@ -164,10 +161,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _askExtras = v;
                 _apply();
               }),
-              title: const Text('Sonstiges mit abfragen'),
-              subtitle: const Text(
-                  'z. B. Beispielsatz oder Merkhilfe – wenn die Vokabel '
-                  'welche hat.'),
+              title: Text(l10n.settingsAskExtrasTitle),
+              subtitle: Text(l10n.settingsAskExtrasSubtitle),
             ),
           ),
           const SizedBox(height: 8),
@@ -177,10 +172,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Text(
-                'Formen sind z. B. Stammformen, Genitiv oder Geschlecht. Hat '
-                'eine Vokabel keine Formen, wird automatisch nur die '
-                'Übersetzung abgefragt. Der Abfrage-Modus gilt für den '
-                'Test-Modus.',
+                l10n.settingsFormsHint,
                 style: TextStyle(color: muted(context)),
               ),
             ),
@@ -190,14 +182,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 32),
           const BackupSection(),
           const Divider(height: 32),
-          Text('Über die App', style: titleStyle),
+          Text(l10n.settingsAboutTitle, style: titleStyle),
           const SizedBox(height: 8),
           Card(
             child: Column(
               children: [
                 ListTile(
                   leading: const Icon(Icons.waving_hand_outlined),
-                  title: const Text('Einführung ansehen'),
+                  title: Text(l10n.settingsShowIntro),
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const IntroScreen()),
@@ -206,8 +198,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.lock_outline),
-                  title: const Text('Datenschutz'),
-                  subtitle: const Text('Alles bleibt auf deinem Handy'),
+                  title: Text(l10n.settingsPrivacyTitle),
+                  subtitle: Text(l10n.settingsPrivacySubtitle),
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const PrivacyScreen()),
@@ -216,13 +208,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.description_outlined),
-                  title: const Text('Lizenzen'),
-                  subtitle: const Text('Verwendete Software'),
+                  title: Text(l10n.settingsLicensesTitle),
+                  subtitle: Text(l10n.settingsLicensesSubtitle),
                   onTap: () => showLicensePage(
                     context: context,
                     applicationName: 'Vokabeltrainer',
-                    applicationLegalese: 'Kostenlos, ohne Werbung und ohne '
-                        'In-App-Käufe.',
+                    applicationLegalese: l10n.settingsLicensesLegalese,
                   ),
                 ),
               ],

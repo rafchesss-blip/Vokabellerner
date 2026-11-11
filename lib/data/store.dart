@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/l10n.dart';
 import '../models/practice_list.dart';
 import '../models/vocab.dart';
 
@@ -154,10 +155,10 @@ class Store {
     try {
       json = jsonDecode(text);
     } on FormatException {
-      throw const FormatException('Das ist keine gültige Sicherungsdatei.');
+      throw FormatException(L.storeBackupInvalid);
     }
     if (json is! Map || json['lessons'] is! List) {
-      throw const FormatException('Das ist keine gültige Sicherungsdatei.');
+      throw FormatException(L.storeBackupInvalid);
     }
     try {
       _apply(
@@ -169,7 +170,7 @@ class Store {
           ? log.map((k, v) => MapEntry(k as String, (v as num).toInt()))
           : {};
     } catch (_) {
-      throw const FormatException('Die Sicherungsdatei ist beschädigt.');
+      throw FormatException(L.storeBackupCorrupt);
     }
     await save();
   }
