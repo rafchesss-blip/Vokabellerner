@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import '../models/vocab.dart';
 
 /// Vokabel selbst eingeben oder bearbeiten – mit genau den Feldern der
@@ -93,28 +94,33 @@ class _VocabFormState extends State<_VocabForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final lesson = widget.lesson;
-    final language = lesson.language.isEmpty ? '' : ' (${lesson.language})';
+    final wordLabel = lesson.language.isEmpty
+        ? l10n.vocabFormDialogWord
+        : l10n.vocabFormDialogWordWithLanguage(lesson.language);
     final hasExtras = lesson.extraLabels.isNotEmpty;
 
     return AlertDialog(
-      title: Text(widget.vocab == null ? 'Neue Vokabel' : 'Vokabel bearbeiten'),
+      title: Text(widget.vocab == null
+          ? l10n.vocabFormDialogTitleNew
+          : l10n.vocabFormDialogTitleEdit),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _field(_word, 'Wort$language', autofocus: true),
+            _field(_word, wordLabel, autofocus: true),
             _field(
               _translation,
-              'Übersetzung (${lesson.translationLanguage})',
+              l10n.vocabFormDialogTranslation(lesson.translationLanguage),
               last: !lesson.hasForms && !hasExtras,
             ),
             if (lesson.hasForms)
               _field(
                 _forms,
-                'Formen',
+                l10n.vocabFormDialogForms,
                 hint: lesson.allForms
-                    ? 'alle Formen'
+                    ? l10n.vocabFormDialogAllForms
                     : lesson.formKinds.map((k) => k.label).join(', '),
                 last: !hasExtras,
               ),
@@ -130,11 +136,11 @@ class _VocabFormState extends State<_VocabForm> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Abbrechen'),
+          child: Text(l10n.commonCancel),
         ),
         FilledButton(
           onPressed: _valid ? _save : null,
-          child: const Text('Speichern'),
+          child: Text(l10n.commonSave),
         ),
       ],
     );

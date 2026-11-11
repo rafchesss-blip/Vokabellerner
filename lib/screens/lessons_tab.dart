@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/hint_dialog.dart';
 import '../data/store.dart';
+import '../l10n/l10n.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
 import '../utils/goals.dart';
@@ -19,11 +20,8 @@ class LessonsTab extends StatelessWidget {
       context,
       id: 'new_lesson',
       emoji: '📚',
-      title: 'Neue Lektion',
-      text: 'Gib der Lektion einen Namen und wähle die Sprache. Dann legst '
-          'du fest, was du lernen willst: Wort und Übersetzung sind immer '
-          'dabei, dazu auf Wunsch Formen und bis zu drei eigene Felder wie '
-          'Beispielsatz oder Merkhilfe.',
+      title: context.l10n.lessonsTabNewLessonHintTitle,
+      text: context.l10n.lessonsTabNewLessonHintText,
     );
     if (!go || !context.mounted) return;
     final lesson = await Navigator.push<Lesson>(
@@ -57,17 +55,14 @@ class LessonsTab extends StatelessWidget {
                     children: [
                       const Text('📚', style: TextStyle(fontSize: 40)),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Noch keine Lektionen',
-                        style: TextStyle(
+                      Text(
+                        context.l10n.lessonsTabEmptyTitle,
+                        style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Leg deine erste Lektion an. Die Vokabeln tippst du '
-                        'selbst ein – oder du fotografierst die Seite aus '
-                        'deinem Buch und lässt eine KI-App wie ChatGPT oder '
-                        'Gemini sie ablesen.',
+                        context.l10n.lessonsTabEmptyText,
                         textAlign: TextAlign.center,
                         style: TextStyle(color: muted(context)),
                       ),
@@ -80,9 +75,10 @@ class LessonsTab extends StatelessWidget {
             FilledButton.icon(
               onPressed: () => createLesson(context),
               icon: const Icon(Icons.add),
-              label: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: Text('Neue Lektion', style: TextStyle(fontSize: 16)),
+              label: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(context.l10n.lessonsTabNewLesson,
+                    style: const TextStyle(fontSize: 16)),
               ),
             ),
           ],
@@ -131,7 +127,7 @@ class _LessonCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '${lesson.language.isEmpty ? '' : '${lesson.language} · '}'
-                      '${vocabs.length} Vokabeln · $known gewusst',
+                      '${context.l10n.lessonsTabCardStats(vocabs.length, known)}',
                       style: TextStyle(color: muted(context), fontSize: 13),
                     ),
                   ],

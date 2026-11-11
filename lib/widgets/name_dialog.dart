@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 
 /// Fragt (optional) nach dem Namen. Liefert den Namen, `''` für „ohne
@@ -40,7 +41,9 @@ class _NameDialogState extends State<_NameDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       icon: const Text('👋', style: TextStyle(fontSize: 36)),
-      title: Text(widget.firstStart ? 'Willkommen!' : 'Dein Name'),
+      title: Text(widget.firstStart
+          ? context.l10n.nameDialogWelcome
+          : context.l10n.nameDialogTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -49,8 +52,7 @@ class _NameDialogState extends State<_NameDialog> {
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
-                'Wie heißt du? Dann begrüßt dich die App mit Namen – auch in '
-                'den Erinnerungen. Das ist freiwillig.',
+                context.l10n.nameDialogIntro,
                 style: TextStyle(color: muted(context)),
               ),
             ),
@@ -60,9 +62,9 @@ class _NameDialogState extends State<_NameDialog> {
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _save(),
-            decoration: const InputDecoration(
-              labelText: 'Dein Name (optional)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: context.l10n.nameDialogLabel,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 10),
@@ -72,7 +74,7 @@ class _NameDialogState extends State<_NameDialog> {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  'Dein Name wird nur auf diesem Handy gespeichert.',
+                  context.l10n.nameDialogLocalOnly,
                   style: TextStyle(color: faint(context), fontSize: 12),
                 ),
               ),
@@ -83,11 +85,13 @@ class _NameDialogState extends State<_NameDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, widget.firstStart ? '' : null),
-          child: Text(widget.firstStart ? 'Überspringen' : 'Abbrechen'),
+          child: Text(widget.firstStart
+              ? context.l10n.commonSkip
+              : context.l10n.commonCancel),
         ),
         FilledButton(
           onPressed: _save,
-          child: const Text('Speichern'),
+          child: Text(context.l10n.commonSave),
         ),
       ],
     );

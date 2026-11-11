@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 
 /// Einführung beim ersten Öffnen: was die App kann, dass alles auf dem
@@ -21,47 +22,18 @@ class _IntroPage {
 }
 
 class _IntroScreenState extends State<IntroScreen> {
-  static const _pages = [
-    _IntroPage(
-      '👋',
-      'Willkommen beim Vokabeltrainer',
-      'Lerne Vokabeln in jeder Sprache – mit Karteikarten, Tests und '
-          'cleverer Wiederholung. Jede Vokabel kommt genau dann wieder, '
-          'kurz bevor du sie vergessen würdest.',
-    ),
-    _IntroPage(
-      '📷',
-      'Eintippen oder scannen',
-      'Leg Lektionen an und tippe die Vokabeln ein. Oder fotografiere die '
-          'Liste aus deinem Buch: Eine KI-App wie ChatGPT oder Gemini liest '
-          'sie für dich ab.',
-    ),
-    _IntroPage(
-      '🎯',
-      'Bereit für den Test',
-      'Gib das Datum deines Vokabeltests an. Die App verteilt die Vokabeln '
-          'auf die Tage davor und erinnert dich ans Lernen – nie nach '
-          '21 Uhr.',
-    ),
-    _IntroPage(
-      '🔒',
-      'Alles bleibt auf deinem Handy',
-      'Kein Konto, keine Cloud: Deine Lektionen und dein Lernstand werden '
-          'nirgends im Internet gespeichert. Nur wenn du scannst, geht das '
-          'Foto an die KI-App, die du selbst auswählst.',
-    ),
-    _IntroPage(
-      '💚',
-      'Komplett kostenlos',
-      'Ich verdiene mit dieser App nichts: keine Werbung, keine '
-          'In-App-Käufe, kein Abo. Sie ist einfach zum Lernen da.',
-    ),
-  ];
+  static List<_IntroPage> _pages(AppLocalizations l) => [
+        _IntroPage('👋', l.introWelcomeTitle, l.introWelcomeText),
+        _IntroPage('📷', l.introScanTitle, l.introScanText),
+        _IntroPage('🎯', l.introTestTitle, l.introTestText),
+        _IntroPage('🔒', l.introPrivacyTitle, l.introPrivacyText),
+        _IntroPage('💚', l.introFreeTitle, l.introFreeText),
+      ];
 
   final _controller = PageController();
   int _index = 0;
 
-  bool get _last => _index == _pages.length - 1;
+  bool get _last => _index == _pages(context.l10n).length - 1;
 
   @override
   void dispose() {
@@ -83,6 +55,7 @@ class _IntroScreenState extends State<IntroScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final pages = _pages(context.l10n);
 
     return PopScope(
       canPop: false,
@@ -97,7 +70,7 @@ class _IntroScreenState extends State<IntroScreen> {
                   duration: const Duration(milliseconds: 200),
                   child: TextButton(
                     onPressed: _last ? null : () => Navigator.pop(context),
-                    child: const Text('Überspringen'),
+                    child: Text(context.l10n.commonSkip),
                   ),
                 ),
               ),
@@ -106,7 +79,7 @@ class _IntroScreenState extends State<IntroScreen> {
                   controller: _controller,
                   onPageChanged: (i) => setState(() => _index = i),
                   children: [
-                    for (final p in _pages)
+                    for (final p in pages)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
                         child: Column(
@@ -141,7 +114,7 @@ class _IntroScreenState extends State<IntroScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  for (var i = 0; i < _pages.length; i++)
+                  for (var i = 0; i < pages.length; i++)
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -165,7 +138,9 @@ class _IntroScreenState extends State<IntroScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       child: Text(
-                        _last ? "Los geht's" : 'Weiter',
+                        _last
+                            ? context.l10n.commonLetsGo
+                            : context.l10n.commonNext,
                         style: const TextStyle(fontSize: 17),
                       ),
                     ),

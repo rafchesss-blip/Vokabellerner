@@ -12,7 +12,8 @@ class PrivacyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: standardAppBar(context, 'Datenschutz', showSettings: false),
+      appBar: standardAppBar(context, context.l10n.privacyScreenTitle,
+          showSettings: false),
       body: FutureBuilder<String>(
         future: rootBundle
             .loadString('privacy/$appLanguageCode.md')

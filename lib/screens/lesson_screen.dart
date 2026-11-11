@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/store.dart';
+import '../l10n/l10n.dart';
 import '../models/vocab.dart';
 import '../services/scan.dart';
 import '../theme/app_theme.dart';
@@ -59,17 +60,15 @@ class _LessonScreenState extends State<LessonScreen> {
       context,
       id: 'manual',
       emoji: '✍️',
-      title: 'Vokabeln eintippen',
-      text: 'Du bekommst ein Feld für jede Angabe dieser Lektion. Nur Wort '
-          'und Übersetzung müssen ausgefüllt sein. Später kannst du jede '
-          'Vokabel antippen, um sie zu ändern.',
+      title: context.l10n.lessonScreenManualHintTitle,
+      text: context.l10n.lessonScreenManualHintText,
     );
     if (!go || !mounted) return;
     final v = await showVocabForm(context, _lesson);
     if (v == null) return;
     _lesson.mainBox.vocabs.add(v);
     await Store.instance.save();
-    if (mounted) _snack('„${v.latin}" hinzugefügt.');
+    if (mounted) _snack(context.l10n.lessonScreenVocabAdded(v.latin));
   }
 
   Future<void> _edit(Vocab vocab) async {
@@ -81,9 +80,9 @@ class _LessonScreenState extends State<LessonScreen> {
     await Store.instance.deleteVocab(vocab);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('„${vocab.latin}" gelöscht.'),
+      content: Text(context.l10n.lessonScreenVocabDeleted(vocab.latin)),
       action: SnackBarAction(
-        label: 'Rückgängig',
+        label: context.l10n.commonUndo,
         onPressed: () {
           _lesson.mainBox.vocabs.add(vocab);
           Store.instance.save();
@@ -99,15 +98,10 @@ class _LessonScreenState extends State<LessonScreen> {
       context,
       id: 'scan',
       emoji: '📷',
-      title: 'So funktioniert Scannen',
-      text: '1. Fotografiere die Vokabelliste – gerade und gut lesbar.\n'
-          '2. Wähle eine KI-App. Sie öffnet sich mit dem Foto und der '
-          'Anleitung.\n'
-          '3. Schick die Nachricht ab.\n'
-          '4. Kopiere die Antwort und komm zurück – die Vokabeln werden '
-          'automatisch erkannt.\n\n'
-          'Abgelesen wird: ${scanColumns(_lesson).join(' · ')}',
-      button: "Los geht's",
+      title: context.l10n.lessonScreenScanHintTitle,
+      text: context.l10n
+          .lessonScreenScanHintText(scanColumns(_lesson).join(' · ')),
+      button: context.l10n.commonLetsGo,
     );
     if (!go || !mounted) return;
 
@@ -125,10 +119,8 @@ class _LessonScreenState extends State<LessonScreen> {
       context,
       id: 'free_ai',
       emoji: '💡',
-      title: 'Am besten eine kostenlose KI',
-      text: 'ChatGPT, Gemini und Co. lesen Vokabeln auch in der kostenlosen '
-          'Version zuverlässig ab – du brauchst kein Abo. Die Anleitung für '
-          'die KI wird automatisch eingefügt.',
+      title: context.l10n.lessonScreenFreeAiHintTitle,
+      text: context.l10n.lessonScreenFreeAiHintText,
     );
     if (!go || !mounted) return;
 
@@ -147,7 +139,7 @@ class _LessonScreenState extends State<LessonScreen> {
     final ok = await sendToAi(app, photo, buildScanPrompt(_lesson));
     if (!ok && mounted) {
       setState(() => _waitingForAi = false);
-      _snack('${app.name} ließ sich nicht öffnen.');
+      _snack(context.l10n.lessonScreenAiOpenFailed(app.name));
     }
   }
 
@@ -159,12 +151,11 @@ class _LessonScreenState extends State<LessonScreen> {
     final looksRight = text != null && looksLikeScanAnswer(text);
     if (auto && !looksRight) return;
 
-    final found = text == null || text.contains('Antworte NUR')
+    final found = text == null || isScanPrompt(text)
         ? <Vocab>[]
         : parseScanAnswer(text, _lesson);
     if (found.isEmpty) {
-      _snack('Keine Vokabeln in der Zwischenablage. Kopiere in der KI-App '
-          'die ganze Antwort und versuch es noch einmal.');
+      _snack(context.l10n.lessonScreenNothingInClipboard);
       return;
     }
 
@@ -194,8 +185,7 @@ class _LessonScreenState extends State<LessonScreen> {
     await clearClipboard();
     if (!mounted) return;
     setState(() => _waitingForAi = false);
-    _snack('${chosen.length} Vokabeln übernommen. Tippe eine an, um sie zu '
-        'korrigieren.');
+    _snack(context.l10n.lessonScreenImported(chosen.length));
   }
 
   // ── Lektion ────────────────────────────────────────────────────────────
@@ -212,20 +202,17 @@ class _LessonScreenState extends State<LessonScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('„${_lesson.name}" löschen?'),
-        content: const Text(
-          'Die Lektion und alle ihre Vokabeln werden gelöscht – auch aus '
-          'deinen Übungslisten.',
-        ),
+        title: Text(ctx.l10n.lessonScreenDeleteLessonTitle(_lesson.name)),
+        content: Text(ctx.l10n.lessonScreenDeleteLessonText),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Abbrechen'),
+            child: Text(ctx.l10n.commonCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Löschen'),
+            child: Text(ctx.l10n.commonDelete),
           ),
         ],
       ),
@@ -247,19 +234,19 @@ class _LessonScreenState extends State<LessonScreen> {
             _lesson.name,
             actions: [
               PopupMenuButton<String>(
-                tooltip: 'Optionen',
+                tooltip: context.l10n.commonOptions,
                 onSelected: (v) {
                   if (v == 'settings') _editSettings();
                   if (v == 'delete') _deleteLesson();
                 },
-                itemBuilder: (_) => const [
+                itemBuilder: (_) => [
                   PopupMenuItem(
                     value: 'settings',
-                    child: Text('Lektion einstellen'),
+                    child: Text(context.l10n.lessonScreenMenuSettings),
                   ),
                   PopupMenuItem(
                     value: 'delete',
-                    child: Text('Lektion löschen'),
+                    child: Text(context.l10n.lessonScreenMenuDelete),
                   ),
                 ],
               ),
@@ -280,7 +267,7 @@ class _LessonScreenState extends State<LessonScreen> {
                 Padding(
                   padding: const EdgeInsets.all(24),
                   child: Text(
-                    'Noch keine Vokabeln in dieser Lektion.',
+                    context.l10n.lessonScreenEmpty,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: muted(context)),
                   ),
@@ -289,7 +276,7 @@ class _LessonScreenState extends State<LessonScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
                   child: Text(
-                    '${vocabs.length} Vokabeln',
+                    context.l10n.vocabCount(vocabs.length),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
@@ -342,18 +329,18 @@ class _AddCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Row(
+              Row(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2.5),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Warte auf die Antwort der KI …',
-                      style: TextStyle(
+                      context.l10n.lessonScreenWaitingForAi,
+                      style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w700),
                     ),
                   ),
@@ -361,20 +348,18 @@ class _AddCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Kopiere in der KI-App die Antwort (Kopieren-Knopf am '
-                'Textblock) und komm zurück – die Vokabeln werden dann '
-                'automatisch erkannt.',
+                context.l10n.lessonScreenWaitingHelp,
                 style: TextStyle(color: muted(context)),
               ),
               const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: onPaste,
                 icon: const Icon(Icons.content_paste),
-                label: const Text('Antwort einfügen'),
+                label: Text(context.l10n.lessonScreenPasteAnswer),
               ),
               TextButton(
                 onPressed: onCancelWaiting,
-                child: const Text('Abbrechen'),
+                child: Text(context.l10n.commonCancel),
               ),
             ],
           ),
@@ -389,9 +374,9 @@ class _AddCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Vokabeln hinzufügen',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+            Text(
+              context.l10n.lessonScreenAddTitle,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 12),
             Row(
@@ -400,9 +385,9 @@ class _AddCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onManual,
                     icon: const Icon(Icons.edit_outlined),
-                    label: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Text('Selbst eingeben'),
+                    label: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(context.l10n.lessonScreenAddManually),
                     ),
                   ),
                 ),
@@ -411,9 +396,9 @@ class _AddCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onScan,
                     icon: const Icon(Icons.document_scanner_outlined),
-                    label: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Text('Scannen'),
+                    label: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(context.l10n.lessonScreenScan),
                     ),
                   ),
                 ),
@@ -427,9 +412,7 @@ class _AddCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Tipp: Mit „Scannen" fotografierst du die Vokabelliste '
-                    'aus deinem Buch. Eine KI-App wie ChatGPT oder Gemini '
-                    'liest sie für dich ab – kein Abtippen nötig.',
+                    context.l10n.lessonScreenScanTip,
                     style: TextStyle(color: muted(context), fontSize: 13),
                   ),
                 ),
@@ -458,16 +441,17 @@ class _PhotoSourceSheet extends StatelessWidget {
             FilledButton.icon(
               onPressed: () => Navigator.pop(context, true),
               icon: const Icon(Icons.photo_camera_outlined),
-              label: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: Text('Foto aufnehmen', style: TextStyle(fontSize: 16)),
+              label: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(context.l10n.lessonScreenTakePhoto,
+                    style: const TextStyle(fontSize: 16)),
               ),
             ),
             const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () => Navigator.pop(context, false),
               icon: const Icon(Icons.photo_library_outlined),
-              label: const Text('Foto aus der Galerie'),
+              label: Text(context.l10n.lessonScreenPhotoFromGallery),
             ),
           ],
         ),
@@ -502,7 +486,7 @@ class _AiPickerSheet extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                 child: Text(
-                  'Mit welcher KI?',
+                  context.l10n.lessonScreenWhichAi,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
@@ -510,9 +494,7 @@ class _AiPickerSheet extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                   child: Text(
-                    'Auf deinem Handy ist noch keine KI-App. Installiere eine '
-                    '– kostenlos – und tippe danach noch einmal auf '
-                    '„Scannen".',
+                    context.l10n.lessonScreenNoAiInstalled,
                     style: TextStyle(color: muted(context)),
                   ),
                 ),
@@ -530,16 +512,14 @@ class _AiPickerSheet extends StatelessWidget {
               for (final app in missing)
                 ListTile(
                   leading: const Icon(Icons.download_outlined, size: 40),
-                  title: Text('${app.name} installieren'),
-                  subtitle: const Text('kostenlos im Play Store'),
+                  title: Text(context.l10n.lessonScreenInstallApp(app.name)),
+                  subtitle: Text(context.l10n.lessonScreenFreeInPlayStore),
                   onTap: () => Navigator.pop(context, app),
                 ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 child: Text(
-                  'Der Vokabeltrainer ist nicht mit diesen Apps oder ihren '
-                  'Anbietern verbunden. Für sie gilt ihre eigene '
-                  'Datenschutzerklärung.',
+                  context.l10n.lessonScreenAiDisclaimer,
                   style: TextStyle(color: faint(context), fontSize: 12),
                 ),
               ),
@@ -574,7 +554,7 @@ class _ImportPreviewState extends State<_ImportPreview> {
   Widget build(BuildContext context) {
     final vocabs = widget.vocabs;
     return AlertDialog(
-      title: Text('${vocabs.length} Vokabeln erkannt'),
+      title: Text(context.l10n.lessonScreenRecognized(vocabs.length)),
       contentPadding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
       content: SizedBox(
         width: double.maxFinite,
@@ -586,8 +566,7 @@ class _ImportPreviewState extends State<_ImportPreview> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: Text(
-                  '${widget.duplicates} waren schon in der Lektion und '
-                  'werden übersprungen.',
+                  context.l10n.lessonScreenDuplicatesSkipped(widget.duplicates),
                   style: TextStyle(color: muted(context), fontSize: 13),
                 ),
               ),
@@ -616,14 +595,14 @@ class _ImportPreviewState extends State<_ImportPreview> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Abbrechen'),
+          child: Text(context.l10n.commonCancel),
         ),
         FilledButton(
           onPressed: _chosen.isEmpty
               ? null
               : () => Navigator.pop(
                   context, [for (final v in vocabs) if (_chosen.contains(v)) v]),
-          child: Text('${_chosen.length} übernehmen'),
+          child: Text(context.l10n.lessonScreenImportButton(_chosen.length)),
         ),
       ],
     );
@@ -667,7 +646,7 @@ class _VocabTile extends StatelessWidget {
       ),
       subtitle: Text(_details(vocab)),
       trailing: IconButton(
-        tooltip: 'Löschen',
+        tooltip: context.l10n.commonDelete,
         icon: const Icon(Icons.delete_outline),
         onPressed: onDelete,
       ),

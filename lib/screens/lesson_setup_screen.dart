@@ -1,8 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
 import '../widgets/standard_app_bar.dart';
+
+/// Name der aktuellen App-Sprache (in der App-Sprache), z. B. „Deutsch" –
+/// Vorgabe für die Übersetzungssprache neuer Lektionen.
+String _appLanguageName() => switch (appLanguageCode) {
+      'en' => L.languageEnglish,
+      'es' => L.languageSpanish,
+      'fr' => L.languageFrench,
+      'it' => L.languageItalian,
+      'pt' => L.languagePortuguese,
+      'pl' => L.languagePolish,
+      'tr' => L.languageTurkish,
+      'ru' => L.languageRussian,
+      'zh' => L.languageChinese,
+      _ => L.languageGerman,
+    };
 
 /// Neue Lektion anlegen oder ihre Einstellungen ändern: Name, Sprache und
 /// welche Felder eingegeben werden (Wort, Übersetzung, Formen, Sonstiges).
@@ -18,27 +34,27 @@ class LessonSetupScreen extends StatefulWidget {
 }
 
 class _LessonSetupScreenState extends State<LessonSetupScreen> {
-  static const _languages = [
-    'Englisch',
-    'Französisch',
-    'Latein',
-    'Spanisch',
-    'Italienisch',
-    'Russisch',
-  ];
-  static const _extraSuggestions = [
-    'Beispielsatz',
-    'Merkhilfe',
-    'Aussprache',
-    'Gegenteil',
-  ];
+  static List<String> _languages(AppLocalizations l) => [
+        l.languageEnglish,
+        l.languageFrench,
+        l.languageLatin,
+        l.languageSpanish,
+        l.languageItalian,
+        l.languageRussian,
+      ];
+  static List<String> _extraSuggestions(AppLocalizations l) => [
+        l.lessonSetupSuggestionExample,
+        l.lessonSetupSuggestionMnemonic,
+        l.lessonSetupSuggestionPronunciation,
+        l.lessonSetupSuggestionOpposite,
+      ];
   static const _maxExtras = 3;
 
   late final _name = TextEditingController(text: widget.lesson?.name ?? '');
   late final _language =
       TextEditingController(text: widget.lesson?.language ?? '');
   late final _translation = TextEditingController(
-      text: widget.lesson?.translationLanguage ?? 'Deutsch');
+      text: widget.lesson?.translationLanguage ?? _appLanguageName());
   late bool _hasForms = widget.lesson?.hasForms ?? false;
   late bool _allForms = widget.lesson?.allForms ?? true;
   late final Set<FormKind> _kinds = {
@@ -74,7 +90,7 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
     final labels = [
       for (var i = 0; i < _extras.length; i++)
         _extras[i].text.trim().isEmpty
-            ? 'Sonstiges ${i + 1}'
+            ? context.l10n.lessonSetupExtraDefaultName(i + 1)
             : _extras[i].text.trim(),
     ];
     final lesson = widget.lesson ??
@@ -84,7 +100,7 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
       ..name = _name.text.trim()
       ..language = _language.text.trim()
       ..translationLanguage = _translation.text.trim().isEmpty
-          ? 'Deutsch'
+          ? _appLanguageName()
           : _translation.text.trim()
       ..hasForms = _hasForms
       ..allForms = _hasForms && _allForms
@@ -97,11 +113,14 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
   Widget build(BuildContext context) {
     final titleStyle = Theme.of(context).textTheme.titleMedium;
     final scheme = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: standardAppBar(
         context,
-        widget.lesson == null ? 'Neue Lektion' : 'Lektion einstellen',
+        widget.lesson == null
+            ? l10n.lessonSetupTitleNew
+            : l10n.lessonSetupTitleEdit,
         showSettings: false,
       ),
       bottomNavigationBar: SafeArea(
@@ -110,9 +129,10 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
           child: FilledButton.icon(
             onPressed: _valid ? _save : null,
             icon: const Icon(Icons.check),
-            label: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text('Speichern', style: TextStyle(fontSize: 17)),
+            label: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child:
+                  Text(l10n.commonSave, style: const TextStyle(fontSize: 17)),
             ),
           ),
         ),
@@ -124,10 +144,10 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
             controller: _name,
             autofocus: widget.lesson == null,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(
-              labelText: 'Name der Lektion',
-              hintText: 'z. B. Unit 3 oder Lektion 5',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.lessonSetupNameLabel,
+              hintText: l10n.lessonSetupNameHint,
+              border: const OutlineInputBorder(),
             ),
             onChanged: (_) => setState(() {}),
           ),
@@ -135,9 +155,9 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
           TextField(
             controller: _language,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(
-              labelText: 'Sprache der Wörter',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.lessonSetupLanguageLabel,
+              border: const OutlineInputBorder(),
             ),
             onChanged: (_) => setState(() {}),
           ),
@@ -146,7 +166,7 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
             spacing: 8,
             runSpacing: 4,
             children: [
-              for (final l in _languages)
+              for (final l in _languages(l10n))
                 ChoiceChip(
                   label: Text(l),
                   selected: _language.text.trim() == l,
@@ -158,41 +178,39 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
           TextField(
             controller: _translation,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(
-              labelText: 'Übersetzung auf',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.lessonSetupTranslationLabel,
+              border: const OutlineInputBorder(),
             ),
           ),
           const Divider(height: 40),
-          Text('Was wird eingegeben?', style: titleStyle),
+          Text(l10n.lessonSetupFieldsTitle, style: titleStyle),
           const SizedBox(height: 4),
           Text(
-            'Danach richtet sich das Eingeben, das Scannen mit KI und der '
-            'Test.',
+            l10n.lessonSetupFieldsHelp,
             style: TextStyle(color: muted(context)),
           ),
           const SizedBox(height: 8),
           Card(
             child: Column(
               children: [
-                const CheckboxListTile(
+                CheckboxListTile(
                   value: true,
                   onChanged: null,
-                  title: Text('Wort'),
-                  subtitle: Text('immer dabei'),
+                  title: Text(l10n.lessonSetupWord),
+                  subtitle: Text(l10n.lessonSetupAlwaysIncluded),
                 ),
-                const CheckboxListTile(
+                CheckboxListTile(
                   value: true,
                   onChanged: null,
-                  title: Text('Übersetzung'),
-                  subtitle: Text('immer dabei'),
+                  title: Text(l10n.lessonSetupTranslation),
+                  subtitle: Text(l10n.lessonSetupAlwaysIncluded),
                 ),
                 CheckboxListTile(
                   value: _hasForms,
                   onChanged: (v) => setState(() => _hasForms = v ?? false),
-                  title: const Text('Formen'),
-                  subtitle: const Text(
-                      'z. B. Stammformen, Genitiv, Geschlecht'),
+                  title: Text(l10n.lessonSetupForms),
+                  subtitle: Text(l10n.lessonSetupFormsSubtitle),
                 ),
                 if (_hasForms)
                   Padding(
@@ -201,7 +219,7 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Welche Formen?',
+                          l10n.lessonSetupWhichForms,
                           style: TextStyle(color: muted(context)),
                         ),
                         const SizedBox(height: 6),
@@ -210,7 +228,7 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
                           runSpacing: 4,
                           children: [
                             FilterChip(
-                              label: const Text('Alles'),
+                              label: Text(l10n.lessonSetupAllForms),
                               selected: _allForms,
                               onSelected: (on) =>
                                   setState(() => _allForms = on),
@@ -229,8 +247,7 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
                           Padding(
                             padding: const EdgeInsets.only(top: 6),
                             child: Text(
-                              'Alles, was im Buch zum Wort steht: Stammformen, '
-                              'Plural, Geschlecht, Steigerung, Fall und mehr.',
+                              l10n.lessonSetupAllFormsHelp,
                               style: TextStyle(color: muted(context)),
                             ),
                           )
@@ -238,7 +255,7 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
                           Padding(
                             padding: const EdgeInsets.only(top: 6),
                             child: Text(
-                              'Wähle mindestens eine Art aus.',
+                              l10n.lessonSetupPickOneKind,
                               style: TextStyle(color: scheme.error),
                             ),
                           ),
@@ -249,10 +266,10 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Text('Sonstiges (bis zu 3)', style: titleStyle),
+          Text(l10n.lessonSetupExtrasTitle, style: titleStyle),
           const SizedBox(height: 4),
           Text(
-            'Eigene Felder, z. B. Beispielsatz oder Merkhilfe.',
+            l10n.lessonSetupExtrasHelp,
             style: TextStyle(color: muted(context)),
           ),
           const SizedBox(height: 8),
@@ -263,10 +280,10 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
                 controller: _extras[i],
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
-                  labelText: 'Sonstiges ${i + 1} – Name',
+                  labelText: l10n.lessonSetupExtraFieldLabel(i + 1),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
-                    tooltip: 'Entfernen',
+                    tooltip: l10n.lessonSetupRemove,
                     icon: const Icon(Icons.close),
                     onPressed: () => setState(() {
                       _extras.removeAt(i).dispose();
@@ -282,10 +299,10 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
               children: [
                 ActionChip(
                   avatar: const Icon(Icons.add, size: 18),
-                  label: const Text('Sonstiges'),
+                  label: Text(l10n.lessonSetupExtraChip),
                   onPressed: _addExtra,
                 ),
-                for (final s in _extraSuggestions)
+                for (final s in _extraSuggestions(l10n))
                   if (!_extras.any((c) => c.text.trim() == s))
                     ActionChip(
                       label: Text(s),

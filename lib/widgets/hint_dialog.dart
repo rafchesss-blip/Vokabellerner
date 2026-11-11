@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 
 /// Kleines Tipp-Fenster mit „Nicht mehr anzeigen".
@@ -13,7 +14,7 @@ Future<bool> showHintOnce(
   required String emoji,
   required String title,
   required String text,
-  String button = 'Weiter',
+  String? button,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   final key = 'hint_hidden_$id';
@@ -38,7 +39,8 @@ class _HintDialog extends StatefulWidget {
   final String emoji;
   final String title;
   final String text;
-  final String button;
+  /// Beschriftung des Knopfs, sonst „Weiter".
+  final String? button;
 
   const _HintDialog({
     required this.emoji,
@@ -68,7 +70,7 @@ class _HintDialogState extends State<_HintDialog> {
           CheckboxListTile(
             value: _hide,
             onChanged: (v) => setState(() => _hide = v ?? false),
-            title: const Text('Nicht mehr anzeigen'),
+            title: Text(context.l10n.hintDialogDontShowAgain),
             controlAffinity: ListTileControlAffinity.leading,
             contentPadding: EdgeInsets.zero,
             dense: true,
@@ -78,7 +80,7 @@ class _HintDialogState extends State<_HintDialog> {
       actions: [
         FilledButton(
           onPressed: () => Navigator.pop(context, _hide),
-          child: Text(widget.button),
+          child: Text(widget.button ?? context.l10n.commonNext),
         ),
       ],
     );

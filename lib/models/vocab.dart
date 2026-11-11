@@ -1,3 +1,4 @@
+import '../l10n/l10n.dart';
 import '../utils/fsrs.dart';
 
 int _idCounter = 0;
@@ -184,31 +185,27 @@ enum FormKind {
 
 extension FormKindX on FormKind {
   String get label => switch (this) {
-        FormKind.verb => 'Verbformen',
-        FormKind.noun => 'Nomenformen',
-        FormKind.plural => 'Plural',
-        FormKind.adjective => 'Adjektivformen',
-        FormKind.comparison => 'Steigerung',
-        FormKind.gender => 'Geschlecht',
-        FormKind.inflectionClass => 'Deklination/Konjugation',
-        FormKind.government => 'Fall/Präposition',
-        FormKind.wordClass => 'Wortart',
+        FormKind.verb => L.formKindVerbLabel,
+        FormKind.noun => L.formKindNounLabel,
+        FormKind.plural => L.formKindPluralLabel,
+        FormKind.adjective => L.formKindAdjectiveLabel,
+        FormKind.comparison => L.formKindComparisonLabel,
+        FormKind.gender => L.formKindGenderLabel,
+        FormKind.inflectionClass => L.formKindInflectionClassLabel,
+        FormKind.government => L.formKindGovernmentLabel,
+        FormKind.wordClass => L.formKindWordClassLabel,
       };
 
   String get example => switch (this) {
-        FormKind.verb =>
-          'Stammformen bzw. unregelmäßige Formen, z. B. vocō, vocāvī, '
-              'vocātum oder go, went, gone',
-        FormKind.noun => 'z. B. Genitiv: lūnae',
-        FormKind.plural => 'z. B. mice, les chevaux',
-        FormKind.adjective => 'Formen der anderen Geschlechter, z. B. bonus, -a, -um',
-        FormKind.comparison => 'z. B. good, better, best',
-        FormKind.gender => 'bei Nomen, z. B. m, f, n oder der/die/das',
-        FormKind.inflectionClass => 'z. B. a-Deklination, e-Konjugation',
-        FormKind.government =>
-          'welcher Fall oder welche Präposition folgt, z. B. + Dat., '
-              'sich freuen über',
-        FormKind.wordClass => 'z. B. Verb, Nomen, Adjektiv, Adverb',
+        FormKind.verb => L.formKindVerbExample,
+        FormKind.noun => L.formKindNounExample,
+        FormKind.plural => L.formKindPluralExample,
+        FormKind.adjective => L.formKindAdjectiveExample,
+        FormKind.comparison => L.formKindComparisonExample,
+        FormKind.gender => L.formKindGenderExample,
+        FormKind.inflectionClass => L.formKindInflectionClassExample,
+        FormKind.government => L.formKindGovernmentExample,
+        FormKind.wordClass => L.formKindWordClassExample,
       };
 }
 
@@ -246,7 +243,9 @@ class Lesson {
 
   /// Alle Vokabeln landen im ersten Kasten (eigene Lektionen haben einen).
   Box get mainBox {
-    if (boxes.isEmpty) boxes.add(Box(id: newId(), name: 'Vokabeln', vocabs: []));
+    if (boxes.isEmpty) {
+      boxes.add(Box(id: newId(), name: L.vocabModelDefaultBoxName, vocabs: []));
+    }
     return boxes.first;
   }
 

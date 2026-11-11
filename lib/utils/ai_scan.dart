@@ -1,3 +1,4 @@
+import '../l10n/l10n.dart';
 import '../models/vocab.dart';
 
 /// Vokabeln per KI-App (ChatGPT, Gemini, …) aus einem Foto ablesen.
@@ -11,21 +12,19 @@ const scanMarker = '#VOKABELN';
 
 /// Spalten in der Reihenfolge, in der die KI sie liefern soll.
 List<String> scanColumns(Lesson lesson) => [
-      'Wort',
-      'Übersetzung',
-      if (lesson.hasForms) 'Formen',
+      L.aiScanColumnWord,
+      L.aiScanColumnTranslation,
+      if (lesson.hasForms) L.aiScanColumnForms,
       ...lesson.extraLabels,
     ];
 
 String _forms(Lesson lesson) {
   if (lesson.allForms) {
     return [
-      '- Formen: ALLE grammatischen Angaben, die im Foto zum Wort stehen – '
-          'nichts weglassen. Zum Beispiel (aber nicht nur):',
+      '- ${L.aiScanPromptRuleAllForms(L.aiScanColumnForms)}',
       for (final k in FormKind.values) '  - ${k.label} (${k.example})',
-      '  Auch alles andere, was zum Wort gehört (Abkürzungen, Hinweise in '
-          'Klammern), gehört hierher. Mehrere Angaben mit Komma trennen.',
-      '  Steht im Foto keine Angabe zum Wort, dann "-".',
+      '  ${L.aiScanPromptRuleAllFormsMore}',
+      '  ${L.aiScanPromptRuleAllFormsNone}',
     ].join('\n');
   }
   final kinds = lesson.formKinds;
@@ -37,10 +36,10 @@ String _forms(Lesson lesson) {
       .where((k) => !kinds.contains(k))
       .map((k) => k.label);
   return [
-    '- Formen: nur diese Angaben, mehrere mit Komma getrennt:',
+    '- ${L.aiScanPromptRuleSomeForms(L.aiScanColumnForms)}',
     ...lines,
-    if (missing.isNotEmpty) '  Weglassen: ${missing.join(', ')}.',
-    '  Hat ein Wort keine solchen Angaben (z. B. ein Adverb), steht dort "-".',
+    if (missing.isNotEmpty) '  ${L.aiScanPromptRuleOmit(missing.join(', '))}',
+    '  ${L.aiScanPromptRuleSomeFormsNone}',
   ].join('\n');
 }
 
@@ -48,44 +47,44 @@ String _forms(Lesson lesson) {
 String buildScanPrompt(Lesson lesson) {
   final cols = scanColumns(lesson);
   final language = lesson.language.trim().isEmpty
-      ? 'der Fremdsprache'
+      ? L.aiScanForeignLanguage
       : lesson.language.trim();
-  final example = [
-    'Wort',
-    'Übersetzung',
-    if (lesson.hasForms) 'Formen',
-    for (final l in lesson.extraLabels) l,
-  ].join(' | ');
+  final example = cols.join(' | ');
 
   return '''
-Lies alle Vokabeln auf dem Foto ab (Wörter auf $language, Übersetzung auf ${lesson.translationLanguage}).
+${L.aiScanPromptIntro(language, lesson.translationLanguage)}
 
-Antworte NUR mit einem einzigen Codeblock in genau diesem Format, ohne weiteren Text:
+${L.aiScanPromptAnswerOnly}
 
 $scanMarker
 $example
 
-Regeln:
-- Eine Zeile pro Vokabel, die Spalten mit " | " getrennt, immer genau ${cols.length} Spalten in dieser Reihenfolge: ${cols.join(', ')}.
-- Die Zeile mit den Spaltennamen weglassen, die erste Zeile ist immer $scanMarker.
-- Wort: so geschrieben wie im Foto, mit allen Sonderzeichen und Akzenten.
-- Übersetzung: wie im Foto; mehrere Bedeutungen mit Komma trennen.
+${L.aiScanPromptRules}
+- ${L.aiScanPromptRuleColumns(cols.length, cols.join(', '))}
+- ${L.aiScanPromptRuleNoHeader(scanMarker)}
+- ${L.aiScanPromptRuleWord(L.aiScanColumnWord)}
+- ${L.aiScanPromptRuleTranslation(L.aiScanColumnTranslation)}
 ${lesson.hasForms ? '${_forms(lesson)}\n' : ''}${[
-    for (final l in lesson.extraLabels)
-      '- $l: aus dem Foto; steht dort nichts, dann "-".',
+    for (final l in lesson.extraLabels) '- ${L.aiScanPromptRuleExtra(l)}',
   ].join('\n')}
-- Fehlt eine Angabe, schreib "-". Erfinde nichts, was nicht im Foto steht.
-- Kein "|" innerhalb einer Spalte verwenden.
+- ${L.aiScanPromptRuleMissing}
+- ${L.aiScanPromptRuleNoPipe}
 '''
       .replaceAll(RegExp(r'\n{3,}'), '\n\n')
       .trim();
 }
 
+/// Ob [text] die Anleitung selbst enthält – in irgendeiner App-Sprache,
+/// falls die Sprache inzwischen gewechselt wurde. Dann ist es keine
+/// Antwort der KI.
+bool isScanPrompt(String text) => AppLocalizations.supportedLocales.any(
+    (l) => text.contains(lookupAppLocalizations(l).aiScanPromptAnswerOnly));
+
 /// Ob [text] wie eine KI-Antwort aussieht (und nicht z. B. die Anleitung).
 bool looksLikeScanAnswer(String text) =>
     RegExp('^\\s*(```\\w*\\s*)?$scanMarker\\s*\$', multiLine: true)
         .hasMatch(text) &&
-    !text.contains('Antworte NUR');
+    !isScanPrompt(text);
 
 /// Liest die Antwort der KI. Spalten wie in [scanColumns]; "-" heißt leer.
 /// Zeilen ohne Wort oder Übersetzung werden übersprungen.
@@ -111,7 +110,8 @@ List<Vocab> parseScanAnswer(String text, Lesson lesson) {
 
     final parts = line.split('|').map((p) => p.trim()).toList();
     // Kopfzeile, falls die KI sie doch mitschickt.
-    if (parts.first.toLowerCase() == 'wort') continue;
+    final head = parts.first.toLowerCase();
+    if (head == 'wort' || head == L.aiScanColumnWord.toLowerCase()) continue;
 
     String? at(int i) => i < parts.length ? clean(parts[i]) : null;
     final word = at(0);
