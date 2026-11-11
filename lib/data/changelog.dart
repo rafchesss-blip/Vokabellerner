@@ -17,6 +17,14 @@ class ChangelogEntry {
 
 const changelog = [
   ChangelogEntry(
+    6,
+    '11.11.2026',
+    '🔒 Datenschutz auf einen Blick',
+    'Unter Einstellungen → „Über die App" findest du die '
+        'Datenschutzerklärung und die Einführung zum Nachlesen: Alles bleibt '
+        'auf deinem Handy, und die App ist ohne Werbung und ohne Käufe.',
+  ),
+  ChangelogEntry(
     5,
     '11.11.2026',
     '🤖 Scannen nur mit KI-Apps',

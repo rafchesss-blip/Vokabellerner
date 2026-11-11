@@ -534,6 +534,15 @@ class _AiPickerSheet extends StatelessWidget {
                   subtitle: const Text('kostenlos im Play Store'),
                   onTap: () => Navigator.pop(context, app),
                 ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Text(
+                  'Der Vokabeltrainer ist nicht mit diesen Apps oder ihren '
+                  'Anbietern verbunden. Für sie gilt ihre eigene '
+                  'Datenschutzerklärung.',
+                  style: TextStyle(color: faint(context), fontSize: 12),
+                ),
+              ),
             ],
           );
         },

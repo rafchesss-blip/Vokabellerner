@@ -16,7 +16,18 @@ void main() {
     await tester.pumpWidget(const VokabeltrainerApp());
     await tester.pumpAndSettle();
 
-    // Beim ersten Start: Name (freiwillig).
+    // Beim ersten Start: Einführung …
+    expect(find.text('Willkommen beim Vokabeltrainer'), findsOneWidget);
+    for (var i = 0; i < 4; i++) {
+      await tester.tap(find.text('Weiter'));
+      await tester.pumpAndSettle();
+    }
+    expect(find.text('Komplett kostenlos'), findsOneWidget);
+    expect(find.textContaining('keine Werbung'), findsOneWidget);
+    await tester.tap(find.text("Los geht's"));
+    await tester.pumpAndSettle();
+
+    // … dann der Name (freiwillig).
     expect(find.text('Willkommen!'), findsOneWidget);
     await tester.enterText(find.byType(TextField), 'Rafael');
     await tester.tap(find.text('Speichern'));

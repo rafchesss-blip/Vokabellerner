@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,12 +8,21 @@ import 'data/store.dart';
 import 'models/settings.dart';
 import 'platform/platform.dart';
 import 'screens/home_shell.dart';
+import 'screens/intro_screen.dart';
 import 'services/notifications.dart';
 import 'theme/app_theme.dart';
 import 'widgets/name_dialog.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Danksagung in Einstellungen → Lizenzen.
+  LicenseRegistry.addLicense(() => Stream.value(const LicenseEntryWithLineBreaks(
+        ['FSRS (Free Spaced Repetition Scheduler)'],
+        'Die Formeln und Standard-Parameter der Wiederholungsplanung stammen '
+        'aus FSRS von Open Spaced Repetition '
+        '(https://github.com/open-spaced-repetition), veröffentlicht unter '
+        'der MIT-Lizenz. Die Umsetzung in dieser App ist eigener Code.',
+      )));
   await Settings.instance.load();
   await Store.instance.load();
   // Browser bitten, die Daten nicht automatisch zu löschen.
@@ -69,8 +79,8 @@ class VokabeltrainerApp extends StatelessWidget {
   }
 }
 
-/// Beim ersten Start nach dem Namen (optional) und nach der Erlaubnis für
-/// Benachrichtigungen fragen.
+/// Beim ersten Start: Einführung, dann Name (optional), dann die Erlaubnis
+/// für Benachrichtigungen.
 class _Startup extends StatefulWidget {
   final Widget child;
 
@@ -91,6 +101,18 @@ class _StartupState extends State<_Startup> {
 
   Future<void> _run() async {
     final settings = Settings.instance;
+    if (!settings.introSeen) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => const IntroScreen(),
+        ),
+      );
+      settings.introSeen = true;
+      await settings.save();
+      if (!mounted) return;
+    }
     if (!settings.nameAsked) {
       final name = await showNameDialog(context, firstStart: true);
       settings

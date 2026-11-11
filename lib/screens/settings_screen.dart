@@ -5,7 +5,9 @@ import '../theme/app_theme.dart';
 import '../widgets/name_dialog.dart';
 import '../widgets/standard_app_bar.dart';
 import 'backup_section.dart';
+import 'intro_screen.dart';
 import 'notifications_section.dart';
+import 'privacy_screen.dart';
 
 /// Einstellungen: Design, Sprachrichtung, Abfrage-Modus und Sicherung.
 ///
@@ -168,6 +170,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const NotificationsSection(),
           const Divider(height: 32),
           const BackupSection(),
+          const Divider(height: 32),
+          Text('Über die App', style: titleStyle),
+          const SizedBox(height: 8),
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.waving_hand_outlined),
+                  title: const Text('Einführung ansehen'),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const IntroScreen()),
+                  ),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.lock_outline),
+                  title: const Text('Datenschutz'),
+                  subtitle: const Text('Alles bleibt auf deinem Handy'),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PrivacyScreen()),
+                  ),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.description_outlined),
+                  title: const Text('Lizenzen'),
+                  subtitle: const Text('Verwendete Software'),
+                  onTap: () => showLicensePage(
+                    context: context,
+                    applicationName: 'Vokabeltrainer',
+                    applicationLegalese: 'Kostenlos, ohne Werbung und ohne '
+                        'In-App-Käufe.',
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 24),
         ],
       ),
