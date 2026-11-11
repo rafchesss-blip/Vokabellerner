@@ -11,7 +11,7 @@ import 'settings_screen.dart';
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key});
 
-  static const _titles = ['Vokabellerner', 'Lektionen', 'Analyse'];
+  static const _titles = ['Vokabeltrainer', 'Lektionen', 'Analyse'];
 
   @override
   Widget build(BuildContext context) {

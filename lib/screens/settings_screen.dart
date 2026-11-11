@@ -21,12 +21,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late AnswerMode _mode = Settings.instance.answerMode;
   late AppThemeMode _themeMode = Settings.instance.themeMode;
   late NeonAccent _accent = Settings.instance.accent;
+  late bool _askExtras = Settings.instance.askExtras;
 
   void _apply() {
     Settings.instance.direction = _direction;
     Settings.instance.answerMode = _mode;
     Settings.instance.themeMode = _themeMode;
     Settings.instance.accent = _accent;
+    Settings.instance.askExtras = _askExtras;
     Settings.instance.save();
   }
 
@@ -110,17 +112,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _apply();
               }),
             ),
-          const SizedBox(height: 16),
+          Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: SwitchListTile(
+              value: _askExtras,
+              onChanged: (v) => setState(() {
+                _askExtras = v;
+                _apply();
+              }),
+              title: const Text('Sonstiges mit abfragen'),
+              subtitle: const Text(
+                  'z. B. Beispielsatz oder Merkhilfe – wenn die Vokabel '
+                  'welche hat.'),
+            ),
+          ),
+          const SizedBox(height: 8),
           Card(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             elevation: 0,
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Text(
-                'Die mittlere Spalte enthält die Formen des lateinischen '
-                'Wortes (z. B. Genitiv oder Stammformen). Hat eine Vokabel '
-                'keine mittlere Spalte, wird automatisch nur die Übersetzung '
-                'abgefragt. Der Abfrage-Modus gilt für den Test-Modus.',
+                'Formen sind z. B. Stammformen, Genitiv oder Geschlecht. Hat '
+                'eine Vokabel keine Formen, wird automatisch nur die '
+                'Übersetzung abgefragt. Der Abfrage-Modus gilt für den '
+                'Test-Modus.',
                 style: TextStyle(color: muted(context)),
               ),
             ),

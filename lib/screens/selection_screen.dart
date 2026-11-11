@@ -185,9 +185,9 @@ class _SelectionScreenState extends State<SelectionScreen> {
       padding: const EdgeInsets.fromLTRB(92, 4, 8, 2),
       child: Row(
         children: [
-          Expanded(flex: 3, child: Text('Latein', style: style)),
-          Expanded(flex: 2, child: Text('Mittlere Spalte', style: style)),
-          Expanded(flex: 3, child: Text('Deutsch', style: style)),
+          Expanded(flex: 3, child: Text('Wort', style: style)),
+          Expanded(flex: 2, child: Text('Formen', style: style)),
+          Expanded(flex: 3, child: Text('Übersetzung', style: style)),
         ],
       ),
     );

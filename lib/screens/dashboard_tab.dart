@@ -7,6 +7,7 @@ import '../platform/platform.dart';
 import '../theme/app_theme.dart';
 import '../utils/goals.dart';
 import '../utils/review_queue.dart';
+import 'lessons_tab.dart';
 import 'practice_lists_screen.dart';
 import 'practice_screen.dart';
 import 'tutorial_screen.dart';
@@ -96,8 +97,10 @@ class DashboardTab extends StatelessWidget {
             _TodayCard(
               plan: plan,
               reviewedToday: store.reviewsToday,
+              hasLessons: store.lessons.isNotEmpty,
               hasLists: store.practiceLists.isNotEmpty,
               onStart: () => _open(context, PracticeScreen(vocabs: pool)),
+              onCreateLesson: () => LessonsTab.createLesson(context),
               onCreateList: () => _open(context, const PracticeListsScreen()),
             ),
             const SizedBox(height: 16),
@@ -216,15 +219,19 @@ class _HeroCard extends StatelessWidget {
 class _TodayCard extends StatelessWidget {
   final ReviewPlan plan;
   final int reviewedToday;
+  final bool hasLessons;
   final bool hasLists;
   final VoidCallback onStart;
+  final VoidCallback onCreateLesson;
   final VoidCallback onCreateList;
 
   const _TodayCard({
     required this.plan,
     required this.reviewedToday,
+    required this.hasLessons,
     required this.hasLists,
     required this.onStart,
+    required this.onCreateLesson,
     required this.onCreateList,
   });
 
@@ -253,18 +260,23 @@ class _TodayCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Erstelle zuerst eine Übungsliste: Gib ihr einen Namen und '
-                'wähle die Vokabeln aus, die du lernen willst.',
+                hasLessons
+                    ? 'Erstelle jetzt eine Übungsliste: Gib ihr einen Namen '
+                        'und wähle die Vokabeln aus, die du lernen willst.'
+                    : 'Leg zuerst eine Lektion an. Die Vokabeln tippst du '
+                        'selbst ein oder scannst sie mit einer KI-App aus '
+                        'deinem Buch.',
                 style: TextStyle(color: muted(context)),
               ),
               const SizedBox(height: 16),
               FilledButton.icon(
-                onPressed: onCreateList,
+                onPressed: hasLessons ? onCreateList : onCreateLesson,
                 icon: const Icon(Icons.add),
-                label: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  child: Text('Übungsliste erstellen',
-                      style: TextStyle(fontSize: 17)),
+                label: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Text(
+                      hasLessons ? 'Übungsliste erstellen' : 'Lektion anlegen',
+                      style: const TextStyle(fontSize: 17)),
                 ),
               ),
             ],

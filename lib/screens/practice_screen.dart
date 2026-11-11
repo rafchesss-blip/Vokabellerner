@@ -144,7 +144,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                                   'Bedeutung auf und bewertest dich selbst: '
                                   'Nochmal, Schwer, Gut oder Leicht.'
                               : 'Ein Wort wird angezeigt. Du gibst Übersetzung '
-                                  'und mittlere Spalte selbst ein.') +
+                                  'und Formen selbst ein.') +
                           (_filter == _Filter.smart
                               ? '\n\n„Fällig & neu“ nutzt Spaced Repetition '
                                   '(FSRS): Jede Vokabel kommt genau dann '

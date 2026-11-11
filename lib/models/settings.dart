@@ -37,38 +37,38 @@ extension NeonAccentX on NeonAccent {
 /// Sprachrichtung der Abfrage.
 ///
 /// [latinToGerman] (normal):
-///   Die App zeigt das lateinische Wort, geantwortet werden die mittlere
-///   Spalte und/oder die deutsche Übersetzung.
+///   Die App zeigt das Wort, geantwortet werden die Formen und/oder die
+///   Übersetzung.
 ///
 /// [germanToLatin]:
-///   Die App zeigt das deutsche Wort, geantwortet werden die mittlere
-///   Spalte und/oder das lateinische Wort.
+///   Die App zeigt die Übersetzung, geantwortet werden die Formen und/oder
+///   das Wort. (Die Namen stammen aus der Latein-Version.)
 enum LanguageDirection { latinToGerman, germanToLatin }
 
 /// Was im Test eingegeben werden muss.
 ///
-/// [translationOnly]  nur die Übersetzung (deutsch bzw. lateinisch)
-/// [middleOnly]       nur die mittlere Spalte (Formen)
-/// [both]             Übersetzung und mittlere Spalte
+/// [translationOnly]  nur die Übersetzung (bzw. das Wort)
+/// [middleOnly]       nur die Formen
+/// [both]             Übersetzung und Formen
 enum AnswerMode { translationOnly, middleOnly, both }
 
 extension LanguageDirectionX on LanguageDirection {
   String get label => switch (this) {
-        LanguageDirection.latinToGerman => 'Latein → Deutsch',
-        LanguageDirection.germanToLatin => 'Deutsch → Latein',
+        LanguageDirection.latinToGerman => 'Wort → Übersetzung',
+        LanguageDirection.germanToLatin => 'Übersetzung → Wort',
       };
 
   String get description => switch (this) {
         LanguageDirection.latinToGerman =>
-          'Die App zeigt das lateinische Wort, du antwortest die Bedeutung.',
+          'Die App zeigt das Wort, du antwortest die Bedeutung.',
         LanguageDirection.germanToLatin =>
-          'Die App zeigt das deutsche Wort, du antwortest lateinisch.',
+          'Die App zeigt die Übersetzung, du antwortest das Wort.',
       };
 
-  /// Das Wort, das in dieser Richtung die „Übersetzung" ist.
+  /// Was in dieser Richtung geantwortet wird.
   String get translationWord => switch (this) {
-        LanguageDirection.latinToGerman => 'deutsche Wort',
-        LanguageDirection.germanToLatin => 'lateinische Wort',
+        LanguageDirection.latinToGerman => 'die Übersetzung',
+        LanguageDirection.germanToLatin => 'das Wort',
       };
 }
 
@@ -76,19 +76,18 @@ extension AnswerModeX on AnswerMode {
   String label(LanguageDirection direction) => switch (this) {
         AnswerMode.translationOnly =>
           direction == LanguageDirection.latinToGerman
-              ? 'Nur deutsches Wort'
-              : 'Nur lateinisches Wort',
-        AnswerMode.middleOnly => 'Nur mittlere Spalte',
+              ? 'Nur Übersetzung'
+              : 'Nur Wort',
+        AnswerMode.middleOnly => 'Nur Formen',
         AnswerMode.both => 'Beides',
       };
 
   String description(LanguageDirection direction) {
     final word = direction.translationWord;
     return switch (this) {
-      AnswerMode.translationOnly => 'Du antwortest nur das $word.',
-      AnswerMode.middleOnly =>
-        'Du antwortest nur die Formen aus der mittleren Spalte.',
-      AnswerMode.both => 'Du antwortest das $word und die mittlere Spalte.',
+      AnswerMode.translationOnly => 'Du antwortest nur $word.',
+      AnswerMode.middleOnly => 'Du antwortest nur die Formen.',
+      AnswerMode.both => 'Du antwortest $word und die Formen.',
     };
   }
 }
@@ -106,6 +105,9 @@ class Settings {
   AnswerMode answerMode = AnswerMode.both;
   AppThemeMode themeMode = AppThemeMode.dark;
   NeonAccent accent = NeonAccent.violet;
+
+  /// Im Test auch die „Sonstiges"-Felder abfragen.
+  bool askExtras = false;
 
   /// Lern-Erinnerungen (nur Android-App).
   bool notificationsEnabled = true;
@@ -136,6 +138,7 @@ class Settings {
       orElse: () => NeonAccent.violet,
     );
 
+    askExtras = prefs.getBool('askExtras') ?? false;
     notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
     notificationsPerDay =
         (prefs.getInt('notificationsPerDay') ?? 3).clamp(1, 3).toInt();
@@ -147,6 +150,7 @@ class Settings {
     await prefs.setString('answerMode', answerMode.name);
     await prefs.setString('themeMode', themeMode.name);
     await prefs.setString('accent', accent.name);
+    await prefs.setBool('askExtras', askExtras);
     await prefs.setBool('notificationsEnabled', notificationsEnabled);
     await prefs.setInt('notificationsPerDay', notificationsPerDay);
     revision.value++;

@@ -10,15 +10,15 @@ import '../utils/normalize.dart';
 import '../widgets/session_summary.dart';
 import '../widgets/standard_app_bar.dart';
 
-/// Ein Antwortteil (z. B. „Deutsche Bedeutung" oder „Mittlere Spalte").
+/// Ein Antwortteil (z. B. „Übersetzung", „Formen" oder ein Sonstiges-Feld).
 class AnswerPart {
   final String label;
   final String correct;
   const AnswerPart(this.label, this.correct);
 }
 
-/// Test-Modus: Wort wird angezeigt, Übersetzung und/oder mittlere Spalte
-/// müssen selbst eingegeben werden.
+/// Test-Modus: Wort wird angezeigt, Übersetzung und/oder Formen (und auf
+/// Wunsch die Sonstiges-Felder) müssen selbst eingegeben werden.
 class TestScreen extends StatefulWidget {
   final List<Vocab> vocabs;
 
@@ -91,9 +91,12 @@ class _TestScreenState extends State<TestScreen> {
     final translation = s.direction == LanguageDirection.latinToGerman
         ? v.german
         : v.latin;
+    final lesson = Store.instance.lessonOf(v);
     final translationLabel = s.direction == LanguageDirection.latinToGerman
-        ? 'Deutsche Bedeutung'
-        : 'Lateinisches Wort';
+        ? 'Übersetzung (${lesson?.translationLanguage ?? 'Deutsch'})'
+        : (lesson == null || lesson.language.isEmpty
+            ? 'Wort'
+            : 'Wort (${lesson.language})');
 
     final needTranslation = s.answerMode != AnswerMode.middleOnly;
     final needMiddle = hasMiddle && s.answerMode != AnswerMode.translationOnly;
@@ -101,10 +104,15 @@ class _TestScreenState extends State<TestScreen> {
     final parts = <AnswerPart>[];
     if (needTranslation) parts.add(AnswerPart(translationLabel, translation));
     if (needMiddle) {
-      parts.add(AnswerPart('Mittlere Spalte', v.middleColumn!));
+      parts.add(AnswerPart('Formen', v.middleColumn!));
     }
-    // Fallback: „nur mittlere Spalte" gewählt, aber keine vorhanden.
+    // Fallback: „nur Formen" gewählt, aber keine vorhanden.
     if (parts.isEmpty) parts.add(AnswerPart(translationLabel, translation));
+    if (s.askExtras) {
+      for (final e in v.extras) {
+        parts.add(AnswerPart(e.label, e.value));
+      }
+    }
 
     return parts;
   }

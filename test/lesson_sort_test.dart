@@ -6,7 +6,7 @@ import 'package:vokabellerner/data/store.dart';
 void main() {
   test('Lektionen werden numerisch sortiert (kleinste Zahl oben)', () async {
     SharedPreferences.setMockInitialValues({});
-    await Store.instance.load(builtIn: []);
+    await Store.instance.load();
     await Store.instance.restoreBackup('''
       {"lessons": [
         {"id": "l18", "name": "Lektion 18", "boxes": []},

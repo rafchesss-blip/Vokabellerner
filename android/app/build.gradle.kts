@@ -27,7 +27,10 @@ android {
     }
 
     defaultConfig {
-        applicationId = "io.github.rafchesss.vokabellerner"
+        // Eigene ID für die Google-Play-Version – so stört sie die selbst
+        // installierte Latein-App nicht. Nach der ersten Veröffentlichung nie
+        // mehr ändern.
+        applicationId = "io.github.rafchesss.vokabeltrainer"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = maxOf(flutter.minSdkVersion, 24)

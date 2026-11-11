@@ -36,10 +36,10 @@ const int planDays = 10;
 const _first = [
   ('🧠 {n} Vokabeln warten auf dich', 'Ein paar Minuten reichen – los geht\'s!'),
   ('⚔️ Die Vokabeln greifen an!', '{n} Stück wollen heute besiegt werden.'),
-  ('🕵️ Geheimauftrag für heute', '{n} lateinische Wörter entschlüsseln. Bereit?'),
-  ('🏛️ Ave! Rom ruft.', 'Heute stehen {n} Vokabeln auf dem Plan.'),
+  ('🕵️ Geheimauftrag für heute', '{n} Wörter entschlüsseln. Bereit?'),
+  ('📚 Deine Vokabeln rufen!', 'Heute stehen {n} Vokabeln auf dem Plan.'),
   ('🎯 Mission des Tages', '{n} Vokabeln knacken – schaffst du sie alle?'),
-  ('🦉 Die Eule der Minerva hat Hunger', 'Füttere sie mit {n} Vokabeln!'),
+  ('🦉 Die Lerneule hat Hunger', 'Füttere sie mit {n} Vokabeln!'),
   ('🎲 Kleine Wette?', 'Ich wette, du schaffst die {n} Vokabeln in 5 Minuten.'),
 ];
 
@@ -47,7 +47,7 @@ const _first = [
 const _middle = [
   ('⏰ Psst… deine Vokabeln warten noch', '{n} Stück sind heute noch offen.'),
   ('🐢 Die Vokabeln werden ungeduldig', 'Noch {n} warten – nur ein paar Minuten!'),
-  ('💬 Caesar fragt, wo du bleibst', '{n} Vokabeln sind noch übrig.'),
+  ('💬 Deine Karten fragen, wo du bleibst', '{n} Vokabeln sind noch übrig.'),
   ('🧩 Fast vergessen?', '{n} Vokabeln wollen heute noch wiederholt werden.'),
   ('🚀 Kurzer Boost gefällig?', '{n} Karten, dann hast du Ruhe.'),
 ];

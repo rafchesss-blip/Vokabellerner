@@ -24,6 +24,16 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
   static const int _maxLists = 10;
 
   Future<void> _createList() async {
+    if (Store.instance.lessons.every((l) => l.allVocabs.isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Leg zuerst unter „Lektionen" eine Lektion mit Vokabeln an.',
+          ),
+        ),
+      );
+      return;
+    }
     if (Store.instance.practiceLists.length >= _maxLists) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

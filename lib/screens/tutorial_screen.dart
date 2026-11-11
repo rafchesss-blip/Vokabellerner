@@ -24,18 +24,32 @@ class _TutorialScreenState extends State<TutorialScreen> {
   static const _pages = [
     _TutorialPage(
       Icons.school_outlined,
-      'So funktioniert der Vokabellerner',
-      'Diese App hilft dir, lateinische Vokabeln zu lernen – mit '
+      'So funktioniert der Vokabeltrainer',
+      'Diese App hilft dir, Vokabeln in jeder Sprache zu lernen – mit '
           'Karteikarten, Tests und cleverer Wiederholung. Wische nach links '
           'oder tippe auf „Weiter", um alles kennenzulernen.',
+    ),
+    _TutorialPage(
+      Icons.menu_book_outlined,
+      'Lektion anlegen',
+      'Im Tab „Lektionen" legst du eine Lektion an: Name, Sprache und was '
+          'du lernen willst – Wort und Übersetzung, auf Wunsch Formen und '
+          'bis zu drei eigene Felder wie Beispielsatz oder Merkhilfe.',
+    ),
+    _TutorialPage(
+      Icons.document_scanner_outlined,
+      'Vokabeln scannen',
+      'Tippe die Vokabeln selbst ein – oder tippe auf „Scannen" und '
+          'fotografiere die Liste aus deinem Buch. Eine KI-App wie ChatGPT '
+          'oder Gemini liest sie ab. Kopiere ihre Antwort, komm zurück, '
+          'fertig.',
     ),
     _TutorialPage(
       Icons.list_alt_outlined,
       'Übungslisten erstellen',
       'Tippe auf der Startseite auf „Übungslisten" und dann auf „Neue '
           'Liste". Gib der Liste einen Namen, optional das Datum deines '
-          'Vokabeltests, und wähle die Vokabeln aus – aufgeteilt in '
-          'Lektionen, Kästen und einzelne Wörter.',
+          'Vokabeltests, und wähle die Vokabeln aus deinen Lektionen aus.',
     ),
     _TutorialPage(
       Icons.play_circle_outline,
@@ -71,7 +85,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     _TutorialPage(
       Icons.notifications_active_outlined,
       'Erinnerungen',
-      'In der Android-App erinnert dich der Vokabellerner bis zu 3-mal am '
+      'Die App erinnert dich bis zu 3-mal am '
           'Tag – mit den aktuellen Zahlen und nie nach 21 Uhr. Hast du für '
           'heute alles gelernt, ist Ruhe. Einstellen kannst du das unter '
           'Einstellungen → Erinnerungen.',
@@ -79,15 +93,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
     _TutorialPage(
       Icons.edit_outlined,
       'Test-Modus',
-      'Hier tippst du die Übersetzung und/oder die mittlere Spalte selbst '
-          'ein. Beim Prüfen wird deine Antwort automatisch verglichen – '
-          'Makronen (ā = a) und Artikel (der/die/das) sind dabei egal.',
-    ),
-    _TutorialPage(
-      Icons.menu_book_outlined,
-      'Lektionen',
-      'Im Tab „Lektionen" siehst du alle Lektionen mit ihren Vokabeln '
-          'und wie viele davon du schon kannst.',
+      'Hier tippst du die Übersetzung und/oder die Formen selbst ein – auf '
+          'Wunsch auch die eigenen Felder (Einstellungen). Beim Prüfen sind '
+          'Groß-/Kleinschreibung und Artikel (der/die/das) egal.',
     ),
     _TutorialPage(
       Icons.insights_outlined,
@@ -100,7 +108,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     _TutorialPage(
       Icons.save_outlined,
       'Deine Daten',
-      'Alles wird nur in diesem Browser bzw. auf diesem Gerät gespeichert – '
+      'Alles wird nur auf diesem Gerät gespeichert – '
           'ohne Konto, ohne Internet. Mach in den Einstellungen ab und zu '
           'eine Sicherung. Damit kannst du auch auf ein anderes Gerät '
           'umziehen.',

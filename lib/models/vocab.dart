@@ -26,7 +26,23 @@ class StatEvent {
       };
 }
 
+/// Ein „Sonstiges"-Feld einer Vokabel (z. B. Beispielsatz, Merkhilfe).
+class VocabExtra {
+  final String label;
+  final String value;
+
+  const VocabExtra(this.label, this.value);
+
+  factory VocabExtra.fromJson(Map<String, dynamic> json) =>
+      VocabExtra(json['label'] as String, json['value'] as String);
+
+  Map<String, dynamic> toJson() => {'label': label, 'value': value};
+}
+
 /// Eine einzelne Vokabel inklusive Lernstufe.
+///
+/// [latin] ist das Wort in der Fremdsprache, [german] die Übersetzung,
+/// [middleColumn] die Formen (die Namen stammen aus der Latein-Version).
 ///
 /// Die Lernstufe reicht von -5 (sehr schlecht) über 0 (neutral)
 /// bis +5 (sehr gut).
@@ -35,6 +51,9 @@ class Vocab {
   String latin;
   String german;
   String? middleColumn;
+
+  /// Bis zu drei „Sonstiges"-Felder.
+  List<VocabExtra> extras;
 
   /// Aktuelle Lernstufe: -5 .. +5, Standard 0 (neutral).
   int level;
@@ -51,10 +70,12 @@ class Vocab {
     required this.latin,
     required this.german,
     this.middleColumn,
+    List<VocabExtra>? extras,
     this.level = 0,
     List<StatEvent>? history,
     this.srs,
-  }) : history = history ?? [];
+  })  : extras = extras ?? [],
+        history = history ?? [];
 
   bool get hasMiddle =>
       middleColumn != null && middleColumn!.trim().isNotEmpty;
@@ -100,6 +121,9 @@ class Vocab {
         latin: json['latin'] as String,
         german: json['german'] as String,
         middleColumn: json['middleColumn'] as String?,
+        extras: (json['extras'] as List? ?? [])
+            .map((e) => VocabExtra.fromJson(e as Map<String, dynamic>))
+            .toList(),
         level: (json['level'] as num?)?.toInt() ?? 0,
         history: (json['history'] as List? ?? [])
             .map((e) => StatEvent.fromJson(e as Map<String, dynamic>))
@@ -114,6 +138,8 @@ class Vocab {
         'latin': latin,
         'german': german,
         'middleColumn': middleColumn,
+        if (extras.isNotEmpty)
+          'extras': extras.map((e) => e.toJson()).toList(),
         'level': level,
         'history': history.map((e) => e.toJson()).toList(),
         if (srs != null) 'srs': srs!.toJson(),
@@ -143,16 +169,59 @@ class Box {
       };
 }
 
+/// Welche Formen eine Lektion hat (fürs Eingeben und Scannen).
+enum FormKind { verb, noun, adjective, gender }
+
+extension FormKindX on FormKind {
+  String get label => switch (this) {
+        FormKind.verb => 'Verbformen',
+        FormKind.noun => 'Nomenformen',
+        FormKind.adjective => 'Adjektivformen',
+        FormKind.gender => 'Geschlecht',
+      };
+
+  String get example => switch (this) {
+        FormKind.verb => 'z. B. Stammformen: vocō, vocāvī, vocātum',
+        FormKind.noun => 'z. B. Genitiv oder Plural: lūnae',
+        FormKind.adjective => 'z. B. bonus, -a, -um',
+        FormKind.gender => 'bei Nomen: m, f oder n',
+      };
+}
+
 /// Eine Lektion mit mehreren Kästen.
 class Lesson {
   String id;
   String name;
   List<Box> boxes;
 
-  Lesson({required this.id, required this.name, required this.boxes});
+  /// Sprache der Wörter (z. B. „Englisch") und der Übersetzung.
+  String language;
+  String translationLanguage;
 
-  /// Eingebaute Lektion (aus `lektionen/`, nur auf GitHub änderbar).
-  bool get isBuiltIn => id.startsWith('builtin:');
+  /// Ob die Vokabeln Formen haben und welche.
+  bool hasForms;
+  Set<FormKind> formKinds;
+
+  /// Namen der „Sonstiges"-Felder (0–3), z. B. „Beispielsatz".
+  List<String> extraLabels;
+
+  Lesson({
+    required this.id,
+    required this.name,
+    required this.boxes,
+    this.language = '',
+    this.translationLanguage = 'Deutsch',
+    this.hasForms = false,
+    Set<FormKind>? formKinds,
+    List<String>? extraLabels,
+  })  : formKinds = formKinds ?? {},
+        extraLabels = extraLabels ?? [];
+
+  /// Alle Vokabeln landen im ersten Kasten (eigene Lektionen haben einen).
+  Box get mainBox {
+    if (boxes.isEmpty) boxes.add(Box(id: newId(), name: 'Vokabeln', vocabs: []));
+    return boxes.first;
+  }
 
   /// Alle Vokabeln dieser Lektion (über alle Kästen hinweg).
   List<Vocab> get allVocabs =>
@@ -164,11 +233,27 @@ class Lesson {
         boxes: (json['boxes'] as List? ?? [])
             .map((e) => Box.fromJson(e as Map<String, dynamic>))
             .toList(),
+        language: json['language'] as String? ?? '',
+        translationLanguage:
+            json['translationLanguage'] as String? ?? 'Deutsch',
+        hasForms: json['hasForms'] as bool? ?? false,
+        formKinds: {
+          for (final k in json['formKinds'] as List? ?? [])
+            ...FormKind.values.where((f) => f.name == k),
+        },
+        extraLabels: (json['extraLabels'] as List? ?? [])
+            .map((e) => e as String)
+            .toList(),
       );
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
+        'language': language,
+        'translationLanguage': translationLanguage,
+        'hasForms': hasForms,
+        'formKinds': [for (final k in formKinds) k.name],
+        'extraLabels': extraLabels,
         'boxes': boxes.map((b) => b.toJson()).toList(),
       };
 }

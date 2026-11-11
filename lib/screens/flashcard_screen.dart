@@ -50,6 +50,14 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
   String get _front => _showLatin ? _current.latin : _current.german;
   String get _back => _showLatin ? _current.german : _current.latin;
 
+  String get _wordLabel {
+    final language = Store.instance.lessonOf(_current)?.language ?? '';
+    return language.isEmpty ? 'Wort' : language;
+  }
+
+  String get _translationLabel =>
+      Store.instance.lessonOf(_current)?.translationLanguage ?? 'Übersetzung';
+
   @override
   void initState() {
     super.initState();
@@ -164,17 +172,18 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                         key: ValueKey(_index),
                         flipped: _revealed,
                         front: _CardFace(
-                          label: _showLatin ? 'Latein' : 'Deutsch',
+                          label: _showLatin ? _wordLabel : _translationLabel,
                           text: _front,
                           hint: 'Tippen zum Umdrehen',
                         ),
                         back: _CardFace(
-                          label: _showLatin ? 'Deutsch' : 'Latein',
+                          label: _showLatin ? _translationLabel : _wordLabel,
                           text: _back,
                           subtitle: _front,
                           middle: _current.hasMiddle
                               ? _current.middleColumn
                               : null,
+                          extras: _current.extras,
                           highlighted: true,
                         ),
                       ),
@@ -265,6 +274,7 @@ class _CardFace extends StatelessWidget {
   final String text;
   final String? subtitle;
   final String? middle;
+  final List<VocabExtra> extras;
   final String? hint;
   final bool highlighted;
 
@@ -273,6 +283,7 @@ class _CardFace extends StatelessWidget {
     required this.text,
     this.subtitle,
     this.middle,
+    this.extras = const [],
     this.hint,
     this.highlighted = false,
   });
@@ -333,6 +344,22 @@ class _CardFace extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+            ),
+          ],
+          for (final e in extras) ...[
+            const SizedBox(height: 12),
+            Text.rich(
+              TextSpan(children: [
+                TextSpan(
+                  text: '${e.label}: ',
+                  style: TextStyle(
+                    color: muted(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                TextSpan(text: e.value),
+              ]),
+              textAlign: TextAlign.center,
             ),
           ],
           if (subtitle != null) ...[

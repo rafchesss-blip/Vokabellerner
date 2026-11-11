@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/practice_list.dart';
 import '../models/vocab.dart';
-import 'builtin_lessons.dart';
 
 /// Zentrale Ablage für Lektionen und Übungslisten (Singleton).
 ///
@@ -32,15 +31,9 @@ class Store {
   /// Abfragen pro Tag („2026-11-07" → 34) für Lernserie und Tagesstatistik.
   Map<String, int> reviewLog = {};
 
-  /// Die eingebauten Lektionen aus `lektionen/` (Stand dieser App-Version).
-  List<Lesson> _builtIn = [];
-
-  /// Lädt den gespeicherten Stand und gleicht ihn mit den eingebauten
-  /// Lektionen ab. [builtIn] kann in Tests direkt übergeben werden.
-  Future<void> load({List<Lesson>? builtIn}) async {
+  /// Lädt den gespeicherten Stand.
+  Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-    _builtIn = builtIn ?? await loadBuiltInLessons();
-
     final lessonsRaw = prefs.getString(_lessonsKey);
     final listsRaw = prefs.getString(_listsKey);
     final logRaw = prefs.getString(_logKey);
@@ -52,54 +45,49 @@ class Store {
       lessonsJson: lessonsRaw == null ? [] : jsonDecode(lessonsRaw) as List,
       listsJson: listsRaw == null ? [] : jsonDecode(listsRaw) as List,
     );
-    await save();
   }
 
-  /// Übernimmt Lektionen/Listen aus JSON und führt sie mit den eingebauten
-  /// Lektionen zusammen.
+  /// Übernimmt Lektionen/Listen aus JSON.
   void _apply({required List lessonsJson, required List listsJson}) {
-    final stored = lessonsJson
+    lessons = lessonsJson
         .map((e) => Lesson.fromJson(e as Map<String, dynamic>))
         .toList();
-    final idMap = <String, String>{};
-    lessons = mergeBuiltInLessons(stored, _freshBuiltIn(), idMap: idMap);
     _sortLessons();
-
     practiceLists = listsJson
         .map((e) => PracticeList.fromJson(e as Map<String, dynamic>))
         .toList();
-    if (idMap.isNotEmpty) {
-      for (final list in practiceLists) {
-        list.vocabIds = [for (final id in list.vocabIds) idMap[id] ?? id];
-      }
-    }
   }
 
-  /// Frische Kopie der eingebauten Lektionen (ohne Fortschritt), damit
-  /// mehrfaches Zusammenführen sich nicht gegenseitig beeinflusst.
-  List<Lesson> _freshBuiltIn() =>
-      [for (final l in _builtIn) Lesson.fromJson(_withoutProgress(l))];
+  // ── Eigene Lektionen ───────────────────────────────────────────────────
 
-  Map<String, dynamic> _withoutProgress(Lesson l) => {
-        'id': l.id,
-        'name': l.name,
-        'boxes': [
-          for (final b in l.boxes)
-            {
-              'id': b.id,
-              'name': b.name,
-              'vocabs': [
-                for (final v in b.vocabs)
-                  {
-                    'id': v.id,
-                    'latin': v.latin,
-                    'german': v.german,
-                    'middleColumn': v.middleColumn,
-                  },
-              ],
-            },
-        ],
-      };
+  Future<void> addLesson(Lesson lesson) async {
+    lessons.add(lesson);
+    _sortLessons();
+    await save();
+  }
+
+  /// Löscht [lesson] und nimmt ihre Vokabeln aus allen Übungslisten.
+  Future<void> deleteLesson(Lesson lesson) async {
+    final ids = {for (final v in lesson.allVocabs) v.id};
+    lessons.removeWhere((l) => l.id == lesson.id);
+    for (final list in practiceLists) {
+      list.vocabIds.removeWhere(ids.contains);
+    }
+    await save();
+  }
+
+  /// Entfernt eine Vokabel aus ihrer Lektion und allen Übungslisten.
+  Future<void> deleteVocab(Vocab vocab) async {
+    for (final l in lessons) {
+      for (final b in l.boxes) {
+        b.vocabs.removeWhere((v) => v.id == vocab.id);
+      }
+    }
+    for (final list in practiceLists) {
+      list.vocabIds.remove(vocab.id);
+    }
+    await save();
+  }
 
   Future<void> save() async {
     final prefs = await SharedPreferences.getInstance();
@@ -235,6 +223,16 @@ class Store {
       }
     }
     return map;
+  }
+
+  /// Lektion, zu der [vocab] gehört.
+  Lesson? lessonOf(Vocab vocab) {
+    for (final l in lessons) {
+      for (final b in l.boxes) {
+        if (b.vocabs.any((v) => v.id == vocab.id)) return l;
+      }
+    }
+    return null;
   }
 
   /// Löst IDs zu Vokabeln auf (unbekannte IDs werden übersprungen).

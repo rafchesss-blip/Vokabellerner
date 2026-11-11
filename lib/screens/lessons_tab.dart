@@ -4,13 +4,28 @@ import '../data/store.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
 import '../utils/goals.dart';
-import '../widgets/standard_app_bar.dart';
+import 'lesson_screen.dart';
+import 'lesson_setup_screen.dart';
 
-/// Tab „Lektionen": Übersicht aller Lektionen mit Fortschritt.
+/// Tab „Lektionen": eigene Lektionen mit Fortschritt, neue anlegen.
 ///
 /// Geübt wird über Übungslisten (Start → Übungslisten).
 class LessonsTab extends StatelessWidget {
   const LessonsTab({super.key});
+
+  static Future<void> createLesson(BuildContext context) async {
+    final lesson = await Navigator.push<Lesson>(
+      context,
+      MaterialPageRoute(builder: (_) => const LessonSetupScreen()),
+    );
+    if (lesson == null) return;
+    await Store.instance.addLesson(lesson);
+    if (!context.mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => LessonScreen(lesson: lesson)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,16 +36,43 @@ class LessonsTab extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           children: [
-            for (final lesson in lessons) _LessonCard(lesson: lesson),
             if (lessons.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(32),
-                child: Text(
-                  'Noch keine Lektionen.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: muted(context)),
+              Card(
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      const Text('📚', style: TextStyle(fontSize: 40)),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Noch keine Lektionen',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Leg deine erste Lektion an. Die Vokabeln tippst du '
+                        'selbst ein – oder du fotografierst die Seite aus '
+                        'deinem Buch und lässt eine KI-App wie ChatGPT oder '
+                        'Gemini sie ablesen.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: muted(context)),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+            for (final lesson in lessons) _LessonCard(lesson: lesson),
+            const SizedBox(height: 4),
+            FilledButton.icon(
+              onPressed: () => createLesson(context),
+              icon: const Icon(Icons.add),
+              label: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Text('Neue Lektion', style: TextStyle(fontSize: 16)),
+              ),
+            ),
           ],
         );
       },
@@ -48,7 +90,6 @@ class _LessonCard extends StatelessWidget {
     final vocabs = lesson.allVocabs;
     final known = vocabs.where(isKnown).length;
     final share = vocabs.isEmpty ? 0.0 : known / vocabs.length;
-    final scheme = Theme.of(context).colorScheme;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -56,7 +97,7 @@ class _LessonCard extends StatelessWidget {
       child: InkWell(
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => LessonDetailScreen(lesson: lesson)),
+          MaterialPageRoute(builder: (_) => LessonScreen(lesson: lesson)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -68,28 +109,17 @@ class _LessonCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            lesson.name,
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        if (!lesson.isBuiltIn) ...[
-                          const SizedBox(width: 8),
-                          Icon(Icons.person_outline,
-                              size: 16, color: scheme.primary),
-                        ],
-                      ],
+                    Text(
+                      lesson.name,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${lesson.boxes.length} Kästen · ${vocabs.length} Vokabeln'
-                      ' · $known gewusst',
+                      '${lesson.language.isEmpty ? '' : '${lesson.language} · '}'
+                      '${vocabs.length} Vokabeln · $known gewusst',
                       style: TextStyle(color: muted(context), fontSize: 13),
                     ),
                   ],
@@ -133,84 +163,6 @@ class _ProgressBadge extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Inhalt einer Lektion (nur ansehen).
-class LessonDetailScreen extends StatelessWidget {
-  final Lesson lesson;
-
-  const LessonDetailScreen({super.key, required this.lesson});
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
-      valueListenable: Store.instance.revision,
-      builder: (context, _, __) {
-        // Nach dem Bearbeiten ist die Lektion ein neues Objekt.
-        final current = Store.instance.lessons
-                .where((l) => l.id == lesson.id)
-                .firstOrNull ??
-            lesson;
-
-        return Scaffold(
-          appBar: standardAppBar(context, current.name),
-          body: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            children: [
-              if (current.isBuiltIn)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
-                    'Eingebaute Lektion – sie wird auf GitHub im Ordner '
-                    '„lektionen“ gepflegt.',
-                    style: TextStyle(color: muted(context), fontSize: 13),
-                  ),
-                ),
-              for (final box in current.boxes) ...[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
-                  child: Text(
-                    box.name,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-                Card(
-                  child: Column(
-                    children: [
-                      for (final v in box.vocabs)
-                        ListTile(
-                          dense: true,
-                          title: Text(
-                            v.latin,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          subtitle: Text(
-                            v.hasMiddle
-                                ? '${v.middleColumn} · ${v.german}'
-                                : v.german,
-                          ),
-                          trailing: v.isNew
-                              ? null
-                              : Icon(
-                                  isKnown(v)
-                                      ? Icons.check_circle
-                                      : Icons.radio_button_unchecked,
-                                  size: 18,
-                                  color: isKnown(v)
-                                      ? Colors.green
-                                      : faint(context),
-                                ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
-        );
-      },
     );
   }
 }

@@ -1,10 +1,29 @@
-# Vokabellerner – Latein
+# Vokabeltrainer (Google-Play-Version)
 
-Ein Latein-Vokabeltrainer als Flutter-App. Er läuft komplett im Browser
-(GitHub Pages), ohne Konto und ohne Server. Der Lernfortschritt wird im
-Browser gespeichert.
+> Dieser Zweig (`play`) ist die Version für Google Play. Die Latein-Version
+> für den Browser liegt auf `main` und wird von hier aus nicht verändert.
 
-**App öffnen:** https://rafchesss-blip.github.io/Vokabellerner/
+Ein Vokabeltrainer für jede Sprache. Lektionen legt man selbst an: Die
+Vokabeln tippt man ein oder fotografiert sie und lässt sie von einer
+KI-App (ChatGPT, Gemini, …) ablesen. Kostenlos, ohne Werbung und ohne
+Konto. Alles bleibt auf dem Handy ([Datenschutz](DATENSCHUTZ.md)).
+
+## Eigene Lektionen und Scannen
+
+- **Lektion anlegen** (Tab „Lektionen“): Name, Sprache, Sprache der
+  Übersetzung. Dazu, was eingegeben wird: Wort und Übersetzung immer,
+  **Formen** auf Wunsch (Verb-, Nomen-, Adjektivformen, Geschlecht, beliebig
+  kombinierbar) und bis zu drei **Sonstiges**-Felder mit eigenem Namen.
+- **Selbst eingeben:** Formular mit genau diesen Feldern.
+- **Scannen:** Foto aufnehmen → die App teilt Foto und Anleitung
+  (`lib/utils/ai_scan.dart`) mit einer KI-App. Die KI antwortet mit einem
+  Textblock, der mit `#VOKABELN` beginnt, eine Zeile pro Vokabel, Spalten mit
+  `|` getrennt. Kopiert man die Antwort und kehrt zurück, erkennt die App sie
+  in der Zwischenablage, zeigt eine Vorschau und übernimmt die Vokabeln.
+  Ganz automatisch zurück geht es nicht: KI-Apps geben keine Antwort an
+  andere Apps zurück.
+- **Test:** Unter Einstellungen → „Sonstiges mit abfragen“ werden auch die
+  Sonstiges-Felder abgefragt.
 
 ## Funktionen
 
@@ -22,117 +41,63 @@ Browser gespeichert.
 - **Karteikarten:** Die Karte dreht sich um, du bewertest mit Nochmal, Schwer,
   Gut oder Leicht und siehst vorher, wann die Karte wiederkommt.
   Am PC: Leertaste zum Umdrehen, 1–4 zum Bewerten.
-- **Test-Modus:** Du tippst die Übersetzung und/oder die mittlere Spalte ein.
-  Die Prüfung ignoriert Makronen (ā = a) und Artikel.
+- **Test-Modus:** Du tippst die Übersetzung und/oder die Formen ein, auf
+  Wunsch auch die Sonstiges-Felder. Die Prüfung ignoriert Makronen (ā = a)
+  und Artikel.
 - **Testdatum:** Hat eine Übungsliste ein Testdatum, verteilt die App die
   neuen Vokabeln gleichmäßig auf die Tage bis zum **Vortag** des Tests (am
   Testtag selbst wird nicht mehr geübt). Je näher der Test, desto kürzer die
   Abstände: höchstens die halbe Restzeit. Am Vortag wird alles noch einmal
   wiederholt. Die Startseite zeigt einen Countdown.
-- **Benachrichtigungen (Android-App):** bis zu 3-mal am Tag (14:30, 17:30
+- **Benachrichtigungen:** bis zu 3-mal am Tag (14:30, 17:30
   und 20:15 Uhr), nie nach 21 Uhr. Die Texte zeigen die aktuellen Zahlen,
   wechseln jeden Tag und werden vor einem Test dringender. Bei jedem
   Öffnen und nach jedem Lernen plant die App sie neu. Ist für heute alles
   gelernt, kommt keine Erinnerung mehr.
-- **Kalender-Erinnerungen (Browser):** Im Browser gibt es keine
-  Benachrichtigungen. Stattdessen kann die App eine Kalenderdatei (.ics) mit
-  einer Erinnerung pro Lerntag erzeugen.
-- **Lektionen:** Die Lektionen sind eingebaut. Der Tab „Lektionen“ zeigt sie
-  mit deinem Fortschritt.
+- **Lektionen:** keine eingebauten – jede Lektion legst du selbst an
+  (siehe oben). Der Tab „Lektionen“ zeigt sie mit deinem Fortschritt.
 - **Analyse:** Jede Vokabel hat eine Lernstufe (−5 bis +5) mit Verlauf.
   Außerdem siehst du, wie gut du sie gerade noch weißt und wann sie wieder
   drankommt.
 - **Sicherung:** Unter Einstellungen → Daten & Sicherung exportierst du eine
   Datei und importierst sie wieder, auch auf einem anderen Gerät.
 
-## Neue Lektion für alle hinzufügen
-
-Die eingebauten Lektionen sind einfache Textdateien im Ordner
-[`lektionen/`](lektionen/).
-
-1. Öffne auf GitHub den Ordner `lektionen` und klicke auf **Add file →
-   Create new file**.
-2. Gib als Namen z. B. `lektion-05.txt` ein.
-3. Schreib die Lektion in diesem Format:
-
-   ```
-   Lektion 5
-
-   Kasten 1
-   luna | f | der Mond
-   stella | f | der Stern
-   et | und
-
-   Kasten 2
-   vocāre | vocō | rufen, nennen
-   ```
-
-   Pro Zeile steht `Latein | mittlere Spalte | Deutsch`. Die mittlere Spalte
-   kann wegfallen (`et | und`). Zeilen mit `#` am Anfang sind Kommentare.
-4. Klicke auf **Commit changes**. Nach etwa 2–3 Minuten ist die Lektion
-   in der App, bei allen Nutzern.
-
-Tippfehler korrigierst du genauso direkt in der Datei. Der Lernfortschritt
-hängt am Dateinamen und am Wort. Ändert sich ein Wort, beginnt es wieder als
-„neu“.
-
-## Android-App
-
-Die APK wird lokal gebaut, nicht von GitHub Actions:
+## Für Google Play bauen
 
 ```bash
-flutter build apk --release --target-platform android-arm,android-arm64
+flutter build appbundle --release
 ```
 
-Damit die Web-Version sie zum Herunterladen anbietet („Android-App
-herunterladen“ auf der Startseite), kommt die APK als
-`Vokabellerner.apk` an ein GitHub-Release:
+Ergebnis: `build/app/outputs/bundle/release/app-release.aab`. Diese Datei
+kommt in die Play Console. Für jede neue Version vorher in `pubspec.yaml`
+die Nummer hinter dem `+` erhöhen (`1.0.0+1` → `1.0.1+2`).
 
-```bash
-cp build/app/outputs/flutter-apk/app-release.apk Vokabellerner.apk
-gh release create v0.1.0 Vokabellerner.apk --title "Version 0.1.0" --notes "…"
-```
-
-Der Link zeigt immer auf das neueste Release.
-
-Signiert wird mit dem Schlüssel aus `android/key.properties`. Diese Datei
-und der Schlüssel liegen nicht im Repo, sondern unter
-`C:\Users\rafch\.vokabellerner-signatur\`. Mit demselben Schlüssel lässt
-sich eine neue Version einfach über die alte installieren, und der
-Lernfortschritt bleibt erhalten. **Den Schlüssel nicht verlieren.**
-
-Der Lernfortschritt der Android-App ist getrennt vom Browser. Zum
-Übertragen gibt es unter Einstellungen → Daten & Sicherung die Sicherung.
-
-## Was ist neu?
-
-Die Web-Version zeigt neue Funktionen einmal oben rechts an (📣). Die
-Einträge stehen in `lib/data/changelog.dart` – kurz und aus Sicht der
-Nutzer geschrieben. Neue Einträge oben einfügen, mit der nächsthöheren
-Nummer.
+- App-ID: `io.github.rafchesss.vokabeltrainer`. Nach der ersten
+  Veröffentlichung nie mehr ändern.
+- Signiert wird mit dem Schlüssel aus `android/key.properties` (liegt nicht im
+  Repo, siehe `C:\Users\rafch\.vokabellerner-signatur\`). Bei Google Play
+  ist das der **Upload-Schlüssel**: Google signiert die App danach selbst
+  (Play App Signing).
+- Zum Ausprobieren ohne Play Store: `flutter build apk --release`.
 
 ## Entwickeln
 
 ```bash
 flutter pub get
-flutter run -d chrome     # im Browser starten
+flutter run               # auf dem Handy/Emulator starten
 flutter test              # Tests
 ```
 
-Bei jedem Push auf `main` testet GitHub Actions die App, baut sie und
-veröffentlicht sie auf GitHub Pages (`.github/workflows/deploy.yml`).
-
-Für eine Android-APK (`flutter create .`, dann `flutter build apk`) gibt es
-statt Datei-Download und -Upload die Zwischenablage für Sicherungen.
+GitHub Actions baut nur `main` (Web-Version); dieser Zweig wird lokal
+gebaut.
 
 ## Aufbau
 
 ```
-lektionen/            eingebaute Lektionen (eine .txt pro Lektion)
 lib/
-  data/               Speicher (shared_preferences) + Laden der Lektionen
+  data/               Speicher (shared_preferences)
   models/             Vokabel, Lektion, Kasten, Übungsliste, Einstellungen
-  screens/            Ansichten (Start, Lektionen, Analyse, Lernen, …)
-  utils/              FSRS, Wiederholungs-Planung, Parser, Ziele
-  platform/           Browser-Funktionen (Datei-Download/-Upload)
+  screens/            Ansichten (Start, Lektionen, Scannen, Lernen, …)
+  services/           Benachrichtigungen, Foto + Teilen mit der KI-App
+  utils/              FSRS, Wiederholungs-Planung, KI-Anleitung, Ziele
 ```

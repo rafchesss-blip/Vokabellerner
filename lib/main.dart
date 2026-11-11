@@ -52,7 +52,7 @@ class VokabeltrainerApp extends StatelessWidget {
       builder: (context, _, __) {
         final s = Settings.instance;
         return MaterialApp(
-          title: 'Vokabellerner',
+          title: 'Vokabeltrainer',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(s.accent),
           darkTheme: AppTheme.dark(s.accent),

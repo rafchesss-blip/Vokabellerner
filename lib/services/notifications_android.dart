@@ -104,7 +104,7 @@ Future<void> showTestNotification() async {
   await initNotifications();
   await _plugin.show(
     id: 9999,
-    title: '🏛️ Ave! So sehen deine Erinnerungen aus',
+    title: '👋 Hallo! So sehen deine Erinnerungen aus',
     body: 'Ich melde mich, wenn Vokabeln auf dich warten – nie nach 21 Uhr.',
     notificationDetails: _details,
   );
