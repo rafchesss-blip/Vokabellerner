@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 
 /// Auswertung am Ende einer Lern-Runde (Karteikarten oder Test).
@@ -12,17 +13,18 @@ Future<void> showSessionSummary(
   required VoidCallback onRestart,
 }) {
   final share = total == 0 ? 0.0 : correct / total;
-  final (emoji, title) = switch (share) {
-    >= 0.9 => ('🏆', 'Hervorragend!'),
-    >= 0.7 => ('🎉', 'Super gemacht!'),
-    >= 0.4 => ('💪', 'Gut geübt!'),
-    _ => ('🌱', 'Dranbleiben!'),
-  };
 
   return showDialog<void>(
     context: context,
     barrierDismissible: false,
     builder: (ctx) {
+      final l = ctx.l10n;
+      final (emoji, title) = switch (share) {
+        >= 0.9 => ('🏆', l.sessionSummaryExcellent),
+        >= 0.7 => ('🎉', l.sessionSummaryGreat),
+        >= 0.4 => ('💪', l.sessionSummaryGood),
+        _ => ('🌱', l.sessionSummaryKeepGoing),
+      };
       final scheme = Theme.of(ctx).colorScheme;
       return AlertDialog(
         contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 8),
@@ -67,12 +69,12 @@ Future<void> showSessionSummary(
             ),
             const SizedBox(height: 20),
             Text(
-              '$correct von $total beim ersten Versuch gewusst.',
+              l.sessionSummaryScore(correct, total),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 6),
             Text(
-              'Die App plant automatisch, wann jede Vokabel wieder drankommt.',
+              l.sessionSummaryScheduled,
               textAlign: TextAlign.center,
               style: TextStyle(color: muted(ctx), fontSize: 13),
             ),
@@ -85,14 +87,14 @@ Future<void> showSessionSummary(
               Navigator.pop(ctx);
               onRestart();
             },
-            child: const Text('Nochmal'),
+            child: Text(l.sessionSummaryRestart),
           ),
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
               Navigator.pop(context);
             },
-            child: const Text('Fertig'),
+            child: Text(l.commonDone),
           ),
         ],
       );

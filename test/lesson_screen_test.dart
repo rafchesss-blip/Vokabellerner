@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:vokabellerner/data/store.dart';
+import 'package:vokabellerner/l10n/app_localizations.dart';
 import 'package:vokabellerner/models/vocab.dart';
 import 'package:vokabellerner/screens/lesson_screen.dart';
 import 'package:vokabellerner/screens/lesson_setup_screen.dart';
@@ -16,6 +17,8 @@ void main() {
     addTearDown(tester.view.reset);
     Lesson? result;
     await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Builder(
         builder: (context) => TextButton(
           onPressed: () async => result = await Navigator.push<Lesson>(
@@ -59,7 +62,11 @@ void main() {
     );
     await tester.runAsync(() => Store.instance.addLesson(lesson));
 
-    await tester.pumpWidget(MaterialApp(home: LessonScreen(lesson: lesson)));
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: LessonScreen(lesson: lesson),
+    ));
     await tester.tap(find.text('Selbst eingeben'));
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();

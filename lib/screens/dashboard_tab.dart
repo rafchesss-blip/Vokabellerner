@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../data/store.dart';
+import '../l10n/l10n.dart';
 import '../models/settings.dart';
 import '../models/vocab.dart';
 import '../platform/platform.dart';
@@ -26,14 +27,26 @@ class DashboardTab extends StatelessWidget {
     );
   }
 
-  static String _greeting() {
+  static String _greeting(AppLocalizations l) {
     final h = DateTime.now().hour;
     final name = Settings.instance.userName;
-    final n = name.isEmpty ? '' : ', $name';
-    if (h < 5) return 'Noch wach$n? 🌙';
-    if (h < 11) return 'Guten Morgen$n! ☀️';
-    if (h < 18) return 'Hallo$n! 👋';
-    return 'Guten Abend$n! 🌆';
+    final named = name.isNotEmpty;
+    if (h < 5) {
+      return named
+          ? l.dashboardGreetingNightName(name)
+          : l.dashboardGreetingNight;
+    }
+    if (h < 11) {
+      return named
+          ? l.dashboardGreetingMorningName(name)
+          : l.dashboardGreetingMorning;
+    }
+    if (h < 18) {
+      return named ? l.dashboardGreetingDayName(name) : l.dashboardGreetingDay;
+    }
+    return named
+        ? l.dashboardGreetingEveningName(name)
+        : l.dashboardGreetingEvening;
   }
 
   /// Lädt die APK herunter und erklärt, wie man sie installiert.
@@ -77,6 +90,7 @@ class DashboardTab extends StatelessWidget {
       // Auch bei neuen Einstellungen (z. B. Name in der Begrüßung).
       listenable: Listenable.merge([Store.instance.revision, Settings.revision]),
       builder: (context, _) {
+        final l = context.l10n;
         final store = Store.instance;
         final pool = todayPool();
         final plan = planReview(pool, store.practiceLists);
@@ -88,7 +102,7 @@ class DashboardTab extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
-            _HeroCard(greeting: _greeting(), streak: streak),
+            _HeroCard(greeting: _greeting(l), streak: streak),
             if (exam != null) ...[
               const SizedBox(height: 16),
               _ExamCard(
@@ -114,32 +128,31 @@ class DashboardTab extends StatelessWidget {
                   icon: Icons.local_fire_department,
                   color: const Color(0xFFFB923C),
                   value: '$streak',
-                  label: streak == 1 ? 'Tag Serie' : 'Tage Serie',
+                  label: l.dashboardStreakLabel(streak),
                 ),
                 const SizedBox(width: 12),
                 _StatTile(
                   icon: Icons.bolt,
                   color: Theme.of(context).colorScheme.primary,
                   value: '${store.reviewsToday}',
-                  label: 'heute geübt',
+                  label: l.dashboardPracticedToday,
                 ),
                 const SizedBox(width: 12),
                 _StatTile(
                   icon: Icons.check_circle,
                   color: const Color(0xFF34D399),
                   value: '$known',
-                  label: 'von ${allVocabs.length} gewusst',
+                  label: l.dashboardKnownOf(allVocabs.length),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             _NavTile(
               icon: Icons.list_alt,
-              title: 'Übungslisten',
+              title: l.dashboardPracticeLists,
               subtitle: store.practiceLists.isEmpty
-                  ? 'Stell dir Vokabeln für einen Test zusammen'
-                  : '${store.practiceLists.length} '
-                      '${store.practiceLists.length == 1 ? 'Liste' : 'Listen'}',
+                  ? l.dashboardPracticeListsEmpty
+                  : l.dashboardListCount(store.practiceLists.length),
               onTap: () => _open(context, const PracticeListsScreen()),
             ),
             if (kIsWeb)
@@ -151,8 +164,8 @@ class DashboardTab extends StatelessWidget {
               ),
             _NavTile(
               icon: Icons.help_outline,
-              title: 'Hilfe & Anleitung',
-              subtitle: 'So funktioniert der Vokabellerner',
+              title: l.dashboardHelpTitle,
+              subtitle: l.dashboardHelpSubtitle,
               onTap: () => _open(context, const TutorialScreen()),
             ),
           ],
@@ -171,10 +184,11 @@ class _HeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l = context.l10n;
     final text = switch (streak) {
-      0 => 'Starte heute deine Lernserie!',
-      1 => 'Tag 1 deiner Lernserie – weiter so!',
-      _ => '🔥 $streak Tage in Folge gelernt!',
+      0 => l.dashboardStreakNone,
+      1 => l.dashboardStreakFirstDay,
+      _ => l.dashboardStreakRun(streak),
     };
 
     return Container(
@@ -241,6 +255,7 @@ class _TodayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     final done = plan.isEmpty;
 
@@ -256,20 +271,18 @@ class _TodayCard extends StatelessWidget {
                 children: [
                   Icon(Icons.list_alt, color: scheme.primary),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Leg los!',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                  Text(
+                    l.dashboardGetStarted,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w800),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               Text(
                 hasLessons
-                    ? 'Erstelle jetzt eine Übungsliste: Gib ihr einen Namen '
-                        'und wähle die Vokabeln aus, die du lernen willst.'
-                    : 'Leg zuerst eine Lektion an. Die Vokabeln tippst du '
-                        'selbst ein oder scannst sie mit einer KI-App aus '
-                        'deinem Buch.',
+                    ? l.dashboardNoListsHint
+                    : l.dashboardNoLessonsHint,
                 style: TextStyle(color: muted(context)),
               ),
               const SizedBox(height: 16),
@@ -279,7 +292,9 @@ class _TodayCard extends StatelessWidget {
                 label: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   child: Text(
-                      hasLessons ? 'Übungsliste erstellen' : 'Lektion anlegen',
+                      hasLessons
+                          ? l.dashboardCreateList
+                          : l.dashboardCreateLesson,
                       style: const TextStyle(fontSize: 17)),
                 ),
               ),
@@ -304,7 +319,7 @@ class _TodayCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  done ? 'Für heute alles erledigt!' : 'Heute',
+                  done ? l.dashboardAllDone : l.dashboardToday,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -316,9 +331,8 @@ class _TodayCard extends StatelessWidget {
             if (done)
               Text(
                 reviewedToday > 0
-                    ? 'Du hast heute $reviewedToday Abfragen geschafft. '
-                        'Morgen geht es weiter!'
-                    : 'Gerade ist nichts fällig. Schau morgen wieder vorbei!',
+                    ? l.dashboardDoneReviewed(reviewedToday)
+                    : l.dashboardNothingDue,
                 style: TextStyle(color: muted(context)),
               )
             else ...[
@@ -326,12 +340,12 @@ class _TodayCard extends StatelessWidget {
                 children: [
                   _BigNumber(
                     value: plan.due.length,
-                    label: 'wiederholen',
+                    label: l.dashboardDueLabel,
                     color: scheme.primary,
                   ),
                   _BigNumber(
                     value: plan.fresh.length,
-                    label: 'neu',
+                    label: l.dashboardNewLabel,
                     color: scheme.tertiary,
                   ),
                 ],
@@ -340,14 +354,15 @@ class _TodayCard extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onStart,
                 icon: const Icon(Icons.play_arrow_rounded, size: 28),
-                label: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  child: Text("Los geht's", style: TextStyle(fontSize: 18)),
+                label: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Text(l.commonLetsGo,
+                      style: const TextStyle(fontSize: 18)),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Aus deinen Übungslisten',
+                l.dashboardFromLists,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: faint(context), fontSize: 12),
               ),
@@ -482,26 +497,26 @@ class _ExamCard extends StatelessWidget {
         .difference(DateTime(now.year, now.month, now.day))
         .inDays;
 
+    final l = context.l10n;
     final (emoji, title, text, color) = switch (days) {
       0 => (
           '🍀',
-          'Heute ist „$name"!',
-          'Du hast geübt – jetzt zeig, was du kannst. Viel Erfolg!',
+          l.dashboardExamToday(name),
+          l.dashboardExamTodayText,
           const Color(0xFF34D399),
         ),
       1 => (
           '🚨',
-          'Morgen ist „$name"!',
-          'Heute ist der letzte Lerntag – alles wird noch einmal wiederholt.',
+          l.dashboardExamTomorrow(name),
+          l.dashboardExamTomorrowText,
           const Color(0xFFE5484D),
         ),
       _ => (
           '🎯',
-          '„$name" in $days Tagen',
+          l.dashboardExamInDays(name, days),
           days <= 3
-              ? 'Endspurt! Noch ${days - 1} Lerntage – jeder zählt.'
-              : 'Noch ${days - 1} Lerntage. Die App verteilt die Vokabeln '
-                  'so, dass du rechtzeitig fertig bist.',
+              ? l.dashboardExamFinalSpurt(days - 1)
+              : l.dashboardExamDaysLeft(days - 1),
           const Color(0xFFFB923C),
         ),
     };

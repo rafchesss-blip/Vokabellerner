@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import '../navigation.dart';
 import '../widgets/changelog_button.dart';
 import 'analyse_tab.dart';
@@ -11,20 +12,20 @@ import 'settings_screen.dart';
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key});
 
-  static const _titles = ['Vokabeltrainer', 'Lektionen', 'Analyse'];
-
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+    final titles = ['Vokabeltrainer', l.homeTabLessons, l.homeTabAnalysis];
     return ValueListenableBuilder<int>(
       valueListenable: shellTabIndex,
       builder: (context, index, _) => Scaffold(
         appBar: AppBar(
-          title: Text(_titles[index]),
+          title: Text(titles[index]),
           actions: [
             const ChangelogButton(),
             IconButton(
               icon: const Icon(Icons.settings_outlined),
-              tooltip: 'Einstellungen',
+              tooltip: l.commonSettings,
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
@@ -47,21 +48,21 @@ class HomeShell extends StatelessWidget {
         bottomNavigationBar: NavigationBar(
           selectedIndex: index,
           onDestinationSelected: (i) => shellTabIndex.value = i,
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
-              label: 'Start',
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home),
+              label: l.homeTabStart,
             ),
             NavigationDestination(
-              icon: Icon(Icons.menu_book_outlined),
-              selectedIcon: Icon(Icons.menu_book),
-              label: 'Lektionen',
+              icon: const Icon(Icons.menu_book_outlined),
+              selectedIcon: const Icon(Icons.menu_book),
+              label: l.homeTabLessons,
             ),
             NavigationDestination(
-              icon: Icon(Icons.insights_outlined),
-              selectedIcon: Icon(Icons.insights),
-              label: 'Analyse',
+              icon: const Icon(Icons.insights_outlined),
+              selectedIcon: const Icon(Icons.insights),
+              label: l.homeTabAnalysis,
             ),
           ],
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:vokabellerner/data/store.dart';
+import 'package:vokabellerner/l10n/app_localizations.dart';
 import 'package:vokabellerner/models/vocab.dart';
 import 'package:vokabellerner/screens/selection_screen.dart';
 
@@ -23,6 +24,8 @@ void main() {
   Future<void> openPicker(WidgetTester tester, Set<String> Function() read) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) => Center(
             child: ElevatedButton(
@@ -81,7 +84,7 @@ void main() {
     await tester.tap(find.byType(Checkbox).at(2));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Fertig (1 Vokabeln)'));
+    await tester.tap(find.text('Fertig (1 Vokabel)'));
     await tester.pumpAndSettle();
 
     expect(result, {'v1'});

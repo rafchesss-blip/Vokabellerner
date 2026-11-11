@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/store.dart';
+import '../l10n/l10n.dart';
 import '../models/settings.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
@@ -92,11 +93,13 @@ class _TestScreenState extends State<TestScreen> {
         ? v.german
         : v.latin;
     final lesson = Store.instance.lessonOf(v);
+    final l = context.l10n;
     final translationLabel = s.direction == LanguageDirection.latinToGerman
-        ? 'Übersetzung (${lesson?.translationLanguage ?? 'Deutsch'})'
+        ? l.testTranslationLabel(
+            lesson?.translationLanguage ?? l.languageGerman)
         : (lesson == null || lesson.language.isEmpty
-            ? 'Wort'
-            : 'Wort (${lesson.language})');
+            ? l.testWordLabel
+            : l.testWordLabelWithLanguage(lesson.language));
 
     final needTranslation = s.answerMode != AnswerMode.middleOnly;
     final needMiddle = hasMiddle && s.answerMode != AnswerMode.translationOnly;
@@ -104,7 +107,7 @@ class _TestScreenState extends State<TestScreen> {
     final parts = <AnswerPart>[];
     if (needTranslation) parts.add(AnswerPart(translationLabel, translation));
     if (needMiddle) {
-      parts.add(AnswerPart('Formen', v.middleColumn!));
+      parts.add(AnswerPart(l.testFormsLabel, v.middleColumn!));
     }
     // Fallback: „nur Formen" gewählt, aber keine vorhanden.
     if (parts.isEmpty) parts.add(AnswerPart(translationLabel, translation));
@@ -204,8 +207,10 @@ class _TestScreenState extends State<TestScreen> {
     final allCorrect =
         _partResults.isNotEmpty && _partResults.every((r) => r);
 
+    final l = context.l10n;
     return Scaffold(
-      appBar: standardAppBar(context, 'Test ${_index + 1} / ${_queue.length}'),
+      appBar: standardAppBar(
+          context, l.testTitle(_index + 1, _queue.length)),
       body: Column(
         children: [
           LinearProgressIndicator(value: (_index + 1) / _queue.length),
@@ -221,7 +226,7 @@ class _TestScreenState extends State<TestScreen> {
                     child: Column(
                       children: [
                         Text(
-                          'Übersetze:',
+                          l.testTranslate,
                           style: TextStyle(color: muted(context)),
                         ),
                         const SizedBox(height: 12),
@@ -258,10 +263,10 @@ class _TestScreenState extends State<TestScreen> {
                       labelText: parts[i].label,
                       border: const OutlineInputBorder(),
                       helperText: _checked && !_partResults[i]
-                          ? 'Richtig: ${parts[i].correct}'
+                          ? l.testCorrectAnswer(parts[i].correct)
                           : null,
                       errorText:
-                          _checked && !_partResults[i] ? 'Falsch' : null,
+                          _checked && !_partResults[i] ? l.testWrong : null,
                       suffixIcon: _checked
                           ? Icon(
                               _partResults[i]
@@ -285,7 +290,7 @@ class _TestScreenState extends State<TestScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      allCorrect ? 'Richtig! 🎉' : 'Leider falsch.',
+                      allCorrect ? l.testResultCorrect : l.testResultWrong,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -301,8 +306,10 @@ class _TestScreenState extends State<TestScreen> {
                       : (_allFilled ? _check : null),
                   child: Text(
                     _checked
-                        ? (_index + 1 >= _queue.length ? 'Fertig' : 'Weiter')
-                        : 'Prüfen',
+                        ? (_index + 1 >= _queue.length
+                            ? l.commonDone
+                            : l.commonNext)
+                        : l.testCheck,
                   ),
                 ),
               ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/changelog.dart';
+import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 
 const _seenKey = 'changelog_seen';
@@ -51,7 +52,7 @@ class _ChangelogButtonState extends State<ChangelogButton> {
   Widget build(BuildContext context) {
     if (_unseen.isEmpty) return const SizedBox.shrink();
     return IconButton(
-      tooltip: 'Was ist neu?',
+      tooltip: context.l10n.changelogTitle,
       onPressed: _open,
       icon: Badge.count(
         count: _unseen.length,
@@ -68,6 +69,7 @@ class _ChangelogSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return SafeArea(
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -78,7 +80,7 @@ class _ChangelogSheet extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           children: [
             Text(
-              'Was ist neu?',
+              l.changelogTitle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
@@ -91,14 +93,14 @@ class _ChangelogSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        e.title,
+                        e.title(l),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(e.text, style: TextStyle(color: muted(context))),
+                      Text(e.text(l), style: TextStyle(color: muted(context))),
                       const SizedBox(height: 6),
                       Text(
                         e.date,
@@ -111,7 +113,7 @@ class _ChangelogSheet extends StatelessWidget {
             const SizedBox(height: 4),
             FilledButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Alles klar!'),
+              child: Text(l.changelogGotIt),
             ),
           ],
         ),

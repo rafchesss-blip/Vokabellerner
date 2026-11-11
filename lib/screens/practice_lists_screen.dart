@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../data/store.dart';
+import '../l10n/l10n.dart';
 import '../models/practice_list.dart';
 import '../models/vocab.dart';
 import '../platform/platform.dart';
@@ -26,20 +28,16 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
   Future<void> _createList() async {
     if (Store.instance.lessons.every((l) => l.allVocabs.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Leg zuerst unter „Lektionen" eine Lektion mit Vokabeln an.',
-          ),
+        SnackBar(
+          content: Text(context.l10n.practiceListsNeedLesson),
         ),
       );
       return;
     }
     if (Store.instance.practiceLists.length >= _maxLists) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Limit erreicht: Du kannst höchstens 10 Listen gleichzeitig haben.',
-          ),
+        SnackBar(
+          content: Text(context.l10n.practiceListsLimit(_maxLists)),
         ),
       );
       return;
@@ -55,7 +53,7 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
     final ids = await Navigator.push<Set<String>>(
       context,
       MaterialPageRoute(
-        builder: (_) => const SelectionScreen(confirmLabel: 'Fertig'),
+        builder: (_) => SelectionScreen(confirmLabel: context.l10n.commonDone),
       ),
     );
     if (ids == null || !mounted) return; // abgebrochen
@@ -149,49 +147,47 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
         builder: (_) => const _NameDialog(),
       );
 
-  /// „ · noch 5 Tage", „ · morgen!", „ · heute!" oder leer (vorbei).
-  String _countdown(DateTime exam) {
+  /// „ · noch 5 Tage", „ · morgen!", „ · heute!" oder „ · vorbei".
+  String _countdown(AppLocalizations l, DateTime exam) {
     final now = DateTime.now();
     final days = DateTime(exam.year, exam.month, exam.day)
         .difference(DateTime(now.year, now.month, now.day))
         .inDays;
-    if (days < 0) return ' · vorbei ✅';
-    if (days == 0) return ' · heute! 🍀';
-    if (days == 1) return ' · morgen!';
-    return ' · noch $days Tage';
+    if (days < 0) return l.practiceListsCountdownPast;
+    if (days == 0) return l.practiceListsCountdownToday;
+    if (days == 1) return l.practiceListsCountdownTomorrow;
+    return l.practiceListsCountdownDays(days);
   }
 
-  String _formatDate(DateTime d) => '${d.day.toString().padLeft(2, '0')}.'
-      '${d.month.toString().padLeft(2, '0')}.${d.year}';
+  String _formatDate(DateTime d) => DateFormat.yMd(appLanguageCode).format(d);
 
   /// Fragt ein optionales Zieldatum ab.
   ///
   /// Liefert `null`, wenn kein Datum gewählt wurde (übersprungen bzw.
   /// entfernt). [initial] wird beim Ändern eines bestehenden Datums gesetzt.
   Future<DateTime?> _askDueDate({DateTime? initial}) async {
+    final l = context.l10n;
     DateTime? picked = initial;
     final result = await showDialog<DateTime?>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           title: Text(
-            initial == null ? 'Wann ist der Vokabeltest?' : 'Testdatum ändern',
+            initial == null
+                ? l.practiceListsDueDateTitle
+                : l.practiceListsChangeDueDate,
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Optional. Die App verteilt die Vokabeln so, dass du bis zum '
-                'Tag vor dem Test alles kannst – am Testtag selbst musst du '
-                'nicht mehr üben.',
-              ),
+              Text(l.practiceListsDueDateHint),
               const SizedBox(height: 16),
               Row(
                 children: [
                   OutlinedButton.icon(
                     icon: const Icon(Icons.event),
-                    label: const Text('Datum wählen'),
+                    label: Text(l.practiceListsPickDate),
                     onPressed: () async {
                       final now = DateTime.now();
                       // Frühestens morgen – dann ist heute der Lerntag.
@@ -226,11 +222,12 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text(initial == null ? 'Überspringen' : 'Entfernen'),
+              child: Text(
+                  initial == null ? l.commonSkip : l.practiceListsRemoveDate),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, picked),
-              child: const Text('Fertig'),
+              child: Text(l.commonDone),
             ),
           ],
         ),
@@ -254,8 +251,8 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
     setState(() {});
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(list.notify
-          ? 'Erinnerungen für „${list.name}" sind an.'
-          : 'Keine Erinnerungen mehr für „${list.name}".'),
+          ? context.l10n.practiceListsNotifyOnSnack(list.name)
+          : context.l10n.practiceListsNotifyOffSnack(list.name)),
     ));
   }
 
@@ -265,7 +262,7 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
       MaterialPageRoute(
         builder: (_) => SelectionScreen(
           initialSelectedIds: list.vocabIds.toSet(),
-          confirmLabel: 'Fertig',
+          confirmLabel: context.l10n.commonDone,
         ),
       ),
     );
@@ -280,17 +277,17 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('„${list.name}" löschen?'),
-        content: const Text('Die Übungsliste wird entfernt.'),
+        title: Text(ctx.l10n.practiceListsDeleteTitle(list.name)),
+        content: Text(ctx.l10n.practiceListsDeleteText),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Abbrechen'),
+            child: Text(ctx.l10n.commonCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Löschen'),
+            child: Text(ctx.l10n.commonDelete),
           ),
         ],
       ),
@@ -307,7 +304,7 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
     final vocabs = Store.instance.resolveVocabs(list.vocabIds);
     if (vocabs.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Diese Liste enthält keine Vokabeln.')),
+        SnackBar(content: Text(context.l10n.practiceListsNoVocabs)),
       );
       return;
     }
@@ -319,14 +316,15 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final lists = Store.instance.practiceLists;
 
     return Scaffold(
-      appBar: standardAppBar(context, 'Deine Übungslisten'),
+      appBar: standardAppBar(context, l.practiceListsTitle),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _createList,
         icon: const Icon(Icons.add),
-        label: const Text('Neue Liste'),
+        label: Text(l.practiceListsNew),
       ),
       body: lists.isEmpty
           ? Center(
@@ -336,12 +334,12 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                   Icon(Icons.folder_open, size: 64, color: faint(context)),
                   const SizedBox(height: 12),
                   Text(
-                    'Noch keine Übungslisten',
+                    l.practiceListsEmptyTitle,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Erstelle deine erste Liste über den Button unten.',
+                    l.practiceListsEmptyText,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: muted(context)),
                   ),
@@ -367,16 +365,17 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                     ),
                     subtitle: Text(
                       (list.dueDate == null
-                              ? '${list.vocabIds.length} Vokabeln'
-                              : '${list.vocabIds.length} Vokabeln · Test: '
-                                  '${_formatDate(list.dueDate!)}'
-                                  '${_countdown(list.dueDate!)}') +
+                              ? l.vocabCount(list.vocabIds.length)
+                              : l.practiceListsSubtitleTest(
+                                      l.vocabCount(list.vocabIds.length),
+                                      _formatDate(list.dueDate!)) +
+                                  _countdown(l, list.dueDate!)) +
                           (notificationsSupported && !list.notify
                               ? ' · 🔕'
                               : ''),
                     ),
                     trailing: PopupMenuButton<String>(
-                      tooltip: 'Optionen',
+                      tooltip: l.commonOptions,
                       onSelected: (v) {
                         if (v == 'edit') _edit(list);
                         if (v == 'dueDate') _editDueDate(list);
@@ -385,23 +384,23 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                         if (v == 'delete') _delete(list);
                       },
                       itemBuilder: (_) => [
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'edit',
                           child: Row(
                             children: [
-                              Icon(Icons.edit_outlined, size: 20),
-                              SizedBox(width: 12),
-                              Text('Bearbeiten'),
+                              const Icon(Icons.edit_outlined, size: 20),
+                              const SizedBox(width: 12),
+                              Text(l.commonEdit),
                             ],
                           ),
                         ),
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'dueDate',
                           child: Row(
                             children: [
-                              Icon(Icons.event_outlined, size: 20),
-                              SizedBox(width: 12),
-                              Text('Testdatum ändern'),
+                              const Icon(Icons.event_outlined, size: 20),
+                              const SizedBox(width: 12),
+                              Text(l.practiceListsChangeDueDate),
                             ],
                           ),
                         ),
@@ -433,18 +432,18 @@ class _PracticeListsScreenState extends State<PracticeListsScreen> {
                                     size: 20),
                                 const SizedBox(width: 12),
                                 Text(list.notify
-                                    ? 'Erinnerungen ausschalten'
-                                    : 'Erinnerungen einschalten'),
+                                    ? l.practiceListsNotifyDisable
+                                    : l.practiceListsNotifyEnable),
                               ],
                             ),
                           ),
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'delete',
                           child: Row(
                             children: [
-                              Icon(Icons.delete_outline, size: 20),
-                              SizedBox(width: 12),
-                              Text('Löschen'),
+                              const Icon(Icons.delete_outline, size: 20),
+                              const SizedBox(width: 12),
+                              Text(l.commonDelete),
                             ],
                           ),
                         ),
@@ -479,25 +478,26 @@ class _NameDialogState extends State<_NameDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return AlertDialog(
-      title: const Text('Neue Übungsliste'),
+      title: Text(l.practiceListsNameDialogTitle),
       content: TextField(
         controller: _controller,
         autofocus: true,
-        decoration: const InputDecoration(
-          labelText: 'Name der Liste',
-          hintText: 'z. B. Vokabeltest 1',
+        decoration: InputDecoration(
+          labelText: l.practiceListsNameLabel,
+          hintText: l.practiceListsNameHint,
         ),
         onSubmitted: (s) => Navigator.pop(context, s),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Abbrechen'),
+          child: Text(l.commonCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, _controller.text),
-          child: const Text('Weiter'),
+          child: Text(l.commonNext),
         ),
       ],
     );
