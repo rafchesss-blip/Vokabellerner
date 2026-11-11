@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/l10n.dart';
+
 /// Erscheinungsbild der App (Dark/Light/System).
 enum AppThemeMode { dark, light, system }
 
@@ -106,6 +108,10 @@ class Settings {
   AppThemeMode themeMode = AppThemeMode.dark;
   NeonAccent accent = NeonAccent.violet;
 
+  /// Sprache der App (z. B. „de"); leer = noch nicht gewählt (dann die
+  /// Sprache des Geräts).
+  String language = '';
+
   /// Name für Begrüßung und Erinnerungen (optional, nur auf dem Gerät).
   String userName = '';
 
@@ -149,6 +155,8 @@ class Settings {
 
     askExtras = prefs.getBool('askExtras') ?? false;
     userName = prefs.getString('userName') ?? '';
+    language = prefs.getString('language') ?? '';
+    setAppLanguage(language.isEmpty ? deviceLanguage() : language);
     nameAsked = prefs.getBool('nameAsked') ?? false;
     introSeen = prefs.getBool('introSeen') ?? false;
     notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
@@ -164,6 +172,7 @@ class Settings {
     await prefs.setString('accent', accent.name);
     await prefs.setBool('askExtras', askExtras);
     await prefs.setString('userName', userName);
+    await prefs.setString('language', language);
     await prefs.setBool('nameAsked', nameAsked);
     await prefs.setBool('introSeen', introSeen);
     await prefs.setBool('notificationsEnabled', notificationsEnabled);

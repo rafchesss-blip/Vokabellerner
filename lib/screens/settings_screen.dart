@@ -5,7 +5,9 @@ import '../theme/app_theme.dart';
 import '../widgets/name_dialog.dart';
 import '../widgets/standard_app_bar.dart';
 import 'backup_section.dart';
+import '../l10n/l10n.dart';
 import 'intro_screen.dart';
+import 'language_screen.dart';
 import 'notifications_section.dart';
 import 'privacy_screen.dart';
 
@@ -44,6 +46,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              leading: const Icon(Icons.language),
+              title: Text(context.l10n.settingsLanguage),
+              subtitle: Text(appLanguages[Settings.instance.language] ??
+                  appLanguages[deviceLanguage()]!),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LanguageScreen()),
+                );
+                if (mounted) setState(() {});
+              },
+            ),
+          ),
           Card(
             margin: EdgeInsets.zero,
             child: ListTile(

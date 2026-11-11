@@ -6,7 +6,7 @@
 Ein Vokabeltrainer für jede Sprache. Lektionen legt man selbst an: Die
 Vokabeln tippt man ein oder fotografiert sie und lässt sie von einer
 KI-App (ChatGPT, Gemini, …) ablesen. Kostenlos, ohne Werbung und ohne
-Konto. Alles bleibt auf dem Handy ([Datenschutz](DATENSCHUTZ.md)).
+Konto. Alles bleibt auf dem Handy ([Datenschutz](privacy/de.md)).
 
 ## Eigene Lektionen und Scannen
 

@@ -1,0 +1,6 @@
+# Übersetzungen: lib/l10n/app_<sprache>.arb, Vorlage ist Deutsch.
+arb-dir: lib/l10n
+template-arb-file: app_de.arb
+output-localization-file: app_localizations.dart
+nullable-getter: false
+untranslated-messages-file: build/untranslated.txt

@@ -1,0 +1,40 @@
+{
+  "@@locale": "de",
+
+  "commonCancel": "Abbrechen",
+  "commonSave": "Speichern",
+  "commonDelete": "Löschen",
+  "commonEdit": "Bearbeiten",
+  "commonNext": "Weiter",
+  "commonBack": "Zurück",
+  "commonDone": "Fertig",
+  "commonOk": "OK",
+  "commonClose": "Schließen",
+  "commonLetsGo": "Los geht's",
+  "commonSkip": "Überspringen",
+  "commonUndo": "Rückgängig",
+  "commonOptions": "Optionen",
+  "commonSettings": "Einstellungen",
+  "commonHome": "Zur Startseite",
+
+  "languagePickerTitle": "Sprache der App",
+  "@languagePickerTitle": {"description": "Überschrift der Sprachauswahl (erster Start und Einstellungen)."},
+  "languagePickerHint": "Du kannst sie später in den Einstellungen ändern.",
+  "settingsLanguage": "Sprache",
+
+  "languageGerman": "Deutsch",
+  "@languageGerman": {"description": "Name der Sprache Deutsch in der App-Sprache, z. B. für die Sprache einer Lektion."},
+  "languageEnglish": "Englisch",
+  "languageSpanish": "Spanisch",
+  "languageFrench": "Französisch",
+  "languageItalian": "Italienisch",
+  "languagePortuguese": "Portugiesisch",
+  "languagePolish": "Polnisch",
+  "languageTurkish": "Türkisch",
+  "languageRussian": "Russisch",
+  "languageChinese": "Chinesisch",
+  "languageLatin": "Latein",
+
+  "vocabCount": "{count, plural, =1{1 Vokabel} other{{count} Vokabeln}}",
+  "@vocabCount": {"placeholders": {"count": {"type": "int"}}}
+}

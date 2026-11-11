@@ -16,7 +16,11 @@ void main() {
     await tester.pumpWidget(const VokabeltrainerApp());
     await tester.pumpAndSettle();
 
-    // Beim ersten Start: Einführung …
+    // Beim ersten Start: Sprache …
+    await tester.tap(find.text('Deutsch'));
+    await tester.pumpAndSettle();
+
+    // … Einführung …
     expect(find.text('Willkommen beim Vokabeltrainer'), findsOneWidget);
     for (var i = 0; i < 4; i++) {
       await tester.tap(find.text('Weiter'));

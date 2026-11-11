@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 import '../widgets/standard_app_bar.dart';
 
-/// Zeigt die Datenschutzerklärung (`DATENSCHUTZ.md`) in der App.
+/// Zeigt die Datenschutzerklärung (`privacy/<sprache>.md`, sonst Deutsch).
 class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key});
 
@@ -13,7 +14,9 @@ class PrivacyScreen extends StatelessWidget {
     return Scaffold(
       appBar: standardAppBar(context, 'Datenschutz', showSettings: false),
       body: FutureBuilder<String>(
-        future: rootBundle.loadString('DATENSCHUTZ.md'),
+        future: rootBundle
+            .loadString('privacy/$appLanguageCode.md')
+            .catchError((_) => rootBundle.loadString('privacy/de.md')),
         builder: (context, snap) {
           if (!snap.hasData) {
             return const Center(child: CircularProgressIndicator());

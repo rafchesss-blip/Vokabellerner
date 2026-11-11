@@ -10,8 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_local_notifications: ^23.0.0
+  flutter_localizations:
+    sdk: flutter
   flutter_timezone: ^5.1.1
   image_picker: ^1.2.4
+  intl: any
   shared_preferences: ^2.2.3
   timezone: ^0.11.2
   web: ^1.1.0
@@ -23,7 +26,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
 
-  # In der App unter Einstellungen → Datenschutz.
+  # Datenschutzerklärung pro Sprache (Einstellungen → Datenschutz).
   assets:
-    - DATENSCHUTZ.md
+    - privacy/

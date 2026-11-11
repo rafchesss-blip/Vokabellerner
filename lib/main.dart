@@ -2,13 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/store.dart';
+import 'l10n/l10n.dart';
 import 'models/settings.dart';
 import 'platform/platform.dart';
 import 'screens/home_shell.dart';
 import 'screens/intro_screen.dart';
+import 'screens/language_screen.dart';
 import 'services/notifications.dart';
 import 'theme/app_theme.dart';
 import 'widgets/name_dialog.dart';
@@ -65,6 +68,14 @@ class VokabeltrainerApp extends StatelessWidget {
         return MaterialApp(
           title: 'Vokabeltrainer',
           debugShowCheckedModeBanner: false,
+          locale: Locale(appLanguageCode),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           theme: AppTheme.light(s.accent),
           darkTheme: AppTheme.dark(s.accent),
           themeMode: switch (s.themeMode) {
@@ -79,8 +90,8 @@ class VokabeltrainerApp extends StatelessWidget {
   }
 }
 
-/// Beim ersten Start: Einführung, dann Name (optional), dann die Erlaubnis
-/// für Benachrichtigungen.
+/// Beim ersten Start: Sprache, Einführung, Name (optional), dann die
+/// Erlaubnis für Benachrichtigungen.
 class _Startup extends StatefulWidget {
   final Widget child;
 
@@ -101,6 +112,16 @@ class _StartupState extends State<_Startup> {
 
   Future<void> _run() async {
     final settings = Settings.instance;
+    if (settings.language.isEmpty) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => const LanguageScreen(firstStart: true),
+        ),
+      );
+      if (!mounted) return;
+    }
     if (!settings.introSeen) {
       await Navigator.push(
         context,
