@@ -20,3 +20,4 @@ pubspec.lock
 *.zip
 
 *.aab
+.claude/worktrees/

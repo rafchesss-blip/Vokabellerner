@@ -812,7 +812,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get notifSectionBlocked =>
-      'Benachrichtigungen sind blockiert. Erlaube sie in den Android-Einstellungen für den Vokabellerner.';
+      'Benachrichtigungen sind blockiert. Erlaube sie in den Android-Einstellungen für den Vokabeltrainer.';
 
   @override
   String get notifSectionTitle => 'Erinnerungen';
@@ -1461,7 +1461,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dashboardHelpTitle => 'Hilfe & Anleitung';
 
   @override
-  String get dashboardHelpSubtitle => 'So funktioniert der Vokabellerner';
+  String get dashboardHelpSubtitle => 'So funktioniert der Vokabeltrainer';
 
   @override
   String get dashboardStreakNone => 'Starte heute deine Lernserie!';
@@ -1926,4 +1926,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String intervalYears(String n) {
     return '$n J';
   }
+
+  @override
+  String get changelog7Title => '🌍 Jetzt in 10 Sprachen';
+
+  @override
+  String get changelog7Text =>
+      'Die App gibt es jetzt auf Deutsch, Englisch, Spanisch, Französisch, Italienisch, Portugiesisch, Polnisch, Türkisch, Russisch und Chinesisch. Umstellen kannst du die Sprache in den Einstellungen.';
 }

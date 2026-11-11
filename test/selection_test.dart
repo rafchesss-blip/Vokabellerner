@@ -25,6 +25,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
+        locale: const Locale('de'),
         supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) => Center(

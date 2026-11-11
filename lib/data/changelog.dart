@@ -28,6 +28,12 @@ class ChangelogEntry {
 
 final changelog = [
   ChangelogEntry(
+    7,
+    '11.11.2026',
+    (l) => l.changelog7Title,
+    (l) => l.changelog7Text,
+  ),
+  ChangelogEntry(
     6,
     '11.11.2026',
     (l) => l.changelog6Title,

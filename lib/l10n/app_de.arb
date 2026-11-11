@@ -862,7 +862,7 @@
   "@storeBackupCorrupt": {
     "description": "Error when the imported backup cannot be read."
   },
-  "notifSectionBlocked": "Benachrichtigungen sind blockiert. Erlaube sie in den Android-Einstellungen für den Vokabellerner.",
+  "notifSectionBlocked": "Benachrichtigungen sind blockiert. Erlaube sie in den Android-Einstellungen für den Vokabeltrainer.",
   "@notifSectionBlocked": {
     "description": "Snackbar when notification permission is denied."
   },
@@ -1624,7 +1624,7 @@
   "@dashboardHelpTitle": {
     "description": "Home screen tile opening the tutorial."
   },
-  "dashboardHelpSubtitle": "So funktioniert der Vokabellerner",
+  "dashboardHelpSubtitle": "So funktioniert der Vokabeltrainer",
   "@dashboardHelpSubtitle": {
     "description": "Subtitle of the help tile."
   },
@@ -2278,5 +2278,13 @@
         "type": "String"
       }
     }
+  },
+  "changelog7Title": "🌍 Jetzt in 10 Sprachen",
+  "changelog7Text": "Die App gibt es jetzt auf Deutsch, Englisch, Spanisch, Französisch, Italienisch, Portugiesisch, Polnisch, Türkisch, Russisch und Chinesisch. Umstellen kannst du die Sprache in den Einstellungen.",
+  "@changelog7Title": {
+    "description": "What's-new entry 7 title: the app is now available in 10 languages."
+  },
+  "@changelog7Text": {
+    "description": "What's-new entry 7 text."
   }
 }

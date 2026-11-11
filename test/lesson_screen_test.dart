@@ -18,6 +18,7 @@ void main() {
     Lesson? result;
     await tester.pumpWidget(MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
+      locale: const Locale('de'),
       supportedLocales: AppLocalizations.supportedLocales,
       home: Builder(
         builder: (context) => TextButton(
@@ -64,6 +65,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
+      locale: const Locale('de'),
       supportedLocales: AppLocalizations.supportedLocales,
       home: LessonScreen(lesson: lesson),
     ));

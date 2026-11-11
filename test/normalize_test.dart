@@ -14,6 +14,14 @@ void main() {
     expect(normalizeAnswer('Herr'), 'herr');
     expect(normalizeAnswer('die Mauer'), 'mauer');
     expect(normalizeAnswer('das Heer'), 'heer');
+    expect(normalizeAnswer('the house'), 'house');
+    expect(normalizeAnswer('la maison'), 'maison');
+    expect(normalizeAnswer("l'arbre"), 'arbre');
+    expect(normalizeAnswer('el perro'), 'perro');
+    expect(normalizeAnswer('a casa'), 'casa');
+    // Kein Artikel, nur gleicher Anfang:
+    expect(normalizeAnswer('these'), 'these');
+    expect(normalizeAnswer('ilex'), 'ilex');
 
     // Sonstiges
     expect(normalizeAnswer('  murus. '), 'murus');

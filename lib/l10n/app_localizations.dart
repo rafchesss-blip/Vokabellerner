@@ -6,6 +6,15 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_de.dart';
+import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_it.dart';
+import 'app_localizations_pl.dart';
+import 'app_localizations_pt.dart';
+import 'app_localizations_ru.dart';
+import 'app_localizations_tr.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -92,7 +101,18 @@ abstract class AppLocalizations {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('de')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
+    Locale('en'),
+    Locale('es'),
+    Locale('fr'),
+    Locale('it'),
+    Locale('pl'),
+    Locale('pt'),
+    Locale('ru'),
+    Locale('tr'),
+    Locale('zh')
+  ];
 
   /// No description provided for @commonCancel.
   ///
@@ -1435,7 +1455,7 @@ abstract class AppLocalizations {
   /// Snackbar when notification permission is denied.
   ///
   /// In de, this message translates to:
-  /// **'Benachrichtigungen sind blockiert. Erlaube sie in den Android-Einstellungen für den Vokabellerner.'**
+  /// **'Benachrichtigungen sind blockiert. Erlaube sie in den Android-Einstellungen für den Vokabeltrainer.'**
   String get notifSectionBlocked;
 
   /// Settings section heading for reminders.
@@ -2191,7 +2211,7 @@ abstract class AppLocalizations {
   /// Subtitle of the help tile.
   ///
   /// In de, this message translates to:
-  /// **'So funktioniert der Vokabellerner'**
+  /// **'So funktioniert der Vokabeltrainer'**
   String get dashboardHelpSubtitle;
 
   /// Below the greeting when the learning streak is 0.
@@ -2919,6 +2939,18 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'{n} J'**
   String intervalYears(String n);
+
+  /// What's-new entry 7 title: the app is now available in 10 languages.
+  ///
+  /// In de, this message translates to:
+  /// **'🌍 Jetzt in 10 Sprachen'**
+  String get changelog7Title;
+
+  /// What's-new entry 7 text.
+  ///
+  /// In de, this message translates to:
+  /// **'Die App gibt es jetzt auf Deutsch, Englisch, Spanisch, Französisch, Italienisch, Portugiesisch, Polnisch, Türkisch, Russisch und Chinesisch. Umstellen kannst du die Sprache in den Einstellungen.'**
+  String get changelog7Text;
 }
 
 class _AppLocalizationsDelegate
@@ -2931,8 +2963,18 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['de'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+        'de',
+        'en',
+        'es',
+        'fr',
+        'it',
+        'pl',
+        'pt',
+        'ru',
+        'tr',
+        'zh'
+      ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -2943,6 +2985,24 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'de':
       return AppLocalizationsDe();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'it':
+      return AppLocalizationsIt();
+    case 'pl':
+      return AppLocalizationsPl();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'ru':
+      return AppLocalizationsRu();
+    case 'tr':
+      return AppLocalizationsTr();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(
