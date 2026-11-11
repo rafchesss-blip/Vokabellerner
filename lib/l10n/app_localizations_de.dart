@@ -781,7 +781,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get backupHint =>
-      'Dein Fortschritt wird nur in diesem Browser gespeichert. Mach ab und zu eine Sicherung – damit kannst du auch auf ein anderes Gerät umziehen.';
+      'Dein Fortschritt wird nur auf diesem Gerät gespeichert. Mach ab und zu eine Sicherung – damit kannst du auch auf ein anderes Gerät umziehen.';
 
   @override
   String get backupExportTitle => 'Sicherung exportieren';
@@ -1901,4 +1901,29 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get changelog1Text =>
       'Leg eigene Lektionen an – Englisch, Französisch, Latein oder was du lernst – und tipp die Vokabeln ein oder scanne sie aus dem Buch.';
+
+  @override
+  String intervalMinutes(int n) {
+    return '$n Min';
+  }
+
+  @override
+  String intervalHours(int n) {
+    return '$n Std';
+  }
+
+  @override
+  String intervalDays(int n) {
+    return '$n T';
+  }
+
+  @override
+  String intervalMonths(int n) {
+    return '$n Mon';
+  }
+
+  @override
+  String intervalYears(String n) {
+    return '$n J';
+  }
 }

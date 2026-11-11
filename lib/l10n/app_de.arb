@@ -822,7 +822,7 @@
   "@backupTitle": {
     "description": "Settings section heading for data and backup."
   },
-  "backupHint": "Dein Fortschritt wird nur in diesem Browser gespeichert. Mach ab und zu eine Sicherung – damit kannst du auch auf ein anderes Gerät umziehen.",
+  "backupHint": "Dein Fortschritt wird nur auf diesem Gerät gespeichert. Mach ab und zu eine Sicherung – damit kannst du auch auf ein anderes Gerät umziehen.",
   "@backupHint": {
     "description": "Explanation in the backup section."
   },
@@ -2233,5 +2233,50 @@
   "changelog1Text": "Leg eigene Lektionen an – Englisch, Französisch, Latein oder was du lernst – und tipp die Vokabeln ein oder scanne sie aus dem Buch.",
   "@changelog1Text": {
     "description": "\"What's new?\" entry 1: text."
+  },
+  "intervalMinutes": "{n} Min",
+  "@intervalMinutes": {
+    "description": "Very short interval until a card comes back, in minutes (shown under rating buttons). Keep it short.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "intervalHours": "{n} Std",
+  "@intervalHours": {
+    "description": "Short interval in hours (abbreviated, very short).",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "intervalDays": "{n} T",
+  "@intervalDays": {
+    "description": "Interval in days (abbreviated, very short, e.g. \"3 d\").",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "intervalMonths": "{n} Mon",
+  "@intervalMonths": {
+    "description": "Interval in months (abbreviated, very short).",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "intervalYears": "{n} J",
+  "@intervalYears": {
+    "description": "Interval in years (abbreviated, very short). n is a decimal like 1.5.",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
   }
 }

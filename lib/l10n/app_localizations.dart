@@ -1375,7 +1375,7 @@ abstract class AppLocalizations {
   /// Explanation in the backup section.
   ///
   /// In de, this message translates to:
-  /// **'Dein Fortschritt wird nur in diesem Browser gespeichert. Mach ab und zu eine Sicherung – damit kannst du auch auf ein anderes Gerät umziehen.'**
+  /// **'Dein Fortschritt wird nur auf diesem Gerät gespeichert. Mach ab und zu eine Sicherung – damit kannst du auch auf ein anderes Gerät umziehen.'**
   String get backupHint;
 
   /// Tile: export a backup.
@@ -2889,6 +2889,36 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Leg eigene Lektionen an – Englisch, Französisch, Latein oder was du lernst – und tipp die Vokabeln ein oder scanne sie aus dem Buch.'**
   String get changelog1Text;
+
+  /// Very short interval until a card comes back, in minutes (shown under rating buttons). Keep it short.
+  ///
+  /// In de, this message translates to:
+  /// **'{n} Min'**
+  String intervalMinutes(int n);
+
+  /// Short interval in hours (abbreviated, very short).
+  ///
+  /// In de, this message translates to:
+  /// **'{n} Std'**
+  String intervalHours(int n);
+
+  /// Interval in days (abbreviated, very short, e.g. "3 d").
+  ///
+  /// In de, this message translates to:
+  /// **'{n} T'**
+  String intervalDays(int n);
+
+  /// Interval in months (abbreviated, very short).
+  ///
+  /// In de, this message translates to:
+  /// **'{n} Mon'**
+  String intervalMonths(int n);
+
+  /// Interval in years (abbreviated, very short). n is a decimal like 1.5.
+  ///
+  /// In de, this message translates to:
+  /// **'{n} J'**
+  String intervalYears(String n);
 }
 
 class _AppLocalizationsDelegate

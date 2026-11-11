@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import '../l10n/l10n.dart';
+
 /// FSRS-6 („Free Spaced Repetition Scheduler") – derselbe Algorithmus,
 /// den auch Anki seit Version 23.10 verwendet.
 ///
@@ -216,10 +218,10 @@ class Fsrs {
 
 /// Kurze Anzeige eines Intervalls, z. B. „10 Min", „3 T", „2 Mon".
 String formatInterval(Duration d) {
-  if (d.inMinutes < 60) return '${math.max(1, d.inMinutes)} Min';
-  if (d.inHours < 24) return '${d.inHours} Std';
+  if (d.inMinutes < 60) return L.intervalMinutes(math.max(1, d.inMinutes));
+  if (d.inHours < 24) return L.intervalHours(d.inHours);
   final days = (d.inMinutes / (60 * 24)).round();
-  if (days < 31) return '$days T';
-  if (days < 365) return '${(days / 30).round()} Mon';
-  return '${(days / 365).toStringAsFixed(1)} J';
+  if (days < 31) return L.intervalDays(days);
+  if (days < 365) return L.intervalMonths((days / 30).round());
+  return L.intervalYears((days / 365).toStringAsFixed(1));
 }
