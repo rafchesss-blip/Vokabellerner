@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../data/store.dart';
+import '../l10n/l10n.dart';
 import '../models/settings.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
@@ -52,11 +53,12 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
 
   String get _wordLabel {
     final language = Store.instance.lessonOf(_current)?.language ?? '';
-    return language.isEmpty ? 'Wort' : language;
+    return language.isEmpty ? context.l10n.flashcardWord : language;
   }
 
   String get _translationLabel =>
-      Store.instance.lessonOf(_current)?.translationLanguage ?? 'Übersetzung';
+      Store.instance.lessonOf(_current)?.translationLanguage ??
+      context.l10n.flashcardTranslation;
 
   @override
   void initState() {
@@ -150,7 +152,8 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
       autofocus: true,
       onKeyEvent: _onKey,
       child: Scaffold(
-        appBar: standardAppBar(context, 'Karte ${_index + 1} / ${_queue.length}'),
+        appBar: standardAppBar(
+            context, context.l10n.flashcardTitle(_index + 1, _queue.length)),
         body: Column(
           children: [
             TweenAnimationBuilder<double>(
@@ -174,7 +177,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                         front: _CardFace(
                           label: _showLatin ? _wordLabel : _translationLabel,
                           text: _front,
-                          hint: 'Tippen zum Umdrehen',
+                          hint: context.l10n.flashcardTapToFlip,
                         ),
                         back: _CardFace(
                           label: _showLatin ? _translationLabel : _wordLabel,
@@ -216,7 +219,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                               ),
                               onPressed: _reveal,
                               icon: const Icon(Icons.flip),
-                              label: const Text('Umdrehen'),
+                              label: Text(context.l10n.flashcardFlip),
                             ),
                           ),
                   ),
@@ -385,6 +388,7 @@ class _RatingButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final now = DateTime.now();
     Widget button(Rating r, String label, Color color) {
       final next = Fsrs.previewInterval(vocab.srs, r, now);
@@ -421,10 +425,10 @@ class _RatingButtons extends StatelessWidget {
 
     return Row(
       children: [
-        button(Rating.again, 'Nochmal', const Color(0xFFE5484D)),
-        button(Rating.hard, 'Schwer', const Color(0xFFF76B15)),
-        button(Rating.good, 'Gut', const Color(0xFF30A46C)),
-        button(Rating.easy, 'Leicht', const Color(0xFF3E63DD)),
+        button(Rating.again, l.flashcardRateAgain, const Color(0xFFE5484D)),
+        button(Rating.hard, l.flashcardRateHard, const Color(0xFFF76B15)),
+        button(Rating.good, l.flashcardRateGood, const Color(0xFF30A46C)),
+        button(Rating.easy, l.flashcardRateEasy, const Color(0xFF3E63DD)),
       ],
     );
   }

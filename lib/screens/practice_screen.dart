@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/store.dart';
+import '../l10n/l10n.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
 import '../utils/review_queue.dart';
@@ -43,9 +44,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
     final vocabs = _selected();
     if (vocabs.isEmpty) {
       _snack(_filter == _Filter.smart
-          ? 'Für heute ist nichts mehr fällig – super! 😎 '
-              'Wähle „Alle“, wenn du trotzdem üben willst.'
-          : 'Keine schwachen Vokabeln vorhanden. 😎');
+          ? context.l10n.practiceNothingDue
+          : context.l10n.practiceNoWeak);
       return;
     }
 
@@ -63,28 +63,29 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Scaffold(
-      appBar: standardAppBar(context, 'Modus wählen'),
+      appBar: standardAppBar(context, l.practiceTitle),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            '${widget.vocabs.length} Vokabeln ausgewählt',
+            l.practiceSelectedCount(widget.vocabs.length),
             textAlign: TextAlign.center,
             style: TextStyle(color: muted(context)),
           ),
           const SizedBox(height: 16),
           SegmentedButton<_Mode>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: _Mode.flashcards,
-                label: Text('Karteikarten'),
-                icon: Icon(Icons.style_outlined),
+                label: Text(l.practiceModeFlashcards),
+                icon: const Icon(Icons.style_outlined),
               ),
               ButtonSegment(
                 value: _Mode.test,
-                label: Text('Test'),
-                icon: Icon(Icons.edit_outlined),
+                label: Text(l.practiceModeTest),
+                icon: const Icon(Icons.edit_outlined),
               ),
             ],
             selected: {_mode},
@@ -92,19 +93,21 @@ class _PracticeScreenState extends State<PracticeScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Welche Vokabeln?',
+            l.practiceWhichVocabs,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
           SegmentedButton<_Filter>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: _Filter.smart,
-                label: Text('Fällig & neu'),
-                icon: Icon(Icons.auto_awesome),
+                label: Text(l.practiceFilterSmart),
+                icon: const Icon(Icons.auto_awesome),
               ),
-              ButtonSegment(value: _Filter.all, label: Text('Alle')),
-              ButtonSegment(value: _Filter.weak, label: Text('Schwache')),
+              ButtonSegment(
+                  value: _Filter.all, label: Text(l.practiceFilterAll)),
+              ButtonSegment(
+                  value: _Filter.weak, label: Text(l.practiceFilterWeak)),
             ],
             selected: {_filter},
             onSelectionChanged: (s) => setState(() => _filter = s.first),
@@ -115,8 +118,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
               final plan =
                   planReview(widget.vocabs, Store.instance.practiceLists);
               return Text(
-                '${plan.due.length} fällig · ${plan.fresh.length} neu'
-                '${plan.freshLater > 0 ? ' (${plan.freshLater} weitere später)' : ''}',
+                plan.freshLater > 0
+                    ? l.practicePlanSummaryLater(
+                        plan.due.length, plan.fresh.length, plan.freshLater)
+                    : l.practicePlanSummary(plan.due.length, plan.fresh.length),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: muted(context)),
               );
@@ -140,19 +145,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   Expanded(
                     child: Text(
                       (_mode == _Mode.flashcards
-                              ? 'Ein Wort wird angezeigt. Du deckst die '
-                                  'Bedeutung auf und bewertest dich selbst: '
-                                  'Nochmal, Schwer, Gut oder Leicht.'
-                              : 'Ein Wort wird angezeigt. Du gibst Übersetzung '
-                                  'und Formen selbst ein.') +
+                              ? l.practiceFlashcardsHint
+                              : l.practiceTestHint) +
                           (_filter == _Filter.smart
-                              ? '\n\n„Fällig & neu“ nutzt Spaced Repetition '
-                                  '(FSRS): Jede Vokabel kommt genau dann '
-                                  'wieder, kurz bevor du sie vergessen '
-                                  'würdest. Hat die Liste ein Testdatum, '
-                                  'werden die neuen Vokabeln auf die Tage '
-                                  'bis zum Vortag verteilt und vorher alles '
-                                  'noch einmal wiederholt.'
+                              ? '\n\n${l.practiceSmartHint}'
                               : ''),
                     ),
                   ),
@@ -164,9 +160,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
           FilledButton.icon(
             onPressed: _start,
             icon: const Icon(Icons.play_arrow),
-            label: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text('Starten', style: TextStyle(fontSize: 17)),
+            label: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child:
+                  Text(l.practiceStart, style: const TextStyle(fontSize: 17)),
             ),
           ),
         ],

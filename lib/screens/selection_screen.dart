@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/store.dart';
+import '../l10n/l10n.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
 import '../widgets/standard_app_bar.dart';
@@ -12,12 +13,14 @@ import '../widgets/standard_app_bar.dart';
 /// zurück (`Navigator.pop(context, Set<String>)`).
 class SelectionScreen extends StatefulWidget {
   final Set<String> initialSelectedIds;
-  final String confirmLabel;
+
+  /// Beschriftung des Bestätigen-Knopfs (Standard: „Fertig").
+  final String? confirmLabel;
 
   const SelectionScreen({
     super.key,
     this.initialSelectedIds = const {},
-    this.confirmLabel = 'Fertig',
+    this.confirmLabel,
   });
 
   @override
@@ -176,6 +179,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
   }
 
   Widget _buildVocabHeader() {
+    final l = context.l10n;
     final style = TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w600,
@@ -185,9 +189,10 @@ class _SelectionScreenState extends State<SelectionScreen> {
       padding: const EdgeInsets.fromLTRB(92, 4, 8, 2),
       child: Row(
         children: [
-          Expanded(flex: 3, child: Text('Wort', style: style)),
-          Expanded(flex: 2, child: Text('Formen', style: style)),
-          Expanded(flex: 3, child: Text('Übersetzung', style: style)),
+          Expanded(flex: 3, child: Text(l.selectionColumnWord, style: style)),
+          Expanded(flex: 2, child: Text(l.selectionColumnForms, style: style)),
+          Expanded(
+              flex: 3, child: Text(l.selectionColumnTranslation, style: style)),
         ],
       ),
     );
@@ -238,23 +243,24 @@ class _SelectionScreenState extends State<SelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final selectedCount = _selected.length;
 
     return Scaffold(
       appBar: standardAppBar(
         context,
-        'Vokabeln auswählen',
+        l.selectionTitle,
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
-            tooltip: 'Auswahl',
+            tooltip: l.selectionMenuTooltip,
             onSelected: (value) {
               if (value == 'all') _selectAll();
               if (value == 'none') _clearAll();
             },
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'all', child: Text('Alle auswählen')),
-              PopupMenuItem(value: 'none', child: Text('Auswahl aufheben')),
+            itemBuilder: (_) => [
+              PopupMenuItem(value: 'all', child: Text(l.selectionSelectAll)),
+              PopupMenuItem(value: 'none', child: Text(l.selectionClear)),
             ],
           ),
         ],
@@ -282,7 +288,8 @@ class _SelectionScreenState extends State<SelectionScreen> {
             onPressed: _confirm,
             icon: const Icon(Icons.check),
             label: Text(
-              '${widget.confirmLabel} ($selectedCount Vokabeln)',
+              l.selectionConfirm(widget.confirmLabel ?? l.commonDone,
+                  l.vocabCount(selectedCount)),
             ),
           ),
         ),

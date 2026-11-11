@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import '../navigation.dart';
 import '../screens/settings_screen.dart';
 
@@ -15,7 +16,7 @@ AppBar standardAppBar(
     title: Text(title),
     leading: IconButton(
       icon: const Icon(Icons.home_outlined),
-      tooltip: 'Zur Startseite',
+      tooltip: context.l10n.commonHome,
       onPressed: () {
         shellTabIndex.value = 0;
         Navigator.of(context).popUntil((route) => route.isFirst);
@@ -26,7 +27,7 @@ AppBar standardAppBar(
       if (showSettings)
         IconButton(
           icon: const Icon(Icons.settings_outlined),
-          tooltip: 'Einstellungen',
+          tooltip: context.l10n.commonSettings,
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const SettingsScreen()),
           ),

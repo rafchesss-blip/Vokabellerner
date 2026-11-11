@@ -1528,5 +1528,710 @@
   "tutorialPage12Text": "Alles wird nur auf diesem Gerät gespeichert – ohne Konto, ohne Internet. Mach in den Einstellungen ab und zu eine Sicherung. Damit kannst du auch auf ein anderes Gerät umziehen.",
   "@tutorialPage12Text": {
     "description": "Tutorial page 12 text."
+  },
+  "dashboardGreetingNight": "Noch wach? 🌙",
+  "@dashboardGreetingNight": {
+    "description": "Home screen greeting late at night (before 5 am), user has no name set."
+  },
+  "dashboardGreetingNightName": "Noch wach, {name}? 🌙",
+  "@dashboardGreetingNightName": {
+    "description": "Home screen greeting late at night (before 5 am) with the user's name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardGreetingMorning": "Guten Morgen! ☀️",
+  "@dashboardGreetingMorning": {
+    "description": "Home screen greeting in the morning (5–11 am), no name set."
+  },
+  "dashboardGreetingMorningName": "Guten Morgen, {name}! ☀️",
+  "@dashboardGreetingMorningName": {
+    "description": "Home screen greeting in the morning with the user's name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardGreetingDay": "Hallo! 👋",
+  "@dashboardGreetingDay": {
+    "description": "Home screen greeting during the day (11 am–6 pm), no name set."
+  },
+  "dashboardGreetingDayName": "Hallo, {name}! 👋",
+  "@dashboardGreetingDayName": {
+    "description": "Home screen greeting during the day with the user's name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardGreetingEvening": "Guten Abend! 🌆",
+  "@dashboardGreetingEvening": {
+    "description": "Home screen greeting in the evening (after 6 pm), no name set."
+  },
+  "dashboardGreetingEveningName": "Guten Abend, {name}! 🌆",
+  "@dashboardGreetingEveningName": {
+    "description": "Home screen greeting in the evening with the user's name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardStreakLabel": "{count, plural, =1{Tag Serie} other{Tage Serie}}",
+  "@dashboardStreakLabel": {
+    "description": "Label below the streak number in a small stat tile (the number is shown separately above).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardPracticedToday": "heute geübt",
+  "@dashboardPracticedToday": {
+    "description": "Label below the number of reviews done today (stat tile)."
+  },
+  "dashboardKnownOf": "von {total} gewusst",
+  "@dashboardKnownOf": {
+    "description": "Label below the number of known words: \"<known> of {total} known\" (stat tile).",
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardPracticeLists": "Übungslisten",
+  "@dashboardPracticeLists": {
+    "description": "Home screen tile opening the practice lists."
+  },
+  "dashboardPracticeListsEmpty": "Stell dir Vokabeln für einen Test zusammen",
+  "@dashboardPracticeListsEmpty": {
+    "description": "Subtitle of the practice lists tile when no list exists yet."
+  },
+  "dashboardListCount": "{count, plural, =1{1 Liste} other{{count} Listen}}",
+  "@dashboardListCount": {
+    "description": "Subtitle of the practice lists tile: number of lists.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardHelpTitle": "Hilfe & Anleitung",
+  "@dashboardHelpTitle": {
+    "description": "Home screen tile opening the tutorial."
+  },
+  "dashboardHelpSubtitle": "So funktioniert der Vokabellerner",
+  "@dashboardHelpSubtitle": {
+    "description": "Subtitle of the help tile."
+  },
+  "dashboardStreakNone": "Starte heute deine Lernserie!",
+  "@dashboardStreakNone": {
+    "description": "Below the greeting when the learning streak is 0."
+  },
+  "dashboardStreakFirstDay": "Tag 1 deiner Lernserie – weiter so!",
+  "@dashboardStreakFirstDay": {
+    "description": "Below the greeting when the learning streak is 1 day."
+  },
+  "dashboardStreakRun": "🔥 {count} Tage in Folge gelernt!",
+  "@dashboardStreakRun": {
+    "description": "Below the greeting: learned {count} days in a row (count is always 2 or more).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardGetStarted": "Leg los!",
+  "@dashboardGetStarted": {
+    "description": "Title of the \"Today\" card when the user has no practice list yet."
+  },
+  "dashboardNoListsHint": "Erstelle jetzt eine Übungsliste: Gib ihr einen Namen und wähle die Vokabeln aus, die du lernen willst.",
+  "@dashboardNoListsHint": {
+    "description": "Hint on the home screen when lessons exist but no practice list."
+  },
+  "dashboardNoLessonsHint": "Leg zuerst eine Lektion an. Die Vokabeln tippst du selbst ein oder scannst sie mit einer KI-App aus deinem Buch.",
+  "@dashboardNoLessonsHint": {
+    "description": "Hint on the home screen when no lesson exists yet."
+  },
+  "dashboardCreateList": "Übungsliste erstellen",
+  "@dashboardCreateList": {
+    "description": "Button: create a practice list."
+  },
+  "dashboardCreateLesson": "Lektion anlegen",
+  "@dashboardCreateLesson": {
+    "description": "Button: create a lesson."
+  },
+  "dashboardAllDone": "Für heute alles erledigt!",
+  "@dashboardAllDone": {
+    "description": "Title of the \"Today\" card when nothing is due anymore."
+  },
+  "dashboardToday": "Heute",
+  "@dashboardToday": {
+    "description": "Title of the card with today's due and new words."
+  },
+  "dashboardDoneReviewed": "{count, plural, =1{Du hast heute 1 Abfrage geschafft. Morgen geht es weiter!} other{Du hast heute {count} Abfragen geschafft. Morgen geht es weiter!}}",
+  "@dashboardDoneReviewed": {
+    "description": "Shown when everything is done for today; count = number of answered questions today.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardNothingDue": "Gerade ist nichts fällig. Schau morgen wieder vorbei!",
+  "@dashboardNothingDue": {
+    "description": "Shown when nothing is due and nothing was practiced today."
+  },
+  "dashboardDueLabel": "wiederholen",
+  "@dashboardDueLabel": {
+    "description": "Label below the big number of words due for review today (\"to review\")."
+  },
+  "dashboardNewLabel": "neu",
+  "@dashboardNewLabel": {
+    "description": "Label below the big number of new words for today."
+  },
+  "dashboardFromLists": "Aus deinen Übungslisten",
+  "@dashboardFromLists": {
+    "description": "Small hint below the start button: the words come from your practice lists."
+  },
+  "dashboardExamToday": "Heute ist „{name}\"!",
+  "@dashboardExamToday": {
+    "description": "Exam countdown card: the test with this list name is today.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardExamTodayText": "Du hast geübt – jetzt zeig, was du kannst. Viel Erfolg!",
+  "@dashboardExamTodayText": {
+    "description": "Exam countdown card text on the day of the test."
+  },
+  "dashboardExamTomorrow": "Morgen ist „{name}\"!",
+  "@dashboardExamTomorrow": {
+    "description": "Exam countdown card: the test with this list name is tomorrow.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardExamTomorrowText": "Heute ist der letzte Lerntag – alles wird noch einmal wiederholt.",
+  "@dashboardExamTomorrowText": {
+    "description": "Exam countdown card text the day before the test."
+  },
+  "dashboardExamInDays": "„{name}\" in {days} Tagen",
+  "@dashboardExamInDays": {
+    "description": "Exam countdown card title: test {name} is in {days} days (days is always 2 or more).",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardExamFinalSpurt": "{count, plural, =1{Endspurt! Noch 1 Lerntag – jeder zählt.} other{Endspurt! Noch {count} Lerntage – jeder zählt.}}",
+  "@dashboardExamFinalSpurt": {
+    "description": "Exam countdown text when the test is 2–3 days away; count = remaining study days.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardExamDaysLeft": "{count, plural, =1{Noch 1 Lerntag. Die App verteilt die Vokabeln so, dass du rechtzeitig fertig bist.} other{Noch {count} Lerntage. Die App verteilt die Vokabeln so, dass du rechtzeitig fertig bist.}}",
+  "@dashboardExamDaysLeft": {
+    "description": "Exam countdown text when the test is more than 3 days away; count = remaining study days.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceListsNeedLesson": "Leg zuerst unter „Lektionen\" eine Lektion mit Vokabeln an.",
+  "@practiceListsNeedLesson": {
+    "description": "Snackbar when the user wants to create a practice list but no lesson has words. \"Lektionen\" is the name of the lessons tab."
+  },
+  "practiceListsLimit": "Limit erreicht: Du kannst höchstens {max} Listen gleichzeitig haben.",
+  "@practiceListsLimit": {
+    "description": "Snackbar when the maximum number of practice lists is reached.",
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceListsCountdownPast": " · vorbei ✅",
+  "@practiceListsCountdownPast": {
+    "description": "Suffix after the test date in a list subtitle: the test is over. Keep the leading \" · \"."
+  },
+  "practiceListsCountdownToday": " · heute! 🍀",
+  "@practiceListsCountdownToday": {
+    "description": "Suffix after the test date in a list subtitle: the test is today. Keep the leading \" · \"."
+  },
+  "practiceListsCountdownTomorrow": " · morgen!",
+  "@practiceListsCountdownTomorrow": {
+    "description": "Suffix after the test date in a list subtitle: the test is tomorrow. Keep the leading \" · \"."
+  },
+  "practiceListsCountdownDays": " · noch {days} Tage",
+  "@practiceListsCountdownDays": {
+    "description": "Suffix after the test date in a list subtitle: test in {days} days (always 2 or more). Keep the leading \" · \".",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceListsDueDateTitle": "Wann ist der Vokabeltest?",
+  "@practiceListsDueDateTitle": {
+    "description": "Title of the dialog asking for the (optional) date of the vocabulary test when creating a list."
+  },
+  "practiceListsChangeDueDate": "Testdatum ändern",
+  "@practiceListsChangeDueDate": {
+    "description": "Dialog title and menu item: change the test date of a list."
+  },
+  "practiceListsDueDateHint": "Optional. Die App verteilt die Vokabeln so, dass du bis zum Tag vor dem Test alles kannst – am Testtag selbst musst du nicht mehr üben.",
+  "@practiceListsDueDateHint": {
+    "description": "Explanation in the test date dialog."
+  },
+  "practiceListsPickDate": "Datum wählen",
+  "@practiceListsPickDate": {
+    "description": "Button in the test date dialog that opens the date picker."
+  },
+  "practiceListsRemoveDate": "Entfernen",
+  "@practiceListsRemoveDate": {
+    "description": "Button in the \"change test date\" dialog that removes the date."
+  },
+  "practiceListsNotifyOnSnack": "Erinnerungen für „{name}\" sind an.",
+  "@practiceListsNotifyOnSnack": {
+    "description": "Snackbar after turning on notifications for the list {name}.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceListsNotifyOffSnack": "Keine Erinnerungen mehr für „{name}\".",
+  "@practiceListsNotifyOffSnack": {
+    "description": "Snackbar after turning off notifications for the list {name}.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceListsDeleteTitle": "„{name}\" löschen?",
+  "@practiceListsDeleteTitle": {
+    "description": "Title of the confirmation dialog for deleting the practice list {name}.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceListsDeleteText": "Die Übungsliste wird entfernt.",
+  "@practiceListsDeleteText": {
+    "description": "Text of the delete confirmation dialog."
+  },
+  "practiceListsNoVocabs": "Diese Liste enthält keine Vokabeln.",
+  "@practiceListsNoVocabs": {
+    "description": "Snackbar when practicing a list without words."
+  },
+  "practiceListsTitle": "Deine Übungslisten",
+  "@practiceListsTitle": {
+    "description": "App bar title of the practice lists screen."
+  },
+  "practiceListsNew": "Neue Liste",
+  "@practiceListsNew": {
+    "description": "Floating button: create a new practice list."
+  },
+  "practiceListsEmptyTitle": "Noch keine Übungslisten",
+  "@practiceListsEmptyTitle": {
+    "description": "Empty state title of the practice lists screen."
+  },
+  "practiceListsEmptyText": "Erstelle deine erste Liste über den Button unten.",
+  "@practiceListsEmptyText": {
+    "description": "Empty state text of the practice lists screen."
+  },
+  "practiceListsSubtitleTest": "{vocabs} · Test: {date}",
+  "@practiceListsSubtitleTest": {
+    "description": "Subtitle of a practice list with a test date. {vocabs} is e.g. \"12 Vokabeln\", {date} the formatted test date. A countdown suffix may follow.",
+    "placeholders": {
+      "vocabs": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceListsNotifyDisable": "Erinnerungen ausschalten",
+  "@practiceListsNotifyDisable": {
+    "description": "Menu item: turn off notifications for this list."
+  },
+  "practiceListsNotifyEnable": "Erinnerungen einschalten",
+  "@practiceListsNotifyEnable": {
+    "description": "Menu item: turn on notifications for this list."
+  },
+  "practiceListsNameDialogTitle": "Neue Übungsliste",
+  "@practiceListsNameDialogTitle": {
+    "description": "Title of the dialog asking for the name of a new practice list."
+  },
+  "practiceListsNameLabel": "Name der Liste",
+  "@practiceListsNameLabel": {
+    "description": "Text field label in the new list dialog."
+  },
+  "practiceListsNameHint": "z. B. Vokabeltest 1",
+  "@practiceListsNameHint": {
+    "description": "Example name in the new list dialog."
+  },
+  "practiceNothingDue": "Für heute ist nichts mehr fällig – super! 😎 Wähle „Alle“, wenn du trotzdem üben willst.",
+  "@practiceNothingDue": {
+    "description": "Snackbar when the \"due & new\" filter selects no words. „Alle“ must match practiceFilterAll."
+  },
+  "practiceNoWeak": "Keine schwachen Vokabeln vorhanden. 😎",
+  "@practiceNoWeak": {
+    "description": "Snackbar when the \"weak\" filter selects no words."
+  },
+  "practiceTitle": "Modus wählen",
+  "@practiceTitle": {
+    "description": "App bar title of the screen where the practice mode is chosen."
+  },
+  "practiceSelectedCount": "{count, plural, =1{1 Vokabel ausgewählt} other{{count} Vokabeln ausgewählt}}",
+  "@practiceSelectedCount": {
+    "description": "Number of words available for this practice session.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceModeFlashcards": "Karteikarten",
+  "@practiceModeFlashcards": {
+    "description": "Practice mode: flashcards with self-rating."
+  },
+  "practiceModeTest": "Test",
+  "@practiceModeTest": {
+    "description": "Practice mode: typing the answers."
+  },
+  "practiceWhichVocabs": "Welche Vokabeln?",
+  "@practiceWhichVocabs": {
+    "description": "Heading above the word filter (due & new / all / weak)."
+  },
+  "practiceFilterSmart": "Fällig & neu",
+  "@practiceFilterSmart": {
+    "description": "Filter: words due for review plus new words (spaced repetition)."
+  },
+  "practiceFilterAll": "Alle",
+  "@practiceFilterAll": {
+    "description": "Filter: all selected words."
+  },
+  "practiceFilterWeak": "Schwache",
+  "@practiceFilterWeak": {
+    "description": "Filter: only weak words (often answered wrong)."
+  },
+  "practicePlanSummary": "{due} fällig · {fresh} neu",
+  "@practicePlanSummary": {
+    "description": "Summary of the \"due & new\" filter: number of due and new words.",
+    "placeholders": {
+      "due": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      }
+    }
+  },
+  "practicePlanSummaryLater": "{due} fällig · {fresh} neu ({later} weitere später)",
+  "@practicePlanSummaryLater": {
+    "description": "Like practicePlanSummary, plus {later} new words that are scheduled for later days.",
+    "placeholders": {
+      "due": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      },
+      "later": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceFlashcardsHint": "Ein Wort wird angezeigt. Du deckst die Bedeutung auf und bewertest dich selbst: Nochmal, Schwer, Gut oder Leicht.",
+  "@practiceFlashcardsHint": {
+    "description": "Explanation of the flashcard mode. The four ratings must match flashcardRateAgain/Hard/Good/Easy."
+  },
+  "practiceTestHint": "Ein Wort wird angezeigt. Du gibst Übersetzung und Formen selbst ein.",
+  "@practiceTestHint": {
+    "description": "Explanation of the test (typing) mode."
+  },
+  "practiceSmartHint": "„Fällig & neu“ nutzt Spaced Repetition (FSRS): Jede Vokabel kommt genau dann wieder, kurz bevor du sie vergessen würdest. Hat die Liste ein Testdatum, werden die neuen Vokabeln auf die Tage bis zum Vortag verteilt und vorher alles noch einmal wiederholt.",
+  "@practiceSmartHint": {
+    "description": "Paragraph explaining the \"due & new\" filter (shown below the mode explanation). „Fällig & neu“ must match practiceFilterSmart."
+  },
+  "practiceStart": "Starten",
+  "@practiceStart": {
+    "description": "Button that starts the practice session."
+  },
+  "flashcardWord": "Wort",
+  "@flashcardWord": {
+    "description": "Small label above the word on a flashcard when the lesson has no language set."
+  },
+  "flashcardTranslation": "Übersetzung",
+  "@flashcardTranslation": {
+    "description": "Small label above the translation on a flashcard when the lesson has no translation language."
+  },
+  "flashcardTitle": "Karte {current} / {total}",
+  "@flashcardTitle": {
+    "description": "App bar title in flashcard mode: card number out of total.",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "flashcardTapToFlip": "Tippen zum Umdrehen",
+  "@flashcardTapToFlip": {
+    "description": "Hint at the bottom of the flashcard front."
+  },
+  "flashcardFlip": "Umdrehen",
+  "@flashcardFlip": {
+    "description": "Button that flips the flashcard."
+  },
+  "flashcardRateAgain": "Nochmal",
+  "@flashcardRateAgain": {
+    "description": "Self-rating button: did not know it, show again. Keep short (4 buttons in a row)."
+  },
+  "flashcardRateHard": "Schwer",
+  "@flashcardRateHard": {
+    "description": "Self-rating button: knew it with difficulty. Keep short."
+  },
+  "flashcardRateGood": "Gut",
+  "@flashcardRateGood": {
+    "description": "Self-rating button: knew it. Keep short."
+  },
+  "flashcardRateEasy": "Leicht",
+  "@flashcardRateEasy": {
+    "description": "Self-rating button: knew it easily. Keep short."
+  },
+  "testTranslationLabel": "Übersetzung ({language})",
+  "@testTranslationLabel": {
+    "description": "Label of the answer field for the translation; {language} is the translation language name.",
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "testWordLabel": "Wort",
+  "@testWordLabel": {
+    "description": "Label of the answer field for the foreign word when the lesson has no language."
+  },
+  "testWordLabelWithLanguage": "Wort ({language})",
+  "@testWordLabelWithLanguage": {
+    "description": "Label of the answer field for the foreign word; {language} is the lesson language name.",
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "testFormsLabel": "Formen",
+  "@testFormsLabel": {
+    "description": "Label of the answer field for the grammatical forms (e.g. \"amo, amavi, amatum\")."
+  },
+  "testTitle": "Test {current} / {total}",
+  "@testTitle": {
+    "description": "App bar title in test mode: question number out of total.",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "testTranslate": "Übersetze:",
+  "@testTranslate": {
+    "description": "Prompt above the word to translate in test mode."
+  },
+  "testCorrectAnswer": "Richtig: {answer}",
+  "@testCorrectAnswer": {
+    "description": "Shown below a wrong answer field: the correct answer.",
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "testWrong": "Falsch",
+  "@testWrong": {
+    "description": "Error text of a wrongly answered field."
+  },
+  "testResultCorrect": "Richtig! 🎉",
+  "@testResultCorrect": {
+    "description": "Feedback after checking: everything correct."
+  },
+  "testResultWrong": "Leider falsch.",
+  "@testResultWrong": {
+    "description": "Feedback after checking: something was wrong."
+  },
+  "testCheck": "Prüfen",
+  "@testCheck": {
+    "description": "Button that checks the typed answers."
+  },
+  "selectionColumnWord": "Wort",
+  "@selectionColumnWord": {
+    "description": "Column header in the word selection list: the foreign word."
+  },
+  "selectionColumnForms": "Formen",
+  "@selectionColumnForms": {
+    "description": "Column header in the word selection list: grammatical forms."
+  },
+  "selectionColumnTranslation": "Übersetzung",
+  "@selectionColumnTranslation": {
+    "description": "Column header in the word selection list: the translation."
+  },
+  "selectionTitle": "Vokabeln auswählen",
+  "@selectionTitle": {
+    "description": "App bar title of the word selection screen."
+  },
+  "selectionMenuTooltip": "Auswahl",
+  "@selectionMenuTooltip": {
+    "description": "Tooltip of the menu with \"select all\" / \"clear selection\"."
+  },
+  "selectionSelectAll": "Alle auswählen",
+  "@selectionSelectAll": {
+    "description": "Menu item: select all words."
+  },
+  "selectionClear": "Auswahl aufheben",
+  "@selectionClear": {
+    "description": "Menu item: clear the selection."
+  },
+  "selectionConfirm": "{label} ({vocabs})",
+  "@selectionConfirm": {
+    "description": "Confirm button of the word selection: {label} is e.g. \"Fertig\", {vocabs} the number of selected words, e.g. \"12 Vokabeln\".",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "vocabs": {
+        "type": "String"
+      }
+    }
+  },
+  "homeTabStart": "Start",
+  "@homeTabStart": {
+    "description": "Bottom navigation label of the home tab. Keep short."
+  },
+  "homeTabLessons": "Lektionen",
+  "@homeTabLessons": {
+    "description": "Bottom navigation label and app bar title of the lessons tab. Keep short."
+  },
+  "homeTabAnalysis": "Analyse",
+  "@homeTabAnalysis": {
+    "description": "Bottom navigation label and app bar title of the statistics/analysis tab. Keep short."
+  },
+  "sessionSummaryExcellent": "Hervorragend!",
+  "@sessionSummaryExcellent": {
+    "description": "Session summary title for 90% or more correct."
+  },
+  "sessionSummaryGreat": "Super gemacht!",
+  "@sessionSummaryGreat": {
+    "description": "Session summary title for 70–89% correct."
+  },
+  "sessionSummaryGood": "Gut geübt!",
+  "@sessionSummaryGood": {
+    "description": "Session summary title for 40–69% correct."
+  },
+  "sessionSummaryKeepGoing": "Dranbleiben!",
+  "@sessionSummaryKeepGoing": {
+    "description": "Session summary title for less than 40% correct (encouraging: keep at it)."
+  },
+  "sessionSummaryScore": "{correct} von {total} beim ersten Versuch gewusst.",
+  "@sessionSummaryScore": {
+    "description": "Session summary: number of words known on the first try out of all words.",
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionSummaryScheduled": "Die App plant automatisch, wann jede Vokabel wieder drankommt.",
+  "@sessionSummaryScheduled": {
+    "description": "Small note in the session summary."
+  },
+  "sessionSummaryRestart": "Nochmal",
+  "@sessionSummaryRestart": {
+    "description": "Session summary button: practice the same words again."
+  },
+  "changelogTitle": "Was ist neu?",
+  "@changelogTitle": {
+    "description": "Title and tooltip of the \"What's new?\" sheet."
+  },
+  "changelogGotIt": "Alles klar!",
+  "@changelogGotIt": {
+    "description": "Button that closes the \"What's new?\" sheet."
+  },
+  "changelog6Title": "🔒 Datenschutz auf einen Blick",
+  "@changelog6Title": {
+    "description": "\"What's new?\" entry 6: title."
+  },
+  "changelog6Text": "Unter Einstellungen → „Über die App\" findest du die Datenschutzerklärung und die Einführung zum Nachlesen: Alles bleibt auf deinem Handy, und die App ist ohne Werbung und ohne Käufe.",
+  "@changelog6Text": {
+    "description": "\"What's new?\" entry 6: text."
+  },
+  "changelog5Title": "🤖 Scannen nur mit KI-Apps",
+  "@changelog5Title": {
+    "description": "\"What's new?\" entry 5: title."
+  },
+  "changelog5Text": "Beim Scannen siehst du nur noch KI-Apps wie ChatGPT oder Gemini zur Auswahl. Die Anleitung für die KI wird gleich mitgeschickt.",
+  "@changelog5Text": {
+    "description": "\"What's new?\" entry 5: text."
+  },
+  "changelog4Title": "🧩 Mehr Formen",
+  "@changelog4Title": {
+    "description": "\"What's new?\" entry 4: title."
+  },
+  "changelog4Text": "Neu bei den Formen: Plural, Steigerung, Fall/Präposition, Deklination/Konjugation und Wortart. Mit „Alles\" übernimmt die KI wirklich alles, was im Buch zum Wort steht.",
+  "@changelog4Text": {
+    "description": "\"What's new?\" entry 4: text."
+  },
+  "changelog3Title": "👋 Mit deinem Namen",
+  "@changelog3Title": {
+    "description": "\"What's new?\" entry 3: title."
+  },
+  "changelog3Text": "Wenn du magst, begrüßt dich die App mit Namen – auch in den Erinnerungen. Ändern kannst du ihn in den Einstellungen.",
+  "@changelog3Text": {
+    "description": "\"What's new?\" entry 3: text."
+  },
+  "changelog2Title": "💡 Kurze Tipps",
+  "@changelog2Title": {
+    "description": "\"What's new?\" entry 2: title."
+  },
+  "changelog2Text": "Beim ersten Mal erklärt ein kleines Fenster, wie Lektion anlegen, Eintippen und Scannen funktionieren. Mit „Nicht mehr anzeigen\" ist es weg.",
+  "@changelog2Text": {
+    "description": "\"What's new?\" entry 2: text."
+  },
+  "changelog1Title": "📚 Lektionen in jeder Sprache",
+  "@changelog1Title": {
+    "description": "\"What's new?\" entry 1: title."
+  },
+  "changelog1Text": "Leg eigene Lektionen an – Englisch, Französisch, Latein oder was du lernst – und tipp die Vokabeln ein oder scanne sie aus dem Buch.",
+  "@changelog1Text": {
+    "description": "\"What's new?\" entry 1: text."
   }
 }
