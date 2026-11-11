@@ -9,6 +9,7 @@ import 'platform/platform.dart';
 import 'screens/home_shell.dart';
 import 'services/notifications.dart';
 import 'theme/app_theme.dart';
+import 'widgets/name_dialog.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,7 +69,7 @@ class VokabeltrainerApp extends StatelessWidget {
   }
 }
 
-/// Beim ersten Start der Android-App nach der Erlaubnis für
+/// Beim ersten Start nach dem Namen (optional) und nach der Erlaubnis für
 /// Benachrichtigungen fragen.
 class _Startup extends StatefulWidget {
   final Widget child;
@@ -89,6 +90,14 @@ class _StartupState extends State<_Startup> {
   }
 
   Future<void> _run() async {
+    final settings = Settings.instance;
+    if (!settings.nameAsked) {
+      final name = await showNameDialog(context, firstStart: true);
+      settings
+        ..userName = name ?? ''
+        ..nameAsked = true;
+      await settings.save();
+    }
     if (notificationsSupported) {
       final prefs = await SharedPreferences.getInstance();
       if (!(prefs.getBool(_askedKey) ?? false)) {

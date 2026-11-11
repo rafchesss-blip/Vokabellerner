@@ -43,6 +43,13 @@ const _first = [
   ('🎲 Kleine Wette?', 'Ich wette, du schaffst die {n} Vokabeln in 5 Minuten.'),
 ];
 
+/// Erste Erinnerung mit Namen ({name}), abwechselnd mit [_first].
+const _firstNamed = [
+  ('👋 Hey {name}!', '{n} Vokabeln warten heute auf dich.'),
+  ('🎯 {name}, deine Mission für heute', '{n} Vokabeln knacken – los geht\'s!'),
+  ('🧠 {name}, kurz lernen?', 'Heute stehen {n} Vokabeln auf dem Plan.'),
+];
+
 /// Mittlere Erinnerung: etwas drängender.
 const _middle = [
   ('⏰ Psst… deine Vokabeln warten noch', '{n} Stück sind heute noch offen.'),
@@ -81,6 +88,7 @@ List<PlannedNotification> planNotifications({
   required int perDay,
   required int streak,
   required bool practicedToday,
+  String name = '',
   DateTime? now,
 }) {
   now ??= DateTime.now();
@@ -135,19 +143,24 @@ List<PlannedNotification> planNotifications({
         'due': plan.due.length,
         'new': plan.fresh.length,
         'streak': streak,
+        'name': name,
       };
       final isLast = i == slots.length - 1;
       final variant = d + i;
 
       var (title, body) = slots.length == 1 || i == 0
-          ? _first[variant % _first.length]
+          ? (name.isNotEmpty && d.isEven
+              ? _firstNamed[(d ~/ 2) % _firstNamed.length]
+              : _first[variant % _first.length])
           : isLast
               ? _last[variant % _last.length]
               : _middle[variant % _middle.length];
 
       // Lernserie in Gefahr (nur heute bekannt, ob schon gelernt wurde).
       if (isLast && streak > 0 && (d > 0 || !practicedToday)) {
-        title = '🔥 Deine $streak-Tage-Serie ist in Gefahr!';
+        title = name.isEmpty
+            ? '🔥 Deine $streak-Tage-Serie ist in Gefahr!'
+            : '🔥 {name}, deine $streak-Tage-Serie ist in Gefahr!';
         body = 'Noch {n} Vokabeln – lern heute, damit sie nicht reißt.';
       }
 

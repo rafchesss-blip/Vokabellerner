@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/settings.dart';
 import '../theme/app_theme.dart';
+import '../widgets/name_dialog.dart';
 import '../widgets/standard_app_bar.dart';
 import 'backup_section.dart';
 import 'notifications_section.dart';
@@ -41,6 +42,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Card(
+            margin: EdgeInsets.zero,
+            child: ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text('Dein Name'),
+              subtitle: Text(Settings.instance.userName.isEmpty
+                  ? 'Nicht angegeben – nur auf diesem Handy gespeichert'
+                  : '${Settings.instance.userName} · nur auf diesem Handy '
+                      'gespeichert'),
+              trailing: const Icon(Icons.edit_outlined),
+              onTap: () async {
+                final name = await showNameDialog(
+                  context,
+                  initial: Settings.instance.userName,
+                );
+                if (name == null) return;
+                setState(() => Settings.instance.userName = name);
+                await Settings.instance.save();
+              },
+            ),
+          ),
+          const Divider(height: 32),
           Text('Design', style: titleStyle),
           const SizedBox(height: 8),
           for (final mode in AppThemeMode.values)

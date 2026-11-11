@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../data/store.dart';
+import '../models/settings.dart';
 import '../models/vocab.dart';
 import '../platform/platform.dart';
 import '../theme/app_theme.dart';
@@ -27,10 +28,12 @@ class DashboardTab extends StatelessWidget {
 
   static String _greeting() {
     final h = DateTime.now().hour;
-    if (h < 5) return 'Noch wach? 🌙';
-    if (h < 11) return 'Guten Morgen! ☀️';
-    if (h < 18) return 'Hallo! 👋';
-    return 'Guten Abend! 🌆';
+    final name = Settings.instance.userName;
+    final n = name.isEmpty ? '' : ', $name';
+    if (h < 5) return 'Noch wach$n? 🌙';
+    if (h < 11) return 'Guten Morgen$n! ☀️';
+    if (h < 18) return 'Hallo$n! 👋';
+    return 'Guten Abend$n! 🌆';
   }
 
   /// Lädt die APK herunter und erklärt, wie man sie installiert.
@@ -70,9 +73,10 @@ class DashboardTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
-      valueListenable: Store.instance.revision,
-      builder: (context, _, __) {
+    return ListenableBuilder(
+      // Auch bei neuen Einstellungen (z. B. Name in der Begrüßung).
+      listenable: Listenable.merge([Store.instance.revision, Settings.revision]),
+      builder: (context, _) {
         final store = Store.instance;
         final pool = todayPool();
         final plan = planReview(pool, store.practiceLists);

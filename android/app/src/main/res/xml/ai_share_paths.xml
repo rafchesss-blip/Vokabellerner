@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fotos, die beim Scannen an eine KI-App gehen. -->
+<paths>
+    <cache-path name="ai_share" path="ai_share/" />
+</paths>

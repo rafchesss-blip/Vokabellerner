@@ -170,21 +170,45 @@ class Box {
 }
 
 /// Welche Formen eine Lektion hat (fürs Eingeben und Scannen).
-enum FormKind { verb, noun, adjective, gender }
+enum FormKind {
+  verb,
+  noun,
+  plural,
+  adjective,
+  comparison,
+  gender,
+  inflectionClass,
+  government,
+  wordClass,
+}
 
 extension FormKindX on FormKind {
   String get label => switch (this) {
         FormKind.verb => 'Verbformen',
         FormKind.noun => 'Nomenformen',
+        FormKind.plural => 'Plural',
         FormKind.adjective => 'Adjektivformen',
+        FormKind.comparison => 'Steigerung',
         FormKind.gender => 'Geschlecht',
+        FormKind.inflectionClass => 'Deklination/Konjugation',
+        FormKind.government => 'Fall/Präposition',
+        FormKind.wordClass => 'Wortart',
       };
 
   String get example => switch (this) {
-        FormKind.verb => 'z. B. Stammformen: vocō, vocāvī, vocātum',
-        FormKind.noun => 'z. B. Genitiv oder Plural: lūnae',
-        FormKind.adjective => 'z. B. bonus, -a, -um',
-        FormKind.gender => 'bei Nomen: m, f oder n',
+        FormKind.verb =>
+          'Stammformen bzw. unregelmäßige Formen, z. B. vocō, vocāvī, '
+              'vocātum oder go, went, gone',
+        FormKind.noun => 'z. B. Genitiv: lūnae',
+        FormKind.plural => 'z. B. mice, les chevaux',
+        FormKind.adjective => 'Formen der anderen Geschlechter, z. B. bonus, -a, -um',
+        FormKind.comparison => 'z. B. good, better, best',
+        FormKind.gender => 'bei Nomen, z. B. m, f, n oder der/die/das',
+        FormKind.inflectionClass => 'z. B. a-Deklination, e-Konjugation',
+        FormKind.government =>
+          'welcher Fall oder welche Präposition folgt, z. B. + Dat., '
+              'sich freuen über',
+        FormKind.wordClass => 'z. B. Verb, Nomen, Adjektiv, Adverb',
       };
 }
 
@@ -198,8 +222,10 @@ class Lesson {
   String language;
   String translationLanguage;
 
-  /// Ob die Vokabeln Formen haben und welche.
+  /// Ob die Vokabeln Formen haben und welche. [allForms]: alles, was im
+  /// Buch zum Wort steht – nicht nur die bekannten [FormKind]s.
   bool hasForms;
+  bool allForms;
   Set<FormKind> formKinds;
 
   /// Namen der „Sonstiges"-Felder (0–3), z. B. „Beispielsatz".
@@ -212,6 +238,7 @@ class Lesson {
     this.language = '',
     this.translationLanguage = 'Deutsch',
     this.hasForms = false,
+    this.allForms = false,
     Set<FormKind>? formKinds,
     List<String>? extraLabels,
   })  : formKinds = formKinds ?? {},
@@ -237,6 +264,7 @@ class Lesson {
         translationLanguage:
             json['translationLanguage'] as String? ?? 'Deutsch',
         hasForms: json['hasForms'] as bool? ?? false,
+        allForms: json['allForms'] as bool? ?? false,
         formKinds: {
           for (final k in json['formKinds'] as List? ?? [])
             ...FormKind.values.where((f) => f.name == k),
@@ -252,6 +280,7 @@ class Lesson {
         'language': language,
         'translationLanguage': translationLanguage,
         'hasForms': hasForms,
+        'allForms': allForms,
         'formKinds': [for (final k in formKinds) k.name],
         'extraLabels': extraLabels,
         'boxes': boxes.map((b) => b.toJson()).toList(),

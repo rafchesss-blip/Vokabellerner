@@ -18,22 +18,29 @@ List<String> scanColumns(Lesson lesson) => [
     ];
 
 String _forms(Lesson lesson) {
-  final kinds = lesson.formKinds.isEmpty
-      ? FormKind.values.toSet()
-      : lesson.formKinds;
+  if (lesson.allForms) {
+    return [
+      '- Formen: ALLE grammatischen Angaben, die im Foto zum Wort stehen – '
+          'nichts weglassen. Zum Beispiel (aber nicht nur):',
+      for (final k in FormKind.values) '  - ${k.label} (${k.example})',
+      '  Auch alles andere, was zum Wort gehört (Abkürzungen, Hinweise in '
+          'Klammern), gehört hierher. Mehrere Angaben mit Komma trennen.',
+      '  Steht im Foto keine Angabe zum Wort, dann "-".',
+    ].join('\n');
+  }
+  final kinds = lesson.formKinds;
   final lines = [
     for (final k in FormKind.values)
       if (kinds.contains(k)) '  - ${k.label} (${k.example})',
   ];
   final missing = FormKind.values
-      .where((k) => k != FormKind.gender && !kinds.contains(k))
+      .where((k) => !kinds.contains(k))
       .map((k) => k.label);
   return [
     '- Formen: nur diese Angaben, mehrere mit Komma getrennt:',
     ...lines,
-    if (missing.isNotEmpty)
-      '  Keine ${missing.join(' und keine ')} – dann steht dort "-".',
-    '  Hat ein Wort keine solchen Formen (z. B. ein Adverb), steht dort "-".',
+    if (missing.isNotEmpty) '  Weglassen: ${missing.join(', ')}.',
+    '  Hat ein Wort keine solchen Angaben (z. B. ein Adverb), steht dort "-".',
   ].join('\n');
 }
 

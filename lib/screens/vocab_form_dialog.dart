@@ -113,7 +113,9 @@ class _VocabFormState extends State<_VocabForm> {
               _field(
                 _forms,
                 'Formen',
-                hint: lesson.formKinds.map((k) => k.label).join(', '),
+                hint: lesson.allForms
+                    ? 'alle Formen'
+                    : lesson.formKinds.map((k) => k.label).join(', '),
                 last: !hasExtras,
               ),
             for (var i = 0; i < lesson.extraLabels.length; i++)

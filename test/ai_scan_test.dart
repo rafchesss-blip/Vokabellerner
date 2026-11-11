@@ -6,6 +6,7 @@ import 'package:vokabellerner/utils/ai_scan.dart';
 void main() {
   Lesson lesson({
     bool forms = false,
+    bool all = false,
     Set<FormKind> kinds = const {},
     List<String> extras = const [],
   }) =>
@@ -15,6 +16,7 @@ void main() {
         boxes: [],
         language: 'Latein',
         hasForms: forms,
+        allForms: all,
         formKinds: {...kinds},
         extraLabels: [...extras],
       );
@@ -31,9 +33,19 @@ void main() {
     expect(prompt, contains('Nomenformen'));
     expect(prompt, contains('Geschlecht'));
     expect(prompt, isNot(contains('- Verbformen')));
+    expect(prompt, contains('Weglassen: Verbformen'));
     expect(prompt, contains('Latein'));
     // Die Anleitung selbst wird nicht als Antwort erkannt.
     expect(looksLikeScanAnswer(prompt), isFalse);
+  });
+
+  test('„Alles" verlangt wirklich alle Angaben', () {
+    final prompt = buildScanPrompt(lesson(forms: true, all: true));
+    expect(prompt, contains('ALLE grammatischen Angaben'));
+    for (final k in FormKind.values) {
+      expect(prompt, contains(k.label));
+    }
+    expect(prompt, isNot(contains('Weglassen')));
   });
 
   test('Ohne Formen und Sonstiges nur zwei Spalten', () {

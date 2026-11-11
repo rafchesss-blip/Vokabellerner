@@ -41,7 +41,7 @@ void main() {
     expect(result!.name, 'Unit 1');
     expect(result!.language, 'Englisch');
     expect(result!.hasForms, isTrue);
-    expect(result!.formKinds, FormKind.values.toSet());
+    expect(result!.allForms, isTrue);
     expect(result!.extraLabels, ['Beispielsatz']);
   });
 
@@ -61,6 +61,11 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(home: LessonScreen(lesson: lesson)));
     await tester.tap(find.text('Selbst eingeben'));
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pumpAndSettle();
+    // Beim ersten Mal ein kurzer Tipp.
+    expect(find.text('Vokabeln eintippen'), findsOneWidget);
+    await tester.tap(find.text('Weiter'));
     await tester.pumpAndSettle();
 
     final fields = find.descendant(

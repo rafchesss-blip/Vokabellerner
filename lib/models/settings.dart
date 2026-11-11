@@ -106,6 +106,12 @@ class Settings {
   AppThemeMode themeMode = AppThemeMode.dark;
   NeonAccent accent = NeonAccent.violet;
 
+  /// Name für Begrüßung und Erinnerungen (optional, nur auf dem Gerät).
+  String userName = '';
+
+  /// Ob beim ersten Start schon nach dem Namen gefragt wurde.
+  bool nameAsked = false;
+
   /// Im Test auch die „Sonstiges"-Felder abfragen.
   bool askExtras = false;
 
@@ -139,6 +145,8 @@ class Settings {
     );
 
     askExtras = prefs.getBool('askExtras') ?? false;
+    userName = prefs.getString('userName') ?? '';
+    nameAsked = prefs.getBool('nameAsked') ?? false;
     notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
     notificationsPerDay =
         (prefs.getInt('notificationsPerDay') ?? 3).clamp(1, 3).toInt();
@@ -151,6 +159,8 @@ class Settings {
     await prefs.setString('themeMode', themeMode.name);
     await prefs.setString('accent', accent.name);
     await prefs.setBool('askExtras', askExtras);
+    await prefs.setString('userName', userName);
+    await prefs.setBool('nameAsked', nameAsked);
     await prefs.setBool('notificationsEnabled', notificationsEnabled);
     await prefs.setInt('notificationsPerDay', notificationsPerDay);
     revision.value++;

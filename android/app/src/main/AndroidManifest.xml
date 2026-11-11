@@ -41,6 +41,16 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
+        <!-- Foto beim Scannen an die KI-App weitergeben -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.aishare"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/ai_share_paths" />
+        </provider>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
@@ -57,5 +67,14 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- KI-Apps, die beim Scannen zur Auswahl stehen -->
+        <package android:name="com.openai.chatgpt"/>
+        <package android:name="com.google.android.apps.bard"/>
+        <package android:name="com.anthropic.claude"/>
+        <package android:name="com.microsoft.copilot"/>
+        <package android:name="ai.perplexity.app.android"/>
+        <package android:name="com.deepseek.chat"/>
+        <package android:name="ai.mistral.chat"/>
+        <package android:name="ai.x.grok"/>
     </queries>
 </manifest>

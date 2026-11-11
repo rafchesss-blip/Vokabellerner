@@ -40,6 +40,7 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
   late final _translation = TextEditingController(
       text: widget.lesson?.translationLanguage ?? 'Deutsch');
   late bool _hasForms = widget.lesson?.hasForms ?? false;
+  late bool _allForms = widget.lesson?.allForms ?? true;
   late final Set<FormKind> _kinds = {
     ...?widget.lesson?.formKinds,
   };
@@ -62,7 +63,7 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
   bool get _valid =>
       _name.text.trim().isNotEmpty &&
       _language.text.trim().isNotEmpty &&
-      (!_hasForms || _kinds.isNotEmpty);
+      (!_hasForms || _allForms || _kinds.isNotEmpty);
 
   void _addExtra([String label = '']) {
     if (_extras.length >= _maxExtras) return;
@@ -86,7 +87,8 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
           ? 'Deutsch'
           : _translation.text.trim()
       ..hasForms = _hasForms
-      ..formKinds = _hasForms ? {..._kinds} : {}
+      ..allForms = _hasForms && _allForms
+      ..formKinds = _hasForms && !_allForms ? {..._kinds} : {}
       ..extraLabels = labels;
     Navigator.pop(context, lesson);
   }
@@ -187,12 +189,7 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
                 ),
                 CheckboxListTile(
                   value: _hasForms,
-                  onChanged: (v) => setState(() {
-                    _hasForms = v ?? false;
-                    if (_hasForms && _kinds.isEmpty) {
-                      _kinds.addAll(FormKind.values);
-                    }
-                  }),
+                  onChanged: (v) => setState(() => _hasForms = v ?? false),
                   title: const Text('Formen'),
                   subtitle: const Text(
                       'z. B. Stammformen, Genitiv, Geschlecht'),
@@ -214,23 +211,30 @@ class _LessonSetupScreenState extends State<LessonSetupScreen> {
                           children: [
                             FilterChip(
                               label: const Text('Alles'),
-                              selected:
-                                  _kinds.length == FormKind.values.length,
-                              onSelected: (on) => setState(() {
-                                _kinds.clear();
-                                if (on) _kinds.addAll(FormKind.values);
-                              }),
+                              selected: _allForms,
+                              onSelected: (on) =>
+                                  setState(() => _allForms = on),
                             ),
-                            for (final k in FormKind.values)
-                              FilterChip(
-                                label: Text(k.label),
-                                selected: _kinds.contains(k),
-                                onSelected: (on) => setState(() =>
-                                    on ? _kinds.add(k) : _kinds.remove(k)),
-                              ),
+                            if (!_allForms)
+                              for (final k in FormKind.values)
+                                FilterChip(
+                                  label: Text(k.label),
+                                  selected: _kinds.contains(k),
+                                  onSelected: (on) => setState(() =>
+                                      on ? _kinds.add(k) : _kinds.remove(k)),
+                                ),
                           ],
                         ),
-                        if (_kinds.isEmpty)
+                        if (_allForms)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                              'Alles, was im Buch zum Wort steht: Stammformen, '
+                              'Plural, Geschlecht, Steigerung, Fall und mehr.',
+                              style: TextStyle(color: muted(context)),
+                            ),
+                          )
+                        else if (_kinds.isEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 6),
                             child: Text(

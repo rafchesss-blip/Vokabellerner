@@ -6,6 +6,7 @@ import '../services/scan.dart';
 import '../theme/app_theme.dart';
 import '../utils/ai_scan.dart';
 import '../utils/goals.dart';
+import '../widgets/hint_dialog.dart';
 import '../widgets/standard_app_bar.dart';
 import 'lesson_setup_screen.dart';
 import 'vocab_form_dialog.dart';
@@ -54,6 +55,16 @@ class _LessonScreenState extends State<LessonScreen> {
   // ── Selbst eingeben ────────────────────────────────────────────────────
 
   Future<void> _addManually() async {
+    final go = await showHintOnce(
+      context,
+      id: 'manual',
+      emoji: '✍️',
+      title: 'Vokabeln eintippen',
+      text: 'Du bekommst ein Feld für jede Angabe dieser Lektion. Nur Wort '
+          'und Übersetzung müssen ausgefüllt sein. Später kannst du jede '
+          'Vokabel antippen, um sie zu ändern.',
+    );
+    if (!go || !mounted) return;
     final v = await showVocabForm(context, _lesson);
     if (v == null) return;
     _lesson.mainBox.vocabs.add(v);
@@ -84,24 +95,59 @@ class _LessonScreenState extends State<LessonScreen> {
   // ── Scannen mit KI ─────────────────────────────────────────────────────
 
   Future<void> _scan() async {
+    var go = await showHintOnce(
+      context,
+      id: 'scan',
+      emoji: '📷',
+      title: 'So funktioniert Scannen',
+      text: '1. Fotografiere die Vokabelliste – gerade und gut lesbar.\n'
+          '2. Wähle eine KI-App. Sie öffnet sich mit dem Foto und der '
+          'Anleitung.\n'
+          '3. Schick die Nachricht ab.\n'
+          '4. Kopiere die Antwort und komm zurück – die Vokabeln werden '
+          'automatisch erkannt.\n\n'
+          'Abgelesen wird: ${scanColumns(_lesson).join(' · ')}',
+      button: "Los geht's",
+    );
+    if (!go || !mounted) return;
+
     final camera = await showModalBottomSheet<bool>(
       context: context,
       showDragHandle: true,
-      isScrollControlled: true,
-      builder: (_) => _ScanHelpSheet(lesson: _lesson),
+      builder: (_) => const _PhotoSourceSheet(),
     );
     if (camera == null || !mounted) return;
 
     final photo = await pickVocabPhoto(camera: camera);
     if (photo == null || !mounted) return;
 
+    go = await showHintOnce(
+      context,
+      id: 'free_ai',
+      emoji: '💡',
+      title: 'Am besten eine kostenlose KI',
+      text: 'ChatGPT, Gemini und Co. lesen Vokabeln auch in der kostenlosen '
+          'Version zuverlässig ab – du brauchst kein Abo. Die Anleitung für '
+          'die KI wird automatisch eingefügt.',
+    );
+    if (!go || !mounted) return;
+
+    final app = await showModalBottomSheet<AiApp>(
+      context: context,
+      showDragHandle: true,
+      builder: (_) => const _AiPickerSheet(),
+    );
+    if (app == null || !mounted) return;
+    if (app.missing) {
+      await installAiApp(app);
+      return;
+    }
+
     setState(() => _waitingForAi = true);
-    try {
-      await sendToAi(photo, buildScanPrompt(_lesson));
-    } catch (_) {
-      if (mounted) {
-        _snack('Teilen hat nicht geklappt. Ist eine KI-App installiert?');
-      }
+    final ok = await sendToAi(app, photo, buildScanPrompt(_lesson));
+    if (!ok && mounted) {
+      setState(() => _waitingForAi = false);
+      _snack('${app.name} ließ sich nicht öffnen.');
     }
   }
 
@@ -396,67 +442,19 @@ class _AddCard extends StatelessWidget {
   }
 }
 
-/// Erklärt den Ablauf beim Scannen. Liefert `true` = Kamera, `false` =
-/// Galerie, `null` = Abbruch.
-class _ScanHelpSheet extends StatelessWidget {
-  final Lesson lesson;
-
-  const _ScanHelpSheet({required this.lesson});
+/// Kamera oder Galerie? `true` = Kamera, `false` = Galerie.
+class _PhotoSourceSheet extends StatelessWidget {
+  const _PhotoSourceSheet();
 
   @override
   Widget build(BuildContext context) {
-    final fields = scanColumns(lesson).join(' · ');
-
-    Widget step(String n, String text) => Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CircleAvatar(
-                radius: 12,
-                child: Text(n, style: const TextStyle(fontSize: 12)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(child: Text(text)),
-            ],
-          ),
-        );
-
     return SafeArea(
-      child: SingleChildScrollView(
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Scannen mit KI',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Abgelesen wird: $fields',
-              style: TextStyle(color: muted(context)),
-            ),
-            const SizedBox(height: 16),
-            step('1', 'Fotografiere die Vokabelliste – gerade und gut lesbar.'),
-            step(
-              '2',
-              'Wähle deine KI-App (ChatGPT, Gemini, …). Beim ersten Mal '
-                  'fragt das Handy, womit – tippe „Immer", dann geht es '
-                  'nächstes Mal schneller.',
-            ),
-            step(
-              '3',
-              'Schick die Nachricht ab. Die Anleitung für die KI ist schon '
-                  'dabei. Fehlt sie, halte das Textfeld gedrückt und tippe '
-                  '„Einfügen".',
-            ),
-            step(
-              '4',
-              'Kopiere die Antwort der KI und komm hierher zurück. Die '
-                  'Vokabeln werden automatisch erkannt.',
-            ),
-            const SizedBox(height: 8),
             FilledButton.icon(
               onPressed: () => Navigator.pop(context, true),
               icon: const Icon(Icons.photo_camera_outlined),
@@ -473,6 +471,72 @@ class _ScanHelpSheet extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Auswahl der KI-App – nur KI-Apps, keine anderen „Teilen"-Ziele.
+class _AiPickerSheet extends StatelessWidget {
+  const _AiPickerSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: FutureBuilder<List<AiApp>>(
+        future: aiApps(),
+        builder: (context, snap) {
+          if (!snap.hasData) {
+            return const Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          final apps = snap.data!;
+          final installed = apps.where((a) => !a.missing).toList();
+          final missing = apps.where((a) => a.missing).toList();
+          return ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                child: Text(
+                  'Mit welcher KI?',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              if (installed.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: Text(
+                    'Auf deinem Handy ist noch keine KI-App. Installiere eine '
+                    '– kostenlos – und tippe danach noch einmal auf '
+                    '„Scannen".',
+                    style: TextStyle(color: muted(context)),
+                  ),
+                ),
+              for (final app in installed)
+                ListTile(
+                  leading: app.icon.isEmpty
+                      ? const Icon(Icons.smart_toy_outlined, size: 40)
+                      : Image.memory(app.icon, width: 40, height: 40),
+                  title: Text(
+                    app.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  onTap: () => Navigator.pop(context, app),
+                ),
+              for (final app in missing)
+                ListTile(
+                  leading: const Icon(Icons.download_outlined, size: 40),
+                  title: Text('${app.name} installieren'),
+                  subtitle: const Text('kostenlos im Play Store'),
+                  onTap: () => Navigator.pop(context, app),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

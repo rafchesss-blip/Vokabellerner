@@ -1,4 +1,4 @@
-/// Was ist neu? Wird nur in der Browser-Version angezeigt.
+/// Was ist neu? Erscheint oben rechts, bis man es einmal gelesen hat.
 ///
 /// Neue Einträge **oben** einfügen, mit der nächsthöheren [ChangelogEntry.id].
 /// Kurz und so geschrieben, wie es Nutzer merken – nicht, was im Code
@@ -17,32 +17,40 @@ class ChangelogEntry {
 
 const changelog = [
   ChangelogEntry(
+    5,
+    '11.11.2026',
+    '🤖 Scannen nur mit KI-Apps',
+    'Beim Scannen siehst du nur noch KI-Apps wie ChatGPT oder Gemini zur '
+        'Auswahl. Die Anleitung für die KI wird gleich mitgeschickt.',
+  ),
+  ChangelogEntry(
     4,
     '11.11.2026',
-    '📱 Die App fürs Handy',
-    'Auf der Startseite kannst du jetzt die Android-App herunterladen. '
-        'Sie erinnert dich mehrmals am Tag ans Lernen.',
+    '🧩 Mehr Formen',
+    'Neu bei den Formen: Plural, Steigerung, Fall/Präposition, '
+        'Deklination/Konjugation und Wortart. Mit „Alles" übernimmt die KI '
+        'wirklich alles, was im Buch zum Wort steht.',
   ),
   ChangelogEntry(
     3,
     '11.11.2026',
-    '✅ Nach dem Test ist Ruhe',
-    'Ist der Test einer Übungsliste vorbei, musst du sie nicht mehr lernen. '
-        'Üben kannst du sie trotzdem jederzeit.',
+    '👋 Mit deinem Namen',
+    'Wenn du magst, begrüßt dich die App mit Namen – auch in den '
+        'Erinnerungen. Ändern kannst du ihn in den Einstellungen.',
   ),
   ChangelogEntry(
     2,
-    '08.11.2026',
-    '🚨 Der Tag vor dem Test',
-    'Am letzten Lerntag kommen Vokabeln, die du falsch hattest, nach einer '
-        'halben Stunde noch einmal – bis sie wirklich sitzen.',
+    '11.11.2026',
+    '💡 Kurze Tipps',
+    'Beim ersten Mal erklärt ein kleines Fenster, wie Lektion anlegen, '
+        'Eintippen und Scannen funktionieren. Mit „Nicht mehr anzeigen" ist '
+        'es weg.',
   ),
   ChangelogEntry(
     1,
-    '07.11.2026',
-    '🎯 Lernen bis zum Testtag',
-    'Gib deiner Übungsliste ein Testdatum. Die App verteilt die Vokabeln '
-        'auf die Tage davor und trägt dir auf Wunsch Erinnerungen in den '
-        'Kalender ein.',
+    '11.11.2026',
+    '📚 Lektionen in jeder Sprache',
+    'Leg eigene Lektionen an – Englisch, Französisch, Latein oder was du '
+        'lernst – und tipp die Vokabeln ein oder scanne sie aus dem Buch.',
   ),
 ];

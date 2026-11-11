@@ -145,4 +145,19 @@ void main() {
     );
     expect(after, isEmpty);
   });
+
+  test('Mit Namen: Erinnerungen sprechen dich an', () {
+    final pool = vocabs(4);
+    final plan = planNotifications(
+      pool: pool,
+      lists: [list(pool)],
+      perDay: 1,
+      streak: 0,
+      practicedToday: false,
+      name: 'Rafael',
+      now: morning,
+    );
+    expect(plan.first.title, contains('Rafael'));
+    expect(plan.every((n) => !n.title.contains('{name}')), isTrue);
+  });
 }

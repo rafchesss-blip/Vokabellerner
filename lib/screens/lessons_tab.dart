@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/hint_dialog.dart';
 import '../data/store.dart';
 import '../models/vocab.dart';
 import '../theme/app_theme.dart';
@@ -14,6 +15,17 @@ class LessonsTab extends StatelessWidget {
   const LessonsTab({super.key});
 
   static Future<void> createLesson(BuildContext context) async {
+    final go = await showHintOnce(
+      context,
+      id: 'new_lesson',
+      emoji: '📚',
+      title: 'Neue Lektion',
+      text: 'Gib der Lektion einen Namen und wähle die Sprache. Dann legst '
+          'du fest, was du lernen willst: Wort und Übersetzung sind immer '
+          'dabei, dazu auf Wunsch Formen und bis zu drei eigene Felder wie '
+          'Beispielsatz oder Merkhilfe.',
+    );
+    if (!go || !context.mounted) return;
     final lesson = await Navigator.push<Lesson>(
       context,
       MaterialPageRoute(builder: (_) => const LessonSetupScreen()),

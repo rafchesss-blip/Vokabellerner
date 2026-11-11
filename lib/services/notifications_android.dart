@@ -82,6 +82,7 @@ Future<void> rescheduleNotifications() async {
     perDay: settings.notificationsPerDay,
     streak: store.streak(),
     practicedToday: store.reviewsToday > 0,
+    name: settings.userName,
   );
 
   for (var i = 0; i < planned.length; i++) {

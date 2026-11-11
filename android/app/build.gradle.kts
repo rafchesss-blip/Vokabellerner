@@ -79,5 +79,7 @@ flutter {
 }
 
 dependencies {
+    // FileProvider: Foto beim Scannen an die KI-App weitergeben.
+    implementation("androidx.core:core:1.13.1")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

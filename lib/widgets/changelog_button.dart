@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,8 +6,8 @@ import '../theme/app_theme.dart';
 
 const _seenKey = 'changelog_seen';
 
-/// Glocke „Neu" oben rechts – nur im Browser und nur, solange es etwas
-/// Ungelesenes gibt. Nach dem Öffnen und Schließen ist sie weg.
+/// „Was ist neu?" oben rechts – nur, solange es etwas Ungelesenes gibt.
+/// Nach dem Öffnen und Schließen ist es weg.
 class ChangelogButton extends StatefulWidget {
   const ChangelogButton({super.key});
 
@@ -22,7 +21,7 @@ class _ChangelogButtonState extends State<ChangelogButton> {
   @override
   void initState() {
     super.initState();
-    if (kIsWeb) _load();
+    _load();
   }
 
   Future<void> _load() async {
