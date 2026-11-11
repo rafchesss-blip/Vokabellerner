@@ -472,5 +472,6 @@
   "intervalMonths": "{n} m",
   "intervalYears": "{n} a",
   "changelog7Title": "🌍 Agora em 10 idiomas",
-  "changelog7Text": "O app agora está em alemão, inglês, espanhol, francês, italiano, português, polonês, turco, russo e chinês. Você pode mudar o idioma nas configurações."
+  "changelog7Text": "O app agora está em alemão, inglês, espanhol, francês, italiano, português, polonês, turco, russo e chinês. Você pode mudar o idioma nas configurações.",
+  "appTitle": "Vocabulário"
 }

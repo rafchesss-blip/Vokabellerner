@@ -4,7 +4,7 @@
     <!-- Erinnerungen nach einem Neustart des Handys wiederherstellen -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <application
-        android:label="Vokabeltrainer"
+        android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

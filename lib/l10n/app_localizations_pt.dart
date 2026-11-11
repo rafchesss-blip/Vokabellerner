@@ -1928,4 +1928,7 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get changelog7Text =>
       'O app agora está em alemão, inglês, espanhol, francês, italiano, português, polonês, turco, russo e chinês. Você pode mudar o idioma nas configurações.';
+
+  @override
+  String get appTitle => 'Vocabulário';
 }

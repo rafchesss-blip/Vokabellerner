@@ -1879,4 +1879,7 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get changelog7Text =>
       '应用现在支持德语、英语、西班牙语、法语、意大利语、葡萄牙语、波兰语、土耳其语、俄语和中文。你可以在设置中切换语言。';
+
+  @override
+  String get appTitle => '背单词';
 }

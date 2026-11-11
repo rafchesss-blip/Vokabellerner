@@ -1925,4 +1925,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get changelog7Text =>
       'The app now speaks German, English, Spanish, French, Italian, Portuguese, Polish, Turkish, Russian and Chinese. You can switch the language in the settings.';
+
+  @override
+  String get appTitle => 'Vocab Trainer';
 }

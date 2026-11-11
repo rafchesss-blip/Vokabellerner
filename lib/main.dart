@@ -66,7 +66,7 @@ class VokabeltrainerApp extends StatelessWidget {
       builder: (context, _, __) {
         final s = Settings.instance;
         return MaterialApp(
-          title: 'Vokabeltrainer',
+          onGenerateTitle: (context) => context.l10n.appTitle,
           debugShowCheckedModeBanner: false,
           locale: Locale(appLanguageCode),
           supportedLocales: AppLocalizations.supportedLocales,

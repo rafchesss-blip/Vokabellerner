@@ -1926,4 +1926,7 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get changelog7Text =>
       'Uygulama artık Almanca, İngilizce, İspanyolca, Fransızca, İtalyanca, Portekizce, Lehçe, Türkçe, Rusça ve Çince. Dili ayarlardan değiştirebilirsin.';
+
+  @override
+  String get appTitle => 'Kelime Öğren';
 }

@@ -472,5 +472,6 @@
   "intervalMonths": "{n} mo",
   "intervalYears": "{n} y",
   "changelog7Title": "🌍 Now in 10 languages",
-  "changelog7Text": "The app now speaks German, English, Spanish, French, Italian, Portuguese, Polish, Turkish, Russian and Chinese. You can switch the language in the settings."
+  "changelog7Text": "The app now speaks German, English, Spanish, French, Italian, Portuguese, Polish, Turkish, Russian and Chinese. You can switch the language in the settings.",
+  "appTitle": "Vocab Trainer"
 }

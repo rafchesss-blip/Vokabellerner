@@ -2002,4 +2002,7 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get changelog7Text =>
       'Aplikacja jest teraz po niemiecku, angielsku, hiszpańsku, francusku, włosku, portugalsku, polsku, turecku, rosyjsku i chińsku. Język zmienisz w ustawieniach.';
+
+  @override
+  String get appTitle => 'Słówka';
 }

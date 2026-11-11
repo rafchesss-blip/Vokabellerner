@@ -472,5 +472,6 @@
   "intervalMonths": "{n} ay",
   "intervalYears": "{n} yıl",
   "changelog7Title": "🌍 Artık 10 dilde",
-  "changelog7Text": "Uygulama artık Almanca, İngilizce, İspanyolca, Fransızca, İtalyanca, Portekizce, Lehçe, Türkçe, Rusça ve Çince. Dili ayarlardan değiştirebilirsin."
+  "changelog7Text": "Uygulama artık Almanca, İngilizce, İspanyolca, Fransızca, İtalyanca, Portekizce, Lehçe, Türkçe, Rusça ve Çince. Dili ayarlardan değiştirebilirsin.",
+  "appTitle": "Kelime Öğren"
 }

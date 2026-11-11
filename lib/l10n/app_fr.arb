@@ -472,5 +472,6 @@
   "intervalMonths": "{n} mois",
   "intervalYears": "{n} an",
   "changelog7Title": "🌍 Maintenant en 10 langues",
-  "changelog7Text": "L’appli est disponible en allemand, anglais, espagnol, français, italien, portugais, polonais, turc, russe et chinois. Tu peux changer de langue dans les paramètres."
+  "changelog7Text": "L’appli est disponible en allemand, anglais, espagnol, français, italien, portugais, polonais, turc, russe et chinois. Tu peux changer de langue dans les paramètres.",
+  "appTitle": "Vocabulaire"
 }

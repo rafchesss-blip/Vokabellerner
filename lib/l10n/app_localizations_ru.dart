@@ -2000,4 +2000,7 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get changelog7Text =>
       'Приложение теперь доступно на немецком, английском, испанском, французском, итальянском, португальском, польском, турецком, русском и китайском. Язык можно сменить в настройках.';
+
+  @override
+  String get appTitle => 'Словарик';
 }

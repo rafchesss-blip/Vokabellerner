@@ -1933,4 +1933,7 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get changelog7Text =>
       'Die App gibt es jetzt auf Deutsch, Englisch, Spanisch, Französisch, Italienisch, Portugiesisch, Polnisch, Türkisch, Russisch und Chinesisch. Umstellen kannst du die Sprache in den Einstellungen.';
+
+  @override
+  String get appTitle => 'Vokabeltrainer';
 }

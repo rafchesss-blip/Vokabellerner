@@ -2286,5 +2286,9 @@
   },
   "@changelog7Text": {
     "description": "What's-new entry 7 text."
+  },
+  "appTitle": "Vokabeltrainer",
+  "@appTitle": {
+    "description": "App name (short, also under the launcher icon – keep it under ~12 characters)."
   }
 }

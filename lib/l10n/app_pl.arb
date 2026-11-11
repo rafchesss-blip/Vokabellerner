@@ -472,5 +472,6 @@
   "intervalMonths": "{n} mies.",
   "intervalYears": "{n} r.",
   "changelog7Title": "🌍 Teraz w 10 językach",
-  "changelog7Text": "Aplikacja jest teraz po niemiecku, angielsku, hiszpańsku, francusku, włosku, portugalsku, polsku, turecku, rosyjsku i chińsku. Język zmienisz w ustawieniach."
+  "changelog7Text": "Aplikacja jest teraz po niemiecku, angielsku, hiszpańsku, francusku, włosku, portugalsku, polsku, turecku, rosyjsku i chińsku. Język zmienisz w ustawieniach.",
+  "appTitle": "Słówka"
 }

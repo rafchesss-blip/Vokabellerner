@@ -212,7 +212,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: Text(l10n.settingsLicensesSubtitle),
                   onTap: () => showLicensePage(
                     context: context,
-                    applicationName: 'Vokabeltrainer',
+                    applicationName: context.l10n.appTitle,
                     applicationLegalese: l10n.settingsLicensesLegalese,
                   ),
                 ),

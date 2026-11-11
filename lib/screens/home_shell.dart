@@ -15,7 +15,7 @@ class HomeShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final titles = ['Vokabeltrainer', l.homeTabLessons, l.homeTabAnalysis];
+    final titles = [l.appTitle, l.homeTabLessons, l.homeTabAnalysis];
     return ValueListenableBuilder<int>(
       valueListenable: shellTabIndex,
       builder: (context, index, _) => Scaffold(

@@ -2951,6 +2951,12 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Die App gibt es jetzt auf Deutsch, Englisch, Spanisch, Französisch, Italienisch, Portugiesisch, Polnisch, Türkisch, Russisch und Chinesisch. Umstellen kannst du die Sprache in den Einstellungen.'**
   String get changelog7Text;
+
+  /// App name (short, also under the launcher icon – keep it under ~12 characters).
+  ///
+  /// In de, this message translates to:
+  /// **'Vokabeltrainer'**
+  String get appTitle;
 }
 
 class _AppLocalizationsDelegate
