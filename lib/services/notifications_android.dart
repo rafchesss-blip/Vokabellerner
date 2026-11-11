@@ -7,17 +7,18 @@ import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../data/store.dart';
+import '../l10n/l10n.dart';
 import '../models/settings.dart';
 import '../utils/notification_plan.dart';
 
 final _plugin = FlutterLocalNotificationsPlugin();
 bool _ready = false;
 
-const _details = NotificationDetails(
+NotificationDetails get _details => NotificationDetails(
   android: AndroidNotificationDetails(
     'lernen',
-    'Lern-Erinnerungen',
-    channelDescription: 'Erinnert dich ans Vokabellernen (nie nach 21 Uhr).',
+    L.notifChannelName,
+    channelDescription: L.notifChannelDescription,
     importance: Importance.high,
     priority: Priority.high,
     icon: 'ic_notification',
@@ -85,12 +86,13 @@ Future<void> rescheduleNotifications() async {
     name: settings.userName,
   );
 
+  final details = _details;
   for (var i = 0; i < planned.length; i++) {
     final n = planned[i];
     await _plugin.zonedSchedule(
       id: i,
       scheduledDate: tz.TZDateTime.from(n.time, tz.local),
-      notificationDetails: _details,
+      notificationDetails: details,
       // Ungefähr pünktlich reicht – dafür braucht es keine Sonderrechte.
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       title: n.title,
@@ -105,8 +107,8 @@ Future<void> showTestNotification() async {
   await initNotifications();
   await _plugin.show(
     id: 9999,
-    title: '👋 Hallo! So sehen deine Erinnerungen aus',
-    body: 'Ich melde mich, wenn Vokabeln auf dich warten – nie nach 21 Uhr.',
+    title: L.notifTestTitle,
+    body: L.notifTestBody,
     notificationDetails: _details,
   );
 }

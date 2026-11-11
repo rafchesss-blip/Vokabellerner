@@ -11,28 +11,25 @@ enum NeonAccent { violet, cyan, emerald, orange, pink }
 
 extension AppThemeModeX on AppThemeMode {
   String get label => switch (this) {
-        AppThemeMode.dark => 'Dark Mode',
-        AppThemeMode.light => 'Light Mode',
-        AppThemeMode.system => 'System (automatisch)',
+        AppThemeMode.dark => L.settingsThemeDark,
+        AppThemeMode.light => L.settingsThemeLight,
+        AppThemeMode.system => L.settingsThemeSystem,
       };
 
   String get description => switch (this) {
-        AppThemeMode.dark =>
-          'Dunkler Hintergrund mit leuchtenden Neon-Farben.',
-        AppThemeMode.light =>
-          'Helles, minimalistisches Design mit Weiß- und Hellgrautönen.',
-        AppThemeMode.system =>
-          'Richtet sich nach der Einstellung deines Geräts.',
+        AppThemeMode.dark => L.settingsThemeDarkDesc,
+        AppThemeMode.light => L.settingsThemeLightDesc,
+        AppThemeMode.system => L.settingsThemeSystemDesc,
       };
 }
 
 extension NeonAccentX on NeonAccent {
   String get label => switch (this) {
-        NeonAccent.violet => 'Neon-Violett',
-        NeonAccent.cyan => 'Neon-Cyan',
-        NeonAccent.emerald => 'Neon-Smaragd',
-        NeonAccent.orange => 'Neon-Orange',
-        NeonAccent.pink => 'Neon-Pink',
+        NeonAccent.violet => L.settingsAccentViolet,
+        NeonAccent.cyan => L.settingsAccentCyan,
+        NeonAccent.emerald => L.settingsAccentEmerald,
+        NeonAccent.orange => L.settingsAccentOrange,
+        NeonAccent.pink => L.settingsAccentPink,
       };
 }
 
@@ -56,21 +53,13 @@ enum AnswerMode { translationOnly, middleOnly, both }
 
 extension LanguageDirectionX on LanguageDirection {
   String get label => switch (this) {
-        LanguageDirection.latinToGerman => 'Wort → Übersetzung',
-        LanguageDirection.germanToLatin => 'Übersetzung → Wort',
+        LanguageDirection.latinToGerman => L.settingsDirectionForward,
+        LanguageDirection.germanToLatin => L.settingsDirectionBackward,
       };
 
   String get description => switch (this) {
-        LanguageDirection.latinToGerman =>
-          'Die App zeigt das Wort, du antwortest die Bedeutung.',
-        LanguageDirection.germanToLatin =>
-          'Die App zeigt die Übersetzung, du antwortest das Wort.',
-      };
-
-  /// Was in dieser Richtung geantwortet wird.
-  String get translationWord => switch (this) {
-        LanguageDirection.latinToGerman => 'die Übersetzung',
-        LanguageDirection.germanToLatin => 'das Wort',
+        LanguageDirection.latinToGerman => L.settingsDirectionForwardDesc,
+        LanguageDirection.germanToLatin => L.settingsDirectionBackwardDesc,
       };
 }
 
@@ -78,18 +67,22 @@ extension AnswerModeX on AnswerMode {
   String label(LanguageDirection direction) => switch (this) {
         AnswerMode.translationOnly =>
           direction == LanguageDirection.latinToGerman
-              ? 'Nur Übersetzung'
-              : 'Nur Wort',
-        AnswerMode.middleOnly => 'Nur Formen',
-        AnswerMode.both => 'Beides',
+              ? L.settingsAnswerTranslationOnly
+              : L.settingsAnswerWordOnly,
+        AnswerMode.middleOnly => L.settingsAnswerFormsOnly,
+        AnswerMode.both => L.settingsAnswerBoth,
       };
 
   String description(LanguageDirection direction) {
-    final word = direction.translationWord;
+    final forward = direction == LanguageDirection.latinToGerman;
     return switch (this) {
-      AnswerMode.translationOnly => 'Du antwortest nur $word.',
-      AnswerMode.middleOnly => 'Du antwortest nur die Formen.',
-      AnswerMode.both => 'Du antwortest $word und die Formen.',
+      AnswerMode.translationOnly => forward
+          ? L.settingsAnswerTranslationOnlyDesc
+          : L.settingsAnswerWordOnlyDesc,
+      AnswerMode.middleOnly => L.settingsAnswerFormsOnlyDesc,
+      AnswerMode.both => forward
+          ? L.settingsAnswerBothTranslationDesc
+          : L.settingsAnswerBothWordDesc,
     };
   }
 }

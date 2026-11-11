@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import '../models/settings.dart';
 import '../services/notifications.dart';
 import '../theme/app_theme.dart';
@@ -26,11 +27,8 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   Future<void> _toggle(bool on) async {
     if (on && !await requestNotificationPermission()) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-          'Benachrichtigungen sind blockiert. Erlaube sie in den '
-          'Android-Einstellungen für den Vokabellerner.',
-        ),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(context.l10n.notifSectionBlocked),
       ));
       return;
     }
@@ -45,8 +43,9 @@ class _NotificationsSectionState extends State<NotificationsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final title = Text(
-      'Erinnerungen',
+      l10n.notifSectionTitle,
       style: Theme.of(context).textTheme.titleMedium,
     );
 
@@ -60,8 +59,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                '📱 Echte Erinnerungen gibt es in der Android-App: mehrmals '
-                'am Tag, mit aktuellen Zahlen und nie nach 21 Uhr.',
+                l10n.notifSectionAndroidOnly,
                 style: TextStyle(color: muted(context)),
               ),
             ),
@@ -84,18 +82,15 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 value: on,
                 onChanged: _toggle,
                 secondary: const Icon(Icons.notifications_active_outlined),
-                title: const Text('Lern-Erinnerungen'),
-                subtitle: const Text(
-                  'Mit aktuellen Zahlen – nie nach 21 Uhr. Ist für heute '
-                  'alles gelernt, ist Ruhe.',
-                ),
+                title: Text(l10n.notifSectionSwitchTitle),
+                subtitle: Text(l10n.notifSectionSwitchSubtitle),
               ),
               if (on) ...[
                 const Divider(height: 1),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
                   child: Text(
-                    'Wie oft am Tag?',
+                    l10n.notifSectionHowOften,
                     style: TextStyle(color: muted(context)),
                   ),
                 ),
@@ -114,15 +109,16 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
                   child: Text(
-                    'um ${_times(_settings.notificationsPerDay)} Uhr',
+                    l10n.notifSectionTimes(
+                        _times(_settings.notificationsPerDay)),
                     textAlign: TextAlign.center,
                     style: TextStyle(color: faint(context), fontSize: 13),
                   ),
                 ),
                 const Divider(height: 1),
-                const ListTile(
-                  leading: Icon(Icons.send_outlined),
-                  title: Text('Test-Benachrichtigung senden'),
+                ListTile(
+                  leading: const Icon(Icons.send_outlined),
+                  title: Text(l10n.notifSectionSendTest),
                   onTap: showTestNotification,
                 ),
               ],

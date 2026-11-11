@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 /// Farbe für eine Lernstufe (-5 .. +5).
 ///
 /// 5 Grüntöne (gut), 1 Grau (neutral), 5 Rottöne (schlecht).
@@ -38,27 +40,27 @@ Color onLevelColor(int level) =>
 String levelLabel(int level) {
   switch (level) {
     case 5:
-      return 'Sehr gut';
+      return L.levelVeryGood;
     case 4:
-      return 'Gut';
+      return L.levelGood;
     case 3:
-      return 'Ziemlich gut';
+      return L.levelQuiteGood;
     case 2:
-      return 'Ganz okay';
+      return L.levelOkay;
     case 1:
-      return 'Leicht gut';
+      return L.levelSlightlyGood;
     case 0:
-      return 'Neutral';
+      return L.levelNeutral;
     case -1:
-      return 'Leicht schwach';
+      return L.levelSlightlyWeak;
     case -2:
-      return 'Schwach';
+      return L.levelWeak;
     case -3:
-      return 'Ziemlich schwach';
+      return L.levelQuiteWeak;
     case -4:
-      return 'Schlecht';
+      return L.levelBad;
     default:
-      return 'Sehr schlecht';
+      return L.levelVeryBad;
   }
 }
 
