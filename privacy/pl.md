@@ -41,4 +41,4 @@ to tylko wtedy, gdy czekasz na odpowiedź albo dotykasz „Wklej odpowiedź”.
 
 ## Kontakt
 
-Pytania dotyczące prywatności: [wpisz adres e-mail]
+Pytania dotyczące prywatności: vheinitz@gmail.com

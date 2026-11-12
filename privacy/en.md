@@ -41,4 +41,4 @@ when you tap “Paste answer”.
 
 ## Contact
 
-Privacy questions: [insert email address]
+Privacy questions: vheinitz@gmail.com

@@ -39,4 +39,4 @@ avviene solo mentre aspetti una risposta o quando tocchi «Incolla risposta».
 
 ## Contatti
 
-Domande sulla privacy: [inserire indirizzo e-mail]
+Domande sulla privacy: vheinitz@gmail.com

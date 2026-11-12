@@ -42,4 +42,4 @@ se produit uniquement pendant que tu attends une réponse ou quand tu touches
 
 ## Contact
 
-Questions sur la confidentialité : [saisir l'adresse e-mail]
+Questions sur la confidentialité : vheinitz@gmail.com

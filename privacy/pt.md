@@ -41,4 +41,4 @@ toca em “Colar resposta”.
 
 ## Contato
 
-Dúvidas sobre privacidade: [inserir endereço de e-mail]
+Dúvidas sobre privacidade: vheinitz@gmail.com

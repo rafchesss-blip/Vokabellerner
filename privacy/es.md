@@ -40,4 +40,4 @@ solo ocurre mientras esperas una respuesta o cuando tocas «Pegar respuesta».
 
 ## Contacto
 
-Preguntas sobre privacidad: [introducir dirección de correo electrónico]
+Preguntas sobre privacidad: vheinitz@gmail.com

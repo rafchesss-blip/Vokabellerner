@@ -41,4 +41,4 @@ auf „Antwort einfügen“ tippst.
 
 ## Kontakt
 
-Fragen zum Datenschutz: [E-Mail-Adresse eintragen]
+Fragen zum Datenschutz: vheinitz@gmail.com

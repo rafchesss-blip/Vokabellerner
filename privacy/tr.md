@@ -40,4 +40,4 @@ Bu yalnızca bir cevap beklerken veya “Cevabı yapıştır”a dokunduğunda o
 
 ## İletişim
 
-Gizlilikle ilgili sorular için: [E-posta adresini gir]
+Gizlilikle ilgili sorular için: vheinitz@gmail.com
