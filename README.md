@@ -80,6 +80,19 @@ die Nummer hinter dem `+` erhöhen (`1.0.0+1` → `1.0.1+2`).
   (Play App Signing).
 - Zum Ausprobieren ohne Play Store: `flutter build apk --release`.
 
+## Store-Eintrag (Google Play)
+
+Alles für die Play Console liegt in [`store/`](store/):
+
+- `<sprache>.md`: Titel, Kurzbeschreibung und Beschreibung pro Sprache
+  (Längen prüfen: `python tool/check_store.py`)
+- `icon-512.png`: App-Symbol 512 × 512
+- `feature-graphic-<sprache>.png`: Titelbild 1024 × 500 (neu erzeugen:
+  `python tool/store_graphics.py`)
+
+Datenschutzerklärung (Link für die Play Console):
+https://github.com/rafchesss-blip/Vokabellerner/blob/play/privacy/de.md
+
 ## Entwickeln
 
 ```bash
